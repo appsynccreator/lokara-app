@@ -1959,6 +1959,27 @@
           </div>
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
+
+        <div class="menu-item" onclick="showEditProfile()">
+          <div class="menu-icon"><i class="fas fa-user-edit"></i></div>
+          <div class="menu-text">
+            <h4>Edit Profil</h4>
+            <p>Ubah informasi akun</p>
+          </div>
+          <i class="fas fa-chevron-right menu-arrow"></i>
+        </div>
+
+        <div class="menu-item" onclick="logout()">
+          <div class="menu-icon" style="background: #FFEBEE; color: var(--danger);"><i class="fas fa-sign-out-alt"></i></div>
+          <div class="menu-text">
+            <h4>Keluar</h4>
+            <p>Logout dari aplikasi</p>
+          </div>
+          <i class="fas fa-chevron-right menu-arrow"></i>
+        </div>
+      </div>
+    </div>
+
     <!-- Banner Ad Page -->
     <div class="page" id="bannerAdPage" style="display:none;">
       <div class="app-header" style="position:sticky; top:0; z-index:120;">
@@ -2363,7 +2384,7 @@
           const tp = document.getElementById(prev);
           if (tp) { tp.style.display = 'block'; tp.classList.add('active'); }
           const bottomNav = document.getElementById('bottomNav');
-          const hideNav = ['productDetailPage', 'addProductPage', 'chatPage'];
+          const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage'];
           if (bottomNav) bottomNav.style.display = hideNav.includes(prev) ? 'none' : 'flex';
           document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
           const navMap = { homePage: 0, ordersPage: 1, profilePage: 4 };
@@ -2545,7 +2566,7 @@
 
       // Sembunyikan bottom nav di halaman tertentu
       const bottomNav = document.getElementById('bottomNav');
-      const hideNav = ['productDetailPage', 'addProductPage', 'chatPage'];
+      const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage'];
       bottomNav.style.display = hideNav.includes(pageId) ? 'none' : 'flex';
 
       // Simpan history untuk tombol back
