@@ -2,7 +2,7 @@
   "name": "LOKARA - Solusi UMKM di Sekitarmu",
   "short_name": "LOKARA",
   "description": "Temukan produk & jasa UMKM lokal di sekitar Anda dalam radius 1 km",
-  "start_url": "/index_lokara.html",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#1B5E20",
   "theme_color": "#1B5E20",
