@@ -2129,6 +2129,29 @@
   </div>
 
   <script>
+    // ==================== CONFIG ====================
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzWfX928Mm1tqoMEYep9No1ucEY5CgbkJ7PTvZMJkqjklZv8QkuJjybCOXFiNL1pJm3Kg/exec';
+
+    // Helper: ganti google.script.run ke fetch
+    function callGAS(action, data, onSuccess, onFailure) {
+      const params = new URLSearchParams();
+      params.append('action', action);
+      params.append('data', JSON.stringify(data || {}));
+
+      fetch(GAS_URL + '?' + params.toString(), { method: 'GET' })
+        .then(function(res) { return res.json(); })
+        .then(function(result) {
+          if (result && result.error) {
+            if (onFailure) onFailure(result.error);
+          } else {
+            if (onSuccess) onSuccess(result);
+          }
+        })
+        .catch(function(err) {
+          if (onFailure) onFailure(err.message || 'Koneksi gagal');
+        });
+    }
+
     // ==================== GLOBAL VARIABLES ====================
     let currentUser = null;
     let currentLocation = { lat: null, lng: null };
@@ -2236,8 +2259,7 @@
       const btn = document.querySelector('#registerForm .btn-primary');
       if (btn) { btn.disabled = true; btn.textContent = 'Mendaftar...'; }
 
-      google.script.run
-        .withSuccessHandler(function(result) {
+      callGAS('register', data, function(result) {
           if (btn) { btn.disabled = false; btn.textContent = 'Daftar'; }
           showToast('Registrasi berhasil! Silakan login', 'success');
           // Clear form
@@ -2246,12 +2268,10 @@
           document.getElementById('regPassword').value = '';
           document.getElementById('regPhone').value = '';
           showLogin();
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           if (btn) { btn.disabled = false; btn.textContent = 'Daftar'; }
           showToast(error.message || error || 'Registrasi gagal', 'error');
-        })
-        .processRequest('register', data);
+        });
     }
 
     function login() {
@@ -2263,8 +2283,7 @@
         return;
       }
 
-      google.script.run
-        .withSuccessHandler(function(result) {
+      callGAS('login', { email, password }, function(result) {
           currentUser = result;
           localStorage.setItem('lokara_user', JSON.stringify(result));
           showMainApp();
@@ -2273,11 +2292,9 @@
           loadNearbyProducts();
           loadNotifications();
           showToast('Selamat datang kembali!', 'success');
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           showToast(error.message || error || 'Login gagal', 'error');
-        })
-        .processRequest('login', { email, password });
+        });
     }
 
     function logout() {
@@ -2372,8 +2389,7 @@
 
     // ==================== CATEGORIES ====================
     function loadCategories() {
-      google.script.run
-        .withSuccessHandler(function(categories) {
+      callGAS('getCategories', {}, function(categories) {
           const grid = document.getElementById('categoriesGrid');
           grid.innerHTML = categories.map(cat => `
             <div class="category-item" onclick="filterByCategory('${cat.nama}')">
@@ -2386,11 +2402,9 @@
           const select = document.getElementById('productCategory');
           select.innerHTML = '<option value="">Pilih Kategori</option>' + 
             categories.map(cat => `<option value="${cat.nama}">${cat.icon} ${cat.nama}</option>`).join('');
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           console.error('Error loading categories:', error);
-        })
-        .processRequest('getCategories', {});
+        });
     }
 
     // ==================== PRODUCTS ====================
@@ -2410,8 +2424,10 @@
         return;
       }
 
-      google.script.run
-        .withSuccessHandler(function(products) {
+      callGAS('getNearbyProducts', {
+          latitude: currentLocation.lat || '',
+          longitude: currentLocation.lng || ''
+        }, function(products) {
           const grid = document.getElementById('nearbyProducts');
           if (products.length === 0) {
             grid.innerHTML = `
@@ -2450,20 +2466,14 @@
               </div>
             </div>
           `).join('');
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           console.error('Error loadNearbyProducts:', error);
-        })
-        .processRequest('getNearbyProducts', {
-          latitude: currentLocation.lat || '',
-          longitude: currentLocation.lng || ''
         });
     }
 
     function showAllProducts() {
       showPage('allProductsPage');
-      google.script.run
-        .withSuccessHandler(function(products) {
+      callGAS('getProducts', {}, function(products) {
           const grid = document.getElementById('allProductsGrid');
           if (products.length === 0) {
             grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open"></i><h3>Belum ada produk</h3></div>`;
@@ -2489,17 +2499,14 @@
               </div>
             </div>
           `).join('');
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           console.error('showAllProducts error:', error);
           showToast('Gagal memuat produk', 'error');
-        })
-        .processRequest('getProducts', {});
+        });
     }
 
     function showProductDetail(productId) {
-      google.script.run
-        .withSuccessHandler(function(product) {
+      callGAS('toggleWishlist', { userId: currentUser.id, productId }, function(product) {
           currentProduct = product;
           document.getElementById('detailName').textContent = product.nama;
           document.getElementById('detailPrice').textContent = 'Rp ' + parseInt(product.harga).toLocaleString('id-ID');
@@ -2563,8 +2570,7 @@
         const keyword = document.getElementById('searchInput').value;
         if (!keyword) return;
 
-        google.script.run
-          .withSuccessHandler(function(products) {
+        callGAS('searchProducts', { keyword }, function(products) {
             const grid = document.getElementById('nearbyProducts');
             if (products.length === 0) {
               grid.innerHTML = `
@@ -2594,8 +2600,7 @@
                 </div>
               </div>
             `).join('');
-          })
-          .processRequest('searchProducts', { keyword });
+          }, function(error) { showToast(error || 'Terjadi kesalahan', 'error'); });
       }
     }
 
@@ -2611,14 +2616,11 @@
         return;
       }
 
-      google.script.run
-        .withSuccessHandler(function(result) {
+      callGAS('getWishlist', { userId: currentUser.id }, function(result) {
           showToast(result.message || 'Wishlist diperbarui', 'success');
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           showToast(error.message || error || 'Gagal update wishlist', 'error');
-        })
-        .processRequest('toggleWishlist', { userId: currentUser.id, productId });
+        });
     }
 
     function showWishlist() {
@@ -2628,8 +2630,7 @@
       }
 
       showPage('wishlistPage');
-      google.script.run
-        .withSuccessHandler(function(items) {
+      callGAS('updateOrderStatus', { orderId, status }, function(items) {
           const grid = document.getElementById('wishlistGrid');
           if (items.length === 0) {
             grid.innerHTML = `
@@ -2653,8 +2654,7 @@
               </div>
             </div>
           `).join('');
-        })
-        .processRequest('getWishlist', { userId: currentUser.id });
+        }, function(error) { showToast(error || 'Terjadi kesalahan', 'error'); });
     }
 
     // ==================== ORDERS ====================
@@ -2669,8 +2669,7 @@
     }
 
     function loadOrders() {
-      google.script.run
-        .withSuccessHandler(function(orders) {
+      callGAS('getOrders', { userId: currentUser.id }, function(orders) {
           const list = document.getElementById('ordersList');
           if (orders.length === 0) {
             list.innerHTML = `
@@ -2723,8 +2722,7 @@
               ` : ''}
             </div>
           `).join('');
-        })
-        .processRequest('getOrders', { userId: currentUser.id });
+        }, function(error) { showToast(error || 'Terjadi kesalahan', 'error'); });
     }
 
     function buyNow() {
@@ -2793,13 +2791,15 @@
       const btn = document.querySelector('#modalBody .btn-primary');
       if (btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }
 
-      google.script.run
-        .withSuccessHandler(function(result) {
+      callGAS('sendMessage', {
+          senderId: currentUser.id,
+          receiverId: currentChatUser,
+          pesan
+        }, function(result) {
           closeModal();
           showToast('Pesanan berhasil dibuat!', 'success');
           showOrders();
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           if (btn) { btn.disabled = false; btn.textContent = 'Konfirmasi Pesanan'; }
           showToast(error.message || error || 'Gagal membuat pesanan', 'error');
         })
@@ -2815,15 +2815,12 @@
     }
 
     function updateOrderStatus(orderId, status) {
-      google.script.run
-        .withSuccessHandler(function(result) {
+      callGAS('updateOrderStatus', { orderId, status }, function(result) {
           showToast(result.message || 'Status diperbarui', 'success');
           loadOrders();
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           showToast(error.message || error || 'Gagal memperbarui status', 'error');
-        })
-        .processRequest('updateOrderStatus', { orderId, status });
+        });
     }
 
     // ==================== SELLER FUNCTIONS ====================
@@ -2879,13 +2876,11 @@
         return;
       }
 
-      google.script.run
-        .withSuccessHandler(function(result) {
+      callGAS('getSellerProducts', { sellerId: currentUser.id }, function(result) {
           showToast('Produk berhasil ditambahkan!', 'success');
           showPage('homePage');
           loadNearbyProducts();
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           showToast(error.message || error || 'Gagal menambah produk', 'error');
         })
         .processRequest('addProduct', {
@@ -2899,8 +2894,7 @@
 
     function showSellerProducts() {
       showPage('sellerProductsPage');
-      google.script.run
-        .withSuccessHandler(function(products) {
+      callGAS('getSellerProducts', { sellerId: currentUser.id }, function(products) {
           const grid = document.getElementById('sellerProductsGrid');
           if (products.length === 0) {
             grid.innerHTML = `
@@ -2928,22 +2922,20 @@
               </div>
             </div>
           `).join('');
-        })
-        .processRequest('getSellerProducts', { sellerId: currentUser.id });
+        }, function(error) {
+          showToast(error || 'Gagal memuat produk', 'error');
+        });
     }
 
     function deleteProduct(productId) {
       if (!confirm('Yakin ingin menghapus produk ini?')) return;
 
-      google.script.run
-        .withSuccessHandler(function(result) {
+      callGAS('deleteProduct', { productId, sellerId: currentUser.id }, function(result) {
           showToast('Produk dihapus', 'success');
           showSellerProducts();
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           showToast(error.message || error || 'Gagal menghapus produk', 'error');
-        })
-        .processRequest('deleteProduct', { productId, sellerId: currentUser.id });
+        });
     }
 
     // ==================== CHAT ====================
@@ -2959,8 +2951,7 @@
     function loadMessages() {
       if (!currentChatUser) return;
 
-      google.script.run
-        .withSuccessHandler(function(messages) {
+      callGAS('getMessages', { userId: currentUser.id, otherId: currentChatUser }, function(messages) {
           const container = document.getElementById('chatMessages');
           container.innerHTML = messages.map(msg => `
             <div class="chat-bubble ${msg.senderId === currentUser.id ? 'sent' : 'received'}">
@@ -2968,11 +2959,9 @@
             </div>
           `).join('');
           container.scrollTop = container.scrollHeight;
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           console.error('loadMessages error:', error);
-        })
-        .processRequest('getMessages', { userId: currentUser.id, otherId: currentChatUser });
+        });
     }
 
     function sendChatMessage() {
@@ -2980,18 +2969,11 @@
       const pesan = input.value.trim();
       if (!pesan || !currentChatUser) return;
 
-      google.script.run
-        .withSuccessHandler(function() {
+      callGAS('sendMessage', { from: currentUser.id, to: currentChatUser.id, pesan }, function() {
           input.value = '';
           loadMessages();
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           showToast(error.message || error || 'Gagal mengirim pesan', 'error');
-        })
-        .processRequest('sendMessage', {
-          senderId: currentUser.id,
-          receiverId: currentChatUser,
-          pesan
         });
     }
 
@@ -3004,8 +2986,7 @@
     function loadNotifications() {
       if (!currentUser) return;
 
-      google.script.run
-        .withSuccessHandler(function(notifications) {
+      callGAS('markNotificationRead', { notificationId }, function(notifications) {
           const list = document.getElementById('notificationsList');
           if (notifications.length === 0) {
             list.innerHTML = `
@@ -3042,14 +3023,11 @@
     }
 
     function markRead(notificationId) {
-      google.script.run
-        .withSuccessHandler(function() {
+      callGAS('markNotificationRead', { notificationId }, function() {
           loadNotifications();
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           console.error('markRead error:', error);
-        })
-        .processRequest('markNotificationRead', { notificationId });
+        });
     }
 
     // ==================== PROFILE ====================
@@ -3104,17 +3082,14 @@
 
           showToast('Menyimpan foto...', '');
 
-          google.script.run
-            .withSuccessHandler(function(result) {
+          callGAS('updateProfilePhoto', { userId: currentUser.id, foto: base64 }, function(result) {
               currentUser.foto = base64;
               localStorage.setItem('lokara_user', JSON.stringify(currentUser));
               showToast('Foto profil berhasil diperbarui!', 'success');
-            })
-            .withFailureHandler(function(error) {
+            }, function(error) {
               showToast(error.message || error || 'Gagal menyimpan foto', 'error');
               updateProfileUI();
-            })
-            .processRequest('updateProfilePhoto', { userId: currentUser.id, foto: base64 });
+            });
         };
         img.src = e.target.result;
       };
@@ -3149,17 +3124,14 @@
     }
 
     function loadDashboardStats() {
-      google.script.run
-        .withSuccessHandler(function(stats) {
+      callGAS('getDashboardStats', { userId: currentUser.id, role: currentUser.role }, function(stats) {
           document.getElementById('statProducts').textContent = stats.totalProducts;
           document.getElementById('statOrders').textContent = stats.totalOrders;
           document.getElementById('statSales').textContent = 'Rp ' + parseInt(stats.totalSales).toLocaleString('id-ID');
           document.getElementById('statRating').textContent = stats.averageRating;
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           console.error('loadDashboardStats error:', error);
-        })
-        .processRequest('getDashboardStats', { userId: currentUser.id, role: currentUser.role });
+        });
     }
 
     function showEditProfile() {
@@ -3182,8 +3154,12 @@
       const btn = document.querySelector('#editProfilePage .btn-primary');
       if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
 
-      google.script.run
-        .withSuccessHandler(function(result) {
+      callGAS('updateProfile', {
+          userId: currentUser.id,
+          nama: nama,
+          telepon: telepon,
+          alamat: alamat
+        }, function(result) {
           if (btn) { btn.disabled = false; btn.textContent = 'Simpan Perubahan'; }
           currentUser.nama = nama;
           currentUser.telepon = telepon;
@@ -3192,16 +3168,9 @@
           updateProfileUI();
           showToast('Profil diperbarui', 'success');
           showPage('profilePage');
-        })
-        .withFailureHandler(function(error) {
+        }, function(error) {
           if (btn) { btn.disabled = false; btn.textContent = 'Simpan Perubahan'; }
           showToast(error.message || error || 'Gagal menyimpan profil', 'error');
-        })
-        .processRequest('updateProfile', {
-          userId: currentUser.id,
-          nama: nama,
-          telepon: telepon,
-          alamat: alamat
         });
     }
 
@@ -3398,21 +3367,18 @@
         // Simpan lokasi ke profil user
         const lat = mapPickedLat;
         const lng = mapPickedLng;
-        google.script.run
-          .withSuccessHandler(function() {
+        callGAS('updateProfile', {
+            userId: currentUser.id,
+            latitude: lat,
+            longitude: lng
+          }, function() {
             currentUser.latitude = lat;
             currentUser.longitude = lng;
             localStorage.setItem('lokara_user', JSON.stringify(currentUser));
             updateProfileLocationUI();
             showToast('Lokasi profil diperbarui', 'success');
-          })
-          .withFailureHandler(function(err) {
+          }, function(err) {
             showToast(err.message || 'Gagal menyimpan lokasi', 'error');
-          })
-          .processRequest('updateProfile', {
-            userId: currentUser.id,
-            latitude: lat,
-            longitude: lng
           });
       }
 
