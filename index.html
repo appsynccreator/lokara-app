@@ -2529,12 +2529,14 @@
               <div class="product-card" onclick="showProductDetail('${product.id}')">
                 <div class="product-image">
                   ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-                  ${product.distance ? `<div class="distance-badge"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>` : ''}
                   <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
                     <i class="far fa-heart"></i>
                   </button>
                 </div>
                 <div class="product-info">
+                  ${product.distance
+                    ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
+                    : ''}
                   <div class="product-name">${product.nama}</div>
                   <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
                   <div class="product-meta">
@@ -2649,12 +2651,14 @@
                 <div class="product-card" onclick="showProductDetail('${product.id}')">
                   <div class="product-image">
                     ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-                    ${product.distance ? `<div class="distance-badge"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>` : ''}
                     <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
                       <i class="far fa-heart"></i>
                     </button>
                   </div>
                   <div class="product-info">
+                    ${product.distance
+                      ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
+                      : ''}
                     <div class="product-name">${product.nama}</div>
                     <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
                     <div class="product-meta">
