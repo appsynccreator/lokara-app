@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LOKARA - Solusi UMKM di Sekitarmu</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1B5E20">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <style>
     :root {
       --primary: #1B5E20;
@@ -2129,27 +2131,26 @@
   </div>
 
   <script>
-    // ==================== CONFIG ====================
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzWfX928Mm1tqoMEYep9No1ucEY5CgbkJ7PTvZMJkqjklZv8QkuJjybCOXFiNL1pJm3Kg/exec';
+    // ==================== KONFIGURASI BACKEND ====================
+    // GANTI URL INI dengan URL deploy Google Apps Script kamu
+    const GAS_URL = 'GANTI_DENGAN_URL_GAS_KAMU';
 
-    // Helper: ganti google.script.run ke fetch
-    function callGAS(action, data, onSuccess, onFailure) {
-      const params = new URLSearchParams();
-      params.append('action', action);
-      params.append('data', JSON.stringify(data || {}));
-
-      fetch(GAS_URL + '?' + params.toString(), { method: 'GET' })
-        .then(function(res) { return res.json(); })
-        .then(function(result) {
-          if (result && result.error) {
-            if (onFailure) onFailure(result.error);
-          } else {
-            if (onSuccess) onSuccess(result);
-          }
-        })
-        .catch(function(err) {
-          if (onFailure) onFailure(err.message || 'Koneksi gagal');
-        });
+    // Helper: panggil Google Apps Script via fetch
+    function callGAS(action, data) {
+      return fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: action, data: data || {} })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        // GAS processRequest mengembalikan { success, data, message }
+        if (res && res.success === false) {
+          return Promise.reject(new Error(res.message || 'Terjadi kesalahan'));
+        }
+        // Jika ada field data, kembalikan data-nya; jika tidak, kembalikan seluruh respons
+        return (res && res.data !== undefined) ? res.data : res;
+      });
     }
 
     // ==================== GLOBAL VARIABLES ====================
@@ -2259,18 +2260,19 @@
       const btn = document.querySelector('#registerForm .btn-primary');
       if (btn) { btn.disabled = true; btn.textContent = 'Mendaftar...'; }
 
-      callGAS('register', data, function(result) {
+      callGAS('register', data)
+        .then(function(result) {
           if (btn) { btn.disabled = false; btn.textContent = 'Daftar'; }
           showToast('Registrasi berhasil! Silakan login', 'success');
-          // Clear form
           document.getElementById('regName').value = '';
           document.getElementById('regEmail').value = '';
           document.getElementById('regPassword').value = '';
           document.getElementById('regPhone').value = '';
           showLogin();
-        }, function(error) {
+        })
+        .catch(function(error) {
           if (btn) { btn.disabled = false; btn.textContent = 'Daftar'; }
-          showToast(error.message || error || 'Registrasi gagal', 'error');
+          showToast(error.message || 'Registrasi gagal', 'error');
         });
     }
 
@@ -2283,7 +2285,8 @@
         return;
       }
 
-      callGAS('login', { email, password }, function(result) {
+      callGAS('login', { email: email, password: password })
+        .then(function(result) {
           currentUser = result;
           localStorage.setItem('lokara_user', JSON.stringify(result));
           showMainApp();
@@ -2292,8 +2295,9 @@
           loadNearbyProducts();
           loadNotifications();
           showToast('Selamat datang kembali!', 'success');
-        }, function(error) {
-          showToast(error.message || error || 'Login gagal', 'error');
+        })
+        .catch(function(error) {
+          showToast(error.message || 'Login gagal', 'error');
         });
     }
 
@@ -2389,7 +2393,8 @@
 
     // ==================== CATEGORIES ====================
     function loadCategories() {
-      callGAS('getCategories', {}, function(categories) {
+      callGAS('getCategories', {})
+        .then(function(categories) {
           const grid = document.getElementById('categoriesGrid');
           grid.innerHTML = categories.map(cat => `
             <div class="category-item" onclick="filterByCategory('${cat.nama}')">
@@ -2398,11 +2403,11 @@
             </div>
           `).join('');
 
-          // Populate product category select
           const select = document.getElementById('productCategory');
           select.innerHTML = '<option value="">Pilih Kategori</option>' + 
             categories.map(cat => `<option value="${cat.nama}">${cat.icon} ${cat.nama}</option>`).join('');
-        }, function(error) {
+        })
+        .catch(function(error) {
           console.error('Error loading categories:', error);
         });
     }
@@ -2427,7 +2432,8 @@
       callGAS('getNearbyProducts', {
           latitude: currentLocation.lat || '',
           longitude: currentLocation.lng || ''
-        }, function(products) {
+        })
+        .then(function(products) {
           const grid = document.getElementById('nearbyProducts');
           if (products.length === 0) {
             grid.innerHTML = `
@@ -2466,14 +2472,16 @@
               </div>
             </div>
           `).join('');
-        }, function(error) {
+        })
+        .catch(function(error) {
           console.error('Error loadNearbyProducts:', error);
         });
     }
 
     function showAllProducts() {
       showPage('allProductsPage');
-      callGAS('getProducts', {}, function(products) {
+      callGAS('getProducts', {})
+        .then(function(products) {
           const grid = document.getElementById('allProductsGrid');
           if (products.length === 0) {
             grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open"></i><h3>Belum ada produk</h3></div>`;
@@ -2499,14 +2507,16 @@
               </div>
             </div>
           `).join('');
-        }, function(error) {
+        })
+        .catch(function(error) {
           console.error('showAllProducts error:', error);
           showToast('Gagal memuat produk', 'error');
         });
     }
 
     function showProductDetail(productId) {
-      callGAS('toggleWishlist', { userId: currentUser.id, productId }, function(product) {
+      callGAS('getProductDetail', { productId: productId })
+        .then(function(product) {
           currentProduct = product;
           document.getElementById('detailName').textContent = product.nama;
           document.getElementById('detailPrice').textContent = 'Rp ' + parseInt(product.harga).toLocaleString('id-ID');
@@ -2531,7 +2541,6 @@
             `;
           }
 
-          // Load reviews
           const reviewsList = document.getElementById('reviewsList');
           if (product.reviews && product.reviews.length > 0) {
             reviewsList.innerHTML = product.reviews.map(r => `
@@ -2550,7 +2559,10 @@
 
           showPage('productDetailPage');
         })
-        .processRequest('getProductDetail', { productId });
+        .catch(function(error) {
+          console.error('showProductDetail error:', error);
+          showToast('Gagal memuat detail produk', 'error');
+        });
     }
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -2570,7 +2582,8 @@
         const keyword = document.getElementById('searchInput').value;
         if (!keyword) return;
 
-        callGAS('searchProducts', { keyword }, function(products) {
+        callGAS('searchProducts', { keyword: keyword })
+          .then(function(products) {
             const grid = document.getElementById('nearbyProducts');
             if (products.length === 0) {
               grid.innerHTML = `
@@ -2600,7 +2613,10 @@
                 </div>
               </div>
             `).join('');
-          }, function(error) { showToast(error || 'Terjadi kesalahan', 'error'); });
+          })
+          .catch(function(error) {
+            console.error('searchProducts error:', error);
+          });
       }
     }
 
@@ -2616,10 +2632,12 @@
         return;
       }
 
-      callGAS('getWishlist', { userId: currentUser.id }, function(result) {
+      callGAS('toggleWishlist', { userId: currentUser.id, productId: productId })
+        .then(function(result) {
           showToast(result.message || 'Wishlist diperbarui', 'success');
-        }, function(error) {
-          showToast(error.message || error || 'Gagal update wishlist', 'error');
+        })
+        .catch(function(error) {
+          showToast(error.message || 'Gagal update wishlist', 'error');
         });
     }
 
@@ -2630,7 +2648,8 @@
       }
 
       showPage('wishlistPage');
-      callGAS('updateOrderStatus', { orderId, status }, function(items) {
+      callGAS('getWishlist', { userId: currentUser.id })
+        .then(function(items) {
           const grid = document.getElementById('wishlistGrid');
           if (items.length === 0) {
             grid.innerHTML = `
@@ -2654,7 +2673,10 @@
               </div>
             </div>
           `).join('');
-        }, function(error) { showToast(error || 'Terjadi kesalahan', 'error'); });
+        })
+        .catch(function(error) {
+          console.error('showWishlist error:', error);
+        });
     }
 
     // ==================== ORDERS ====================
@@ -2669,7 +2691,8 @@
     }
 
     function loadOrders() {
-      callGAS('getOrders', { userId: currentUser.id }, function(orders) {
+      callGAS('getOrders', { userId: currentUser.id })
+        .then(function(orders) {
           const list = document.getElementById('ordersList');
           if (orders.length === 0) {
             list.innerHTML = `
@@ -2722,7 +2745,10 @@
               ` : ''}
             </div>
           `).join('');
-        }, function(error) { showToast(error || 'Terjadi kesalahan', 'error'); });
+        })
+        .catch(function(error) {
+          console.error('loadOrders error:', error);
+        });
     }
 
     function buyNow() {
@@ -2791,19 +2817,7 @@
       const btn = document.querySelector('#modalBody .btn-primary');
       if (btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }
 
-      callGAS('sendMessage', {
-          senderId: currentUser.id,
-          receiverId: currentChatUser,
-          pesan
-        }, function(result) {
-          closeModal();
-          showToast('Pesanan berhasil dibuat!', 'success');
-          showOrders();
-        }, function(error) {
-          if (btn) { btn.disabled = false; btn.textContent = 'Konfirmasi Pesanan'; }
-          showToast(error.message || error || 'Gagal membuat pesanan', 'error');
-        })
-        .processRequest('createOrder', {
+      callGAS('createOrder', {
           buyerId: currentUser.id,
           sellerId: currentProduct.sellerId,
           items: items,
@@ -2811,15 +2825,26 @@
           latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
           longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : '',
           metodePembayaran: selectedPayment
+        })
+        .then(function(result) {
+          closeModal();
+          showToast('Pesanan berhasil dibuat!', 'success');
+          showOrders();
+        })
+        .catch(function(error) {
+          if (btn) { btn.disabled = false; btn.textContent = 'Konfirmasi Pesanan'; }
+          showToast(error.message || 'Gagal membuat pesanan', 'error');
         });
     }
 
     function updateOrderStatus(orderId, status) {
-      callGAS('updateOrderStatus', { orderId, status }, function(result) {
+      callGAS('updateOrderStatus', { orderId: orderId, status: status })
+        .then(function(result) {
           showToast(result.message || 'Status diperbarui', 'success');
           loadOrders();
-        }, function(error) {
-          showToast(error.message || error || 'Gagal memperbarui status', 'error');
+        })
+        .catch(function(error) {
+          showToast(error.message || 'Gagal memperbarui status', 'error');
         });
     }
 
@@ -2876,25 +2901,27 @@
         return;
       }
 
-      callGAS('getSellerProducts', { sellerId: currentUser.id }, function(result) {
-          showToast('Produk berhasil ditambahkan!', 'success');
-          showPage('homePage');
-          loadNearbyProducts();
-        }, function(error) {
-          showToast(error.message || error || 'Gagal menambah produk', 'error');
-        })
-        .processRequest('addProduct', {
+      callGAS('addProduct', {
           sellerId: currentUser.id,
-          nama, deskripsi, harga, stok, kategori, foto,
+          nama: nama, deskripsi: deskripsi, harga: harga, stok: stok, kategori: kategori, foto: foto,
           latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
           longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : '',
           alamat: currentUser.alamat || ''
+        })
+        .then(function(result) {
+          showToast('Produk berhasil ditambahkan!', 'success');
+          showPage('homePage');
+          loadNearbyProducts();
+        })
+        .catch(function(error) {
+          showToast(error.message || 'Gagal menambah produk', 'error');
         });
     }
 
     function showSellerProducts() {
       showPage('sellerProductsPage');
-      callGAS('getSellerProducts', { sellerId: currentUser.id }, function(products) {
+      callGAS('getSellerProducts', { sellerId: currentUser.id })
+        .then(function(products) {
           const grid = document.getElementById('sellerProductsGrid');
           if (products.length === 0) {
             grid.innerHTML = `
@@ -2922,19 +2949,22 @@
               </div>
             </div>
           `).join('');
-        }, function(error) {
-          showToast(error || 'Gagal memuat produk', 'error');
+        })
+        .catch(function(error) {
+          console.error('showSellerProducts error:', error);
         });
     }
 
     function deleteProduct(productId) {
       if (!confirm('Yakin ingin menghapus produk ini?')) return;
 
-      callGAS('deleteProduct', { productId, sellerId: currentUser.id }, function(result) {
+      callGAS('deleteProduct', { productId: productId, sellerId: currentUser.id })
+        .then(function(result) {
           showToast('Produk dihapus', 'success');
           showSellerProducts();
-        }, function(error) {
-          showToast(error.message || error || 'Gagal menghapus produk', 'error');
+        })
+        .catch(function(error) {
+          showToast(error.message || 'Gagal menghapus produk', 'error');
         });
     }
 
@@ -2951,7 +2981,8 @@
     function loadMessages() {
       if (!currentChatUser) return;
 
-      callGAS('getMessages', { userId: currentUser.id, otherId: currentChatUser }, function(messages) {
+      callGAS('getMessages', { userId: currentUser.id, otherId: currentChatUser })
+        .then(function(messages) {
           const container = document.getElementById('chatMessages');
           container.innerHTML = messages.map(msg => `
             <div class="chat-bubble ${msg.senderId === currentUser.id ? 'sent' : 'received'}">
@@ -2959,7 +2990,8 @@
             </div>
           `).join('');
           container.scrollTop = container.scrollHeight;
-        }, function(error) {
+        })
+        .catch(function(error) {
           console.error('loadMessages error:', error);
         });
     }
@@ -2969,11 +3001,17 @@
       const pesan = input.value.trim();
       if (!pesan || !currentChatUser) return;
 
-      callGAS('sendMessage', { from: currentUser.id, to: currentChatUser.id, pesan }, function() {
+      callGAS('sendMessage', {
+          senderId: currentUser.id,
+          receiverId: currentChatUser,
+          pesan: pesan
+        })
+        .then(function() {
           input.value = '';
           loadMessages();
-        }, function(error) {
-          showToast(error.message || error || 'Gagal mengirim pesan', 'error');
+        })
+        .catch(function(error) {
+          showToast(error.message || 'Gagal mengirim pesan', 'error');
         });
     }
 
@@ -2986,7 +3024,8 @@
     function loadNotifications() {
       if (!currentUser) return;
 
-      callGAS('markNotificationRead', { notificationId }, function(notifications) {
+      callGAS('getNotifications', { userId: currentUser.id })
+        .then(function(notifications) {
           const list = document.getElementById('notificationsList');
           if (notifications.length === 0) {
             list.innerHTML = `
@@ -3019,13 +3058,17 @@
             badge.style.display = 'none';
           }
         })
-        .processRequest('getNotifications', { userId: currentUser.id });
+        .catch(function(error) {
+          console.error('loadNotifications error:', error);
+        });
     }
 
     function markRead(notificationId) {
-      callGAS('markNotificationRead', { notificationId }, function() {
+      callGAS('markNotificationRead', { notificationId: notificationId })
+        .then(function() {
           loadNotifications();
-        }, function(error) {
+        })
+        .catch(function(error) {
           console.error('markRead error:', error);
         });
     }
@@ -3082,12 +3125,14 @@
 
           showToast('Menyimpan foto...', '');
 
-          callGAS('updateProfilePhoto', { userId: currentUser.id, foto: base64 }, function(result) {
+          callGAS('updateProfilePhoto', { userId: currentUser.id, foto: base64 })
+            .then(function(result) {
               currentUser.foto = base64;
               localStorage.setItem('lokara_user', JSON.stringify(currentUser));
               showToast('Foto profil berhasil diperbarui!', 'success');
-            }, function(error) {
-              showToast(error.message || error || 'Gagal menyimpan foto', 'error');
+            })
+            .catch(function(error) {
+              showToast(error.message || 'Gagal menyimpan foto', 'error');
               updateProfileUI();
             });
         };
@@ -3124,12 +3169,14 @@
     }
 
     function loadDashboardStats() {
-      callGAS('getDashboardStats', { userId: currentUser.id, role: currentUser.role }, function(stats) {
+      callGAS('getDashboardStats', { userId: currentUser.id, role: currentUser.role })
+        .then(function(stats) {
           document.getElementById('statProducts').textContent = stats.totalProducts;
           document.getElementById('statOrders').textContent = stats.totalOrders;
           document.getElementById('statSales').textContent = 'Rp ' + parseInt(stats.totalSales).toLocaleString('id-ID');
           document.getElementById('statRating').textContent = stats.averageRating;
-        }, function(error) {
+        })
+        .catch(function(error) {
           console.error('loadDashboardStats error:', error);
         });
     }
@@ -3159,7 +3206,8 @@
           nama: nama,
           telepon: telepon,
           alamat: alamat
-        }, function(result) {
+        })
+        .then(function(result) {
           if (btn) { btn.disabled = false; btn.textContent = 'Simpan Perubahan'; }
           currentUser.nama = nama;
           currentUser.telepon = telepon;
@@ -3168,9 +3216,10 @@
           updateProfileUI();
           showToast('Profil diperbarui', 'success');
           showPage('profilePage');
-        }, function(error) {
+        })
+        .catch(function(error) {
           if (btn) { btn.disabled = false; btn.textContent = 'Simpan Perubahan'; }
-          showToast(error.message || error || 'Gagal menyimpan profil', 'error');
+          showToast(error.message || 'Gagal menyimpan profil', 'error');
         });
     }
 
@@ -3197,8 +3246,7 @@
     }
 
     // ==================== PROCESS REQUEST WRAPPER ====================
-    // google.script.run.processRequest() calls the server-side processRequest function directly
-    // No client-side wrapper needed
+    // callGAS() mengirim request ke Google Apps Script via fetch
 
     function showNearbyProducts() {
       showPage('homePage');
@@ -3371,13 +3419,15 @@
             userId: currentUser.id,
             latitude: lat,
             longitude: lng
-          }, function() {
+          })
+          .then(function() {
             currentUser.latitude = lat;
             currentUser.longitude = lng;
             localStorage.setItem('lokara_user', JSON.stringify(currentUser));
             updateProfileLocationUI();
             showToast('Lokasi profil diperbarui', 'success');
-          }, function(err) {
+          })
+          .catch(function(err) {
             showToast(err.message || 'Gagal menyimpan lokasi', 'error');
           });
       }
