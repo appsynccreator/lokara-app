@@ -2640,19 +2640,19 @@
             }
 
             grid.innerHTML = products.map(product => {
-              const distanceHtml = product.distance
-                ? `<div class="distance-badge"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
-                : '';
               const ratingHtml = product.rating
                 ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}</div>`
-                : '';
+                : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
               return `
                 <div class="product-card" onclick="showProductDetail('${product.id}')">
                   <div class="product-image">
                     ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-                    ${distanceHtml}
+                    <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
+                      <i class="far fa-heart"></i>
+                    </button>
                   </div>
                   <div class="product-info">
+                    ${product.distance ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>` : ''}
                     <div class="product-name">${product.nama}</div>
                     <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
                     <div class="product-meta">
