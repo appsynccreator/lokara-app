@@ -7,9 +7,9 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1B5E20">
-  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root {
       --primary: #1B5E20;
@@ -2136,21 +2136,46 @@
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzWfX928Mm1tqoMEYep9No1ucEY5CgbkJ7PTvZMJkqjklZv8QkuJjybCOXFiNL1pJm3Kg/exec';
 
     // Helper: panggil Google Apps Script via fetch
+    // Menggunakan GET + query params untuk menghindari CORS preflight
+    // (POST dengan Content-Type text/plain seharusnya work, tapi GAS kadang redirect)
     function callGAS(action, data) {
-      return fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: action, data: data || {} })
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(res) {
-        // GAS processRequest mengembalikan { success, data, message }
-        if (res && res.success === false) {
-          return Promise.reject(new Error(res.message || 'Terjadi kesalahan'));
-        }
-        // Jika ada field data, kembalikan data-nya; jika tidak, kembalikan seluruh respons
-        return (res && res.data !== undefined) ? res.data : res;
-      });
+      // Cek dulu apakah GAS_URL sudah diisi
+      if (!GAS_URL || GAS_URL === 'GANTI_DENGAN_URL_GAS_KAMU') {
+        showToast('GAS_URL belum diisi! Edit index.html', 'error');
+        return Promise.reject(new Error('GAS_URL belum diisi'));
+      }
+
+      // Encode payload sebagai query parameter untuk GET request
+      // GET request tidak trigger CORS preflight, lebih kompatibel dengan GAS
+      const payload = JSON.stringify({ action: action, data: data || {} });
+      const url = GAS_URL + '?payload=' + encodeURIComponent(payload);
+
+      return fetch(url, { method: 'GET' })
+        .then(function(r) {
+          return r.text().then(function(text) {
+            // Coba parse JSON — jika gagal, tampilkan raw response untuk debug
+            try {
+              return JSON.parse(text);
+            } catch(e) {
+              console.error('Response bukan JSON:', text.substring(0, 500));
+              // Kemungkinan GAS belum di-deploy ulang atau URL salah
+              throw new Error('Response tidak valid. Cek: (1) GAS sudah di-deploy ulang? (2) URL sudah benar? (3) Akses "Anyone"?');
+            }
+          });
+        })
+        .then(function(res) {
+          if (res && res.success === false) {
+            return Promise.reject(new Error(res.message || res.error || 'Terjadi kesalahan'));
+          }
+          return (res && res.data !== undefined) ? res.data : res;
+        })
+        .catch(function(err) {
+          // Network error (offline, CORS block total, dll)
+          if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+            throw new Error('Tidak dapat terhubung ke server. Cek koneksi internet.');
+          }
+          throw err;
+        });
     }
 
     // ==================== GLOBAL VARIABLES ====================
@@ -3452,7 +3477,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('./sw.js')
           .then(function(reg) {
             console.log('LOKARA SW registered:', reg.scope);
           })
