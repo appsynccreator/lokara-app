@@ -2507,33 +2507,46 @@
 
     function showAllProducts() {
       showPage('allProductsPage');
-      callGAS('getProducts', {})
+      callGAS('getProducts', {
+          latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
+          longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : ''
+        })
         .then(function(products) {
           const grid = document.getElementById('allProductsGrid');
           if (products.length === 0) {
             grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open"></i><h3>Belum ada produk</h3></div>`;
             return;
           }
-          grid.innerHTML = products.map(product => `
-            <div class="product-card" onclick="showProductDetail('${product.id}')">
-              <div class="product-image">
-                ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-                <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
-                  <i class="far fa-heart"></i>
-                </button>
-              </div>
-              <div class="product-info">
-                <div class="product-name">${product.nama}</div>
-                <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-                <div class="product-meta">
-                  <div class="product-seller">
-                    <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                    <span>${product.sellerNama || 'UMKM'}</span>
+          grid.innerHTML = products.map(product => {
+            const distanceHtml = product.distance
+              ? `<div class="distance-badge"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
+              : '';
+            const ratingHtml = product.rating
+              ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
+              : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
+            return `
+              <div class="product-card" onclick="showProductDetail('${product.id}')">
+                <div class="product-image">
+                  ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+                  ${distanceHtml}
+                  <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
+                    <i class="far fa-heart"></i>
+                  </button>
+                </div>
+                <div class="product-info">
+                  <div class="product-name">${product.nama}</div>
+                  <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
+                  <div class="product-meta">
+                    <div class="product-seller">
+                      <div class="seller-avatar"><i class="fas fa-store"></i></div>
+                      <span>${product.sellerNama || 'UMKM'}</span>
+                    </div>
+                    ${ratingHtml}
                   </div>
                 </div>
               </div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
         })
         .catch(function(error) {
           console.error('showAllProducts error:', error);
@@ -2609,7 +2622,11 @@
         const keyword = document.getElementById('searchInput').value;
         if (!keyword) return;
 
-        callGAS('searchProducts', { keyword: keyword })
+        callGAS('searchProducts', {
+            keyword: keyword,
+            latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
+            longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : ''
+          })
           .then(function(products) {
             const grid = document.getElementById('nearbyProducts');
             if (products.length === 0) {
@@ -2623,23 +2640,33 @@
               return;
             }
 
-            grid.innerHTML = products.map(product => `
-              <div class="product-card" onclick="showProductDetail('${product.id}')">
-                <div class="product-image">
-                  ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-                </div>
-                <div class="product-info">
-                  <div class="product-name">${product.nama}</div>
-                  <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-                  <div class="product-meta">
-                    <div class="product-seller">
-                      <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                      <span>${product.sellerNama || 'UMKM'}</span>
+            grid.innerHTML = products.map(product => {
+              const distanceHtml = product.distance
+                ? `<div class="distance-badge"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
+                : '';
+              const ratingHtml = product.rating
+                ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}</div>`
+                : '';
+              return `
+                <div class="product-card" onclick="showProductDetail('${product.id}')">
+                  <div class="product-image">
+                    ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+                    ${distanceHtml}
+                  </div>
+                  <div class="product-info">
+                    <div class="product-name">${product.nama}</div>
+                    <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
+                    <div class="product-meta">
+                      <div class="product-seller">
+                        <div class="seller-avatar"><i class="fas fa-store"></i></div>
+                        <span>${product.sellerNama || 'UMKM'}</span>
+                      </div>
+                      ${ratingHtml}
                     </div>
                   </div>
                 </div>
-              </div>
-            `).join('');
+              `;
+            }).join('');
           })
           .catch(function(error) {
             console.error('searchProducts error:', error);
