@@ -2496,7 +2496,7 @@
                     <span>${product.sellerNama}</span>
                   </div>
                   ${product.rating
-                    ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}</div>`
+                    ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
                     : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`
                   }
                 </div>
