@@ -2118,21 +2118,21 @@
     </div>
   </div>
 
+  <!-- config.js berisi GAS_URL — edit file config.js di GitHub, bukan di sini -->
+  <script src="config.js"></script>
   <script>
     // ==================== KONFIGURASI BACKEND ====================
-    // ⚠️ GANTI URL DI BAWAH INI dengan URL deploy Google Apps Script kamu
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzWfX928Mm1tqoMEYep9No1ucEY5CgbkJ7PTvZMJkqjklZv8QkuJjybCOXFiNL1pJm3Kg/exec';
+    // GAS_URL dibaca dari config.js yang ada di GitHub
+    const GAS_URL = (typeof LOKARA_CONFIG !== 'undefined' && LOKARA_CONFIG.GAS_URL)
+      ? LOKARA_CONFIG.GAS_URL : '';
 
     // Helper: panggil Google Apps Script via fetch
-    // POST ke doPost GAS — tidak perlu update Code.js di GAS
     function callGAS(action, data) {
-      if (!GAS_URL || GAS_URL === 'GANTI_DENGAN_URL_GAS_KAMU') {
-        showToast('GAS_URL belum diisi! Edit index.html', 'error');
-        return Promise.reject(new Error('GAS_URL belum diisi'));
+      if (!GAS_URL) {
+        showToast('GAS_URL belum diisi di config.js', 'error');
+        return Promise.reject(new Error('GAS_URL kosong'));
       }
 
-      // GAS menerima POST dengan Content-Type text/plain (bukan application/json)
-      // supaya browser tidak kirim CORS preflight OPTIONS request
       return fetch(GAS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -2142,9 +2142,8 @@
         return r.text();
       })
       .then(function(text) {
-        // Jika response diawali '<', berarti GAS return HTML (error/redirect)
         if (text.trim().startsWith('<')) {
-          console.error('GAS return HTML bukan JSON. Pastikan:\n1. Deploy as "Anyone"\n2. Execute as "Me"\n3. Sudah deploy ulang setelah edit code');
+          console.error('GAS return HTML bukan JSON. Cek deploy setting.');
           throw new Error('Server error: cek pengaturan deploy GAS (akses harus "Anyone")');
         }
         try {
@@ -2162,7 +2161,7 @@
       })
       .catch(function(err) {
         if (err.message === 'Failed to fetch') {
-          throw new Error('Tidak dapat terhubung ke server. Cek koneksi internet.');
+          throw new Error('Tidak dapat terhubung ke server.');
         }
         throw err;
       });
