@@ -2217,9 +2217,9 @@
       if (user) {
         currentUser = JSON.parse(user);
         showMainApp();
-        getLocation();
         loadCategories();
-        loadNearbyProducts();
+        loadAllProducts(); // load dulu tanpa koordinat
+        getLocation();     // GPS menyusul, akan reload dengan jarak
         loadNotifications();
       } else {
         showPage('authPage');
@@ -2328,14 +2328,17 @@
           function(position) {
             currentLocation.lat = position.coords.latitude;
             currentLocation.lng = position.coords.longitude;
-            document.getElementById('locationText').innerHTML = 
+            document.getElementById('locationText').innerHTML =
               `<i class="fas fa-check-circle" style="color: var(--success);"></i> Lokasi aktif`;
-            loadNearbyProducts();
+            // Reload produk dengan koordinat agar jarak dihitung
+            loadAllProducts();
           },
           function(error) {
-            document.getElementById('locationText').innerHTML = 
+            document.getElementById('locationText').innerHTML =
               `<i class="fas fa-exclamation-circle" style="color: var(--warning);"></i> Izinkan akses lokasi`;
-            showToast('Mohon izinkan akses lokasi untuk melihat produk terdekat', 'error');
+            // Tetap tampilkan semua produk meski tanpa jarak
+            if (allProductsCache.length === 0) loadAllProducts();
+            else renderProducts();
           }
         );
       }
@@ -2456,58 +2459,78 @@
       const grid = document.getElementById('mainProductsGrid');
       const label = document.getElementById('productSectionLabel');
 
-      // Filter produk
-      let filtered = allProductsCache;
+      let filtered = allProductsCache.slice(); // copy array
 
-      // Filter radius
-      if (radiusOnly && currentLocation.lat && currentLocation.lng) {
-        filtered = filtered.filter(p => p.distance !== null && parseFloat(p.distance) <= 1);
-        label.textContent = 'Produk Terdekat';
+      // Filter radius — hanya kalau lokasi sudah ada DAN toggle ON
+      if (radiusOnly) {
+        if (currentLocation.lat && currentLocation.lng) {
+          filtered = filtered.filter(function(p) {
+            const d = parseFloat(p.distance);
+            return !isNaN(d) && d <= 1;
+          });
+          label.textContent = 'Produk Terdekat (< 1 KM)';
+        } else {
+          // Lokasi belum ready — tampilkan semua sambil tunggu GPS
+          label.textContent = 'Produk Terdekat (< 1 KM)';
+        }
       } else {
-        label.textContent = radiusOnly ? 'Produk Terdekat' : 'Semua Produk';
+        label.textContent = 'Semua Produk';
       }
 
       // Filter kategori
       if (activeCategory) {
-        filtered = filtered.filter(p => p.kategori === activeCategory);
+        filtered = filtered.filter(function(p) {
+          return p.kategori === activeCategory;
+        });
       }
 
       if (filtered.length === 0) {
+        const msg = radiusOnly && currentLocation.lat
+          ? 'Belum ada UMKM yang mendaftar di radius 1 km'
+          : !currentLocation.lat
+          ? 'Aktifkan GPS untuk melihat produk terdekat'
+          : activeCategory
+          ? 'Tidak ada produk di kategori ini'
+          : 'Belum ada produk terdaftar';
         grid.innerHTML = `
           <div class="empty-state" style="grid-column:1/-1;">
             <i class="fas fa-search-location"></i>
             <h3>${radiusOnly ? 'Tidak ada produk terdekat' : 'Tidak ada produk'}</h3>
-            <p>${radiusOnly ? 'Coba matikan filter < 1 KM' : activeCategory ? 'Coba kategori lain' : 'Belum ada produk terdaftar'}</p>
+            <p>${msg}</p>
           </div>`;
         return;
       }
 
-      grid.innerHTML = filtered.map(product => `
-        <div class="product-card" onclick="showProductDetail('${product.id}')">
-          <div class="product-image">
-            ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-            <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
-              <i class="far fa-heart"></i>
-            </button>
-          </div>
-          <div class="product-info">
-            ${product.distance !== null
-              ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
-              : ''}
-            <div class="product-name">${product.nama}</div>
-            <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-            <div class="product-meta">
-              <div class="product-seller">
-                <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                <span>${product.sellerNama || 'UMKM'}</span>
-              </div>
-              ${product.rating
-                ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
-                : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`}
+      grid.innerHTML = filtered.map(function(product) {
+        const dist = parseFloat(product.distance);
+        const distHtml = !isNaN(dist)
+          ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${dist.toFixed(2)} km</div>`
+          : '';
+        const ratingHtml = product.rating
+          ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
+          : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
+        return `
+          <div class="product-card" onclick="showProductDetail('${product.id}')">
+            <div class="product-image">
+              ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+              <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
+                <i class="far fa-heart"></i>
+              </button>
             </div>
-          </div>
-        </div>
-      `).join('');
+            <div class="product-info">
+              ${distHtml}
+              <div class="product-name">${product.nama}</div>
+              <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
+              <div class="product-meta">
+                <div class="product-seller">
+                  <div class="seller-avatar"><i class="fas fa-store"></i></div>
+                  <span>${product.sellerNama || 'UMKM'}</span>
+                </div>
+                ${ratingHtml}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
     }
 
     function loadAllProducts() {
