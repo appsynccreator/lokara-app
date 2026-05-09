@@ -7,9 +7,9 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1B5E20">
-  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root {
       --primary: #1B5E20;
@@ -2136,20 +2136,47 @@
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzWfX928Mm1tqoMEYep9No1ucEY5CgbkJ7PTvZMJkqjklZv8QkuJjybCOXFiNL1pJm3Kg/exec';
 
     // Helper: panggil Google Apps Script via fetch
+    // POST ke doPost GAS — tidak perlu update Code.js di GAS
     function callGAS(action, data) {
+      if (!GAS_URL || GAS_URL === 'GANTI_DENGAN_URL_GAS_KAMU') {
+        showToast('GAS_URL belum diisi! Edit index.html', 'error');
+        return Promise.reject(new Error('GAS_URL belum diisi'));
+      }
+
+      // GAS menerima POST dengan Content-Type text/plain (bukan application/json)
+      // supaya browser tidak kirim CORS preflight OPTIONS request
       return fetch(GAS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: action, data: data || {} })
       })
-      .then(function(r) { return r.json(); })
-      .then(function(res) {
-        // GAS processRequest mengembalikan { success, data, message }
-        if (res && res.success === false) {
-          return Promise.reject(new Error(res.message || 'Terjadi kesalahan'));
+      .then(function(r) {
+        return r.text();
+      })
+      .then(function(text) {
+        // Jika response diawali '<', berarti GAS return HTML (error/redirect)
+        if (text.trim().startsWith('<')) {
+          console.error('GAS return HTML bukan JSON. Pastikan:\n1. Deploy as "Anyone"\n2. Execute as "Me"\n3. Sudah deploy ulang setelah edit code');
+          throw new Error('Server error: cek pengaturan deploy GAS (akses harus "Anyone")');
         }
-        // Jika ada field data, kembalikan data-nya; jika tidak, kembalikan seluruh respons
+        try {
+          return JSON.parse(text);
+        } catch(e) {
+          console.error('Response tidak valid:', text.substring(0, 300));
+          throw new Error('Response tidak valid dari server');
+        }
+      })
+      .then(function(res) {
+        if (res && res.success === false) {
+          return Promise.reject(new Error(res.message || res.error || 'Terjadi kesalahan'));
+        }
         return (res && res.data !== undefined) ? res.data : res;
+      })
+      .catch(function(err) {
+        if (err.message === 'Failed to fetch') {
+          throw new Error('Tidak dapat terhubung ke server. Cek koneksi internet.');
+        }
+        throw err;
       });
     }
 
@@ -3037,16 +3064,40 @@
             return;
           }
 
-          list.innerHTML = notifications.map(notif => `
-            <div class="menu-item" style="${notif.isRead ? '' : 'background: #E8F5E9;'}" onclick="markRead('${notif.id}')">
-              <div class="menu-icon"><i class="fas fa-bell"></i></div>
-              <div class="menu-text">
-                <h4>${notif.judul}</h4>
-                <p>${notif.pesan}</p>
+          list.innerHTML = notifications.map(notif => {
+            // Pilih icon berdasarkan tipe
+            const icons = {
+              'order': 'fa-shopping-bag',
+              'order_update': 'fa-sync-alt',
+              'chat': 'fa-comment',
+              'welcome': 'fa-hand-wave'
+            };
+            const colors = {
+              'order': 'var(--primary)',
+              'order_update': 'var(--info)',
+              'chat': 'var(--warning)',
+              'welcome': 'var(--success)'
+            };
+            const icon = icons[notif.type] || 'fa-bell';
+            const color = colors[notif.type] || 'var(--primary)';
+            const timeStr = notif.createdAt ? new Date(notif.createdAt).toLocaleString('id-ID', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '';
+
+            return `
+              <div class="menu-item" 
+                   style="${notif.isRead ? '' : 'background: #E8F5E9; border-left: 3px solid var(--primary);'} cursor:pointer; margin-bottom:8px; border-radius:12px;"
+                   onclick="handleNotifClick('${notif.id}', '${notif.type}', '${notif.referenceId || ''}')">
+                <div class="menu-icon" style="background: ${notif.isRead ? '#F5F5F5' : '#E8F5E9'}; color: ${color};">
+                  <i class="fas ${icon}"></i>
+                </div>
+                <div class="menu-text" style="flex:1;">
+                  <h4 style="font-size:14px; ${notif.isRead ? '' : 'color: var(--primary);'}">${notif.judul}</h4>
+                  <p style="font-size:12px; margin-top:2px;">${notif.pesan}</p>
+                  <p style="font-size:11px; color:var(--text-light); margin-top:4px;">${timeStr}</p>
+                </div>
+                ${!notif.isRead ? '<div style="width:10px; height:10px; background: var(--primary); border-radius:50%; flex-shrink:0;"></div>' : ''}
               </div>
-              ${!notif.isRead ? '<div style="width:10px; height:10px; background: var(--primary); border-radius:50%;"></div>' : ''}
-            </div>
-          `).join('');
+            `;
+          }).join('');
 
           // Update badge
           const unread = notifications.filter(n => !n.isRead).length;
@@ -3063,14 +3114,54 @@
         });
     }
 
-    function markRead(notificationId) {
-      callGAS('markNotificationRead', { notificationId: notificationId })
-        .then(function() {
-          loadNotifications();
-        })
-        .catch(function(error) {
-          console.error('markRead error:', error);
-        });
+    function handleNotifClick(notifId, type, referenceId) {
+      // Tandai sudah dibaca dulu
+      callGAS('markNotificationRead', { notificationId: notifId })
+        .then(function() { loadNotifications(); })
+        .catch(function(e) { console.error('markRead error:', e); });
+
+      // Navigasi ke halaman yang relevan
+      switch(type) {
+        case 'chat':
+          // referenceId = senderId (lawan chat)
+          if (referenceId) {
+            currentChatUser = referenceId;
+            showPage('chatPage');
+            // Ambil nama pengirim untuk header chat
+            callGAS('getProfile', { userId: referenceId })
+              .then(function(user) {
+                document.getElementById('chatTitle').textContent = user.nama || 'Chat';
+              })
+              .catch(function() {
+                document.getElementById('chatTitle').textContent = 'Chat';
+              });
+            loadMessages();
+          } else {
+            showPage('chatPage');
+          }
+          break;
+
+        case 'order':
+        case 'order_update':
+          // referenceId = orderId — buka halaman pesanan
+          showOrders();
+          break;
+
+        case 'welcome':
+          showPage('profilePage');
+          break;
+
+        default:
+          // Notifikasi umum — tetap di halaman notifikasi
+          break;
+      }
+    }
+
+    function markRead(notifId) {
+      // Fungsi legacy — tetap ada untuk kompatibilitas
+      callGAS('markNotificationRead', { notificationId: notifId })
+        .then(function() { loadNotifications(); })
+        .catch(function(error) { console.error('markRead error:', error); });
     }
 
     // ==================== PROFILE ====================
@@ -3452,7 +3543,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('./sw.js')
           .then(function(reg) {
             console.log('LOKARA SW registered:', reg.scope);
           })
