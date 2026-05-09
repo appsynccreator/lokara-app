@@ -1712,9 +1712,7 @@
           <i class="fas fa-th-large" style="color: var(--primary);"></i>
           Kategori
         </div>
-        <div class="categories-grid" id="categoriesGrid">
-          <!-- Categories will be loaded dynamically -->
-        </div>
+        <div class="categories-grid" id="categoriesGrid"></div>
       </div>
 
       <!-- Banner -->
@@ -1722,35 +1720,37 @@
         <div class="banner">
           <div class="banner-title">UMKM Lokal</div>
           <div class="banner-subtitle">Dukung produk dari tetangga Anda!</div>
-          <button class="banner-btn" onclick="showNearbyProducts()">Jelajahi Sekarang</button>
+          <button class="banner-btn" onclick="resetFilter()">Jelajahi Sekarang</button>
         </div>
       </div>
 
-      <!-- Nearby Products -->
+      <!-- Products with toggle + filter -->
       <div class="products-section">
-        <div class="section-header">
-          <div class="section-title">
+        <div class="section-header" style="flex-wrap:wrap; gap:8px;">
+          <div class="section-title" id="productSectionTitle">
             <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
-            Produk Terdekat (&lt; 1 KM)
+            <span id="productSectionLabel">Produk Terdekat</span>
           </div>
-          <span class="see-all" onclick="showAllProducts()">Lihat Semua</span>
+          <!-- Toggle radius -->
+          <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
+            <span style="font-size:12px; color:var(--text-light);" id="toggleLabel">< 1 KM</span>
+            <div id="radiusToggle" onclick="toggleRadius()"
+              style="width:44px; height:24px; background:var(--primary); border-radius:12px; position:relative; cursor:pointer; transition:background 0.2s; flex-shrink:0;">
+              <div id="radiusToggleThumb"
+                style="width:20px; height:20px; background:white; border-radius:50%; position:absolute; top:2px; left:22px; transition:left 0.2s; box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
+            </div>
+          </div>
         </div>
-        <div class="products-grid" id="nearbyProducts">
-          <!-- Products will be loaded dynamically -->
-        </div>
-      </div>
-    </div>
 
-    <!-- All Products Page -->
-    <div class="page" id="allProductsPage">
-      <div class="products-section">
-        <div class="section-header">
-          <div class="section-title">
-            <i class="fas fa-store" style="color: var(--primary);"></i>
-            Semua Produk
-          </div>
+        <!-- Active category filter pill -->
+        <div id="activeCategoryFilter" style="display:none; margin-bottom:8px;">
+          <span style="display:inline-flex; align-items:center; gap:6px; background:var(--primary); color:white; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600;">
+            <span id="activeCategoryName"></span>
+            <i class="fas fa-times" style="cursor:pointer;" onclick="resetFilter()"></i>
+          </span>
         </div>
-        <div class="products-grid" id="allProductsGrid"></div>
+
+        <div class="products-grid" id="mainProductsGrid"></div>
       </div>
     </div>
 
@@ -2405,20 +2405,197 @@
       }
     }
 
+    // ==================== UNIFIED PRODUCT SYSTEM ====================
+    let radiusOnly = true;        // true = < 1km, false = semua
+    let activeCategory = null;    // null = semua kategori
+    let allProductsCache = [];    // cache semua produk dari GAS
+
+    function toggleRadius() {
+      radiusOnly = !radiusOnly;
+      const thumb = document.getElementById('radiusToggleThumb');
+      const toggle = document.getElementById('radiusToggle');
+      const label = document.getElementById('toggleLabel');
+      if (radiusOnly) {
+        thumb.style.left = '22px';
+        toggle.style.background = 'var(--primary)';
+        label.textContent = '< 1 KM';
+      } else {
+        thumb.style.left = '2px';
+        toggle.style.background = '#ccc';
+        label.textContent = 'Semua';
+      }
+      renderProducts();
+    }
+
+    function setCategory(cat) {
+      activeCategory = (activeCategory === cat) ? null : cat;
+      // Update UI semua category item
+      document.querySelectorAll('.category-item').forEach(el => {
+        el.style.opacity = (!activeCategory || el.dataset.cat === activeCategory) ? '1' : '0.4';
+      });
+      // Tampilkan pill filter aktif
+      const filterDiv = document.getElementById('activeCategoryFilter');
+      const filterName = document.getElementById('activeCategoryName');
+      if (activeCategory) {
+        filterDiv.style.display = 'block';
+        filterName.textContent = activeCategory;
+      } else {
+        filterDiv.style.display = 'none';
+      }
+      renderProducts();
+    }
+
+    function resetFilter() {
+      activeCategory = null;
+      document.querySelectorAll('.category-item').forEach(el => el.style.opacity = '1');
+      document.getElementById('activeCategoryFilter').style.display = 'none';
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('mainProductsGrid');
+      const label = document.getElementById('productSectionLabel');
+
+      // Filter produk
+      let filtered = allProductsCache;
+
+      // Filter radius
+      if (radiusOnly && currentLocation.lat && currentLocation.lng) {
+        filtered = filtered.filter(p => p.distance !== null && parseFloat(p.distance) <= 1);
+        label.textContent = 'Produk Terdekat';
+      } else {
+        label.textContent = radiusOnly ? 'Produk Terdekat' : 'Semua Produk';
+      }
+
+      // Filter kategori
+      if (activeCategory) {
+        filtered = filtered.filter(p => p.kategori === activeCategory);
+      }
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;">
+            <i class="fas fa-search-location"></i>
+            <h3>${radiusOnly ? 'Tidak ada produk terdekat' : 'Tidak ada produk'}</h3>
+            <p>${radiusOnly ? 'Coba matikan filter < 1 KM' : activeCategory ? 'Coba kategori lain' : 'Belum ada produk terdaftar'}</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(product => `
+        <div class="product-card" onclick="showProductDetail('${product.id}')">
+          <div class="product-image">
+            ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+            <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
+              <i class="far fa-heart"></i>
+            </button>
+          </div>
+          <div class="product-info">
+            ${product.distance !== null
+              ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
+              : ''}
+            <div class="product-name">${product.nama}</div>
+            <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
+            <div class="product-meta">
+              <div class="product-seller">
+                <div class="seller-avatar"><i class="fas fa-store"></i></div>
+                <span>${product.sellerNama || 'UMKM'}</span>
+              </div>
+              ${product.rating
+                ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
+                : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function loadAllProducts() {
+      const grid = document.getElementById('mainProductsGrid');
+      grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-light);"><i class="fas fa-spinner fa-spin" style="font-size:32px;"></i><p style="margin-top:12px;">Memuat produk...</p></div>`;
+
+      callGAS('getProducts', {
+        latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
+        longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : ''
+      })
+      .then(function(products) {
+        allProductsCache = products;
+        renderProducts();
+      })
+      .catch(function(error) {
+        console.error('loadAllProducts error:', error);
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-exclamation-circle"></i><h3>Gagal memuat produk</h3><p>Cek koneksi internet</p></div>`;
+      });
+    }
+
+    // Alias untuk kompatibilitas fungsi lama
+    function loadNearbyProducts() { loadAllProducts(); }
+    function showAllProducts() { showPage('homePage'); loadAllProducts(); }
+    function showNearbyProducts() { showPage('homePage'); }
+    function filterByCategory(category) {
+      showPage('homePage');
+      setCategory(category);
+    }
+
+    // Update search to filter from cache
+    function searchProducts(event) {
+      if (event.key !== 'Enter') return;
+      const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (!keyword) { renderProducts(); return; }
+
+      const grid = document.getElementById('mainProductsGrid');
+      const filtered = allProductsCache.filter(p =>
+        (p.nama || '').toLowerCase().includes(keyword) ||
+        (p.deskripsi || '').toLowerCase().includes(keyword) ||
+        (p.kategori || '').toLowerCase().includes(keyword)
+      );
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-search"></i><h3>Produk tidak ditemukan</h3><p>Coba kata kunci lain</p></div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(product => `
+        <div class="product-card" onclick="showProductDetail('${product.id}')">
+          <div class="product-image">
+            ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+            <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
+              <i class="far fa-heart"></i>
+            </button>
+          </div>
+          <div class="product-info">
+            ${product.distance !== null
+              ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
+              : ''}
+            <div class="product-name">${product.nama}</div>
+            <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
+            <div class="product-meta">
+              <div class="product-seller">
+                <div class="seller-avatar"><i class="fas fa-store"></i></div>
+                <span>${product.sellerNama || 'UMKM'}</span>
+              </div>
+              ${product.rating
+                ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}</div>`
+                : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
     // ==================== CATEGORIES ====================
     function loadCategories() {
       callGAS('getCategories', {})
         .then(function(categories) {
           const grid = document.getElementById('categoriesGrid');
           grid.innerHTML = categories.map(cat => `
-            <div class="category-item" onclick="filterByCategory('${cat.nama}')">
+            <div class="category-item" data-cat="${cat.nama}" onclick="setCategory('${cat.nama}')">
               <div class="category-icon">${cat.icon}</div>
               <div class="category-name">${cat.nama}</div>
             </div>
           `).join('');
-
           const select = document.getElementById('productCategory');
-          select.innerHTML = '<option value="">Pilih Kategori</option>' + 
+          select.innerHTML = '<option value="">Pilih Kategori</option>' +
             categories.map(cat => `<option value="${cat.nama}">${cat.icon} ${cat.nama}</option>`).join('');
         })
         .catch(function(error) {
@@ -2426,121 +2603,7 @@
         });
     }
 
-    // ==================== PRODUCTS ====================
-    function loadNearbyProducts() {
-      if (!currentLocation || !currentLocation.lat || !currentLocation.lng) {
-        // Show placeholder message if location not available yet
-        const grid = document.getElementById('nearbyProducts');
-        if (grid) {
-          grid.innerHTML = `
-            <div class="empty-state" style="grid-column: 1/-1;">
-              <i class="fas fa-location-arrow"></i>
-              <h3>Izinkan akses lokasi</h3>
-              <p>Aktifkan GPS untuk melihat produk terdekat</p>
-            </div>
-          `;
-        }
-        return;
-      }
-
-      callGAS('getNearbyProducts', {
-          latitude: currentLocation.lat || '',
-          longitude: currentLocation.lng || ''
-        })
-        .then(function(products) {
-          const grid = document.getElementById('nearbyProducts');
-          if (products.length === 0) {
-            grid.innerHTML = `
-              <div class="empty-state" style="grid-column: 1/-1;">
-                <i class="fas fa-search-location"></i>
-                <h3>Tidak ada produk terdekat</h3>
-                <p>Belum ada UMKM yang mendaftar di radius 1 km</p>
-              </div>
-            `;
-            return;
-          }
-
-          grid.innerHTML = products.map(product => `
-            <div class="product-card" onclick="showProductDetail('${product.id}')">
-              <div class="product-image">
-                ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-                <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
-                  <i class="far fa-heart"></i>
-                </button>
-              </div>
-              <div class="product-info">
-                <div class="distance-info">
-                  <i class="fas fa-map-marker-alt"></i> ${product.distance} km
-                </div>
-                <div class="product-name">${product.nama}</div>
-                <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-                <div class="product-meta">
-                  <div class="product-seller">
-                    <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                    <span>${product.sellerNama}</span>
-                  </div>
-                  ${product.rating
-                    ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
-                    : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`
-                  }
-                </div>
-              </div>
-            </div>
-          `).join('');
-        })
-        .catch(function(error) {
-          console.error('Error loadNearbyProducts:', error);
-        });
-    }
-
-    function showAllProducts() {
-      showPage('allProductsPage');
-      callGAS('getProducts', {
-          latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
-          longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : ''
-        })
-        .then(function(products) {
-          const grid = document.getElementById('allProductsGrid');
-          if (products.length === 0) {
-            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open"></i><h3>Belum ada produk</h3></div>`;
-            return;
-          }
-          grid.innerHTML = products.map(product => {
-            const ratingHtml = product.rating
-              ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
-              : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
-            return `
-              <div class="product-card" onclick="showProductDetail('${product.id}')">
-                <div class="product-image">
-                  ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-                  <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
-                    <i class="far fa-heart"></i>
-                  </button>
-                </div>
-                <div class="product-info">
-                  ${product.distance
-                    ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
-                    : ''}
-                  <div class="product-name">${product.nama}</div>
-                  <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-                  <div class="product-meta">
-                    <div class="product-seller">
-                      <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                      <span>${product.sellerNama || 'UMKM'}</span>
-                    </div>
-                    ${ratingHtml}
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join('');
-        })
-        .catch(function(error) {
-          console.error('showAllProducts error:', error);
-          showToast('Gagal memuat produk', 'error');
-        });
-    }
-
+    // OLD loadNearbyProducts stub - replaced by unified system above
     function showProductDetail(productId) {
       callGAS('getProductDetail', { productId: productId })
         .then(function(product) {
@@ -2601,71 +2664,6 @@
                 Math.sin(dLon/2) * Math.sin(dLon/2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
       return R * c;
-    }
-
-    // ==================== SEARCH ====================
-    function searchProducts(event) {
-      if (event.key === 'Enter') {
-        const keyword = document.getElementById('searchInput').value;
-        if (!keyword) return;
-
-        callGAS('searchProducts', {
-            keyword: keyword,
-            latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
-            longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : ''
-          })
-          .then(function(products) {
-            const grid = document.getElementById('nearbyProducts');
-            if (products.length === 0) {
-              grid.innerHTML = `
-                <div class="empty-state" style="grid-column: 1/-1;">
-                  <i class="fas fa-search"></i>
-                  <h3>Produk tidak ditemukan</h3>
-                  <p>Coba kata kunci lain</p>
-                </div>
-              `;
-              return;
-            }
-
-            grid.innerHTML = products.map(product => {
-              const ratingHtml = product.rating
-                ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}</div>`
-                : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
-              return `
-                <div class="product-card" onclick="showProductDetail('${product.id}')">
-                  <div class="product-image">
-                    ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-                    <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
-                      <i class="far fa-heart"></i>
-                    </button>
-                  </div>
-                  <div class="product-info">
-                    ${product.distance
-                      ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
-                      : ''}
-                    <div class="product-name">${product.nama}</div>
-                    <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-                    <div class="product-meta">
-                      <div class="product-seller">
-                        <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                        <span>${product.sellerNama || 'UMKM'}</span>
-                      </div>
-                      ${ratingHtml}
-                    </div>
-                  </div>
-                </div>
-              `;
-            }).join('');
-          })
-          .catch(function(error) {
-            console.error('searchProducts error:', error);
-          });
-      }
-    }
-
-    function filterByCategory(category) {
-      document.getElementById('searchInput').value = category;
-      searchProducts({ key: 'Enter' });
     }
 
     // ==================== WISHLIST ====================
@@ -3355,10 +3353,7 @@
     // ==================== PROCESS REQUEST WRAPPER ====================
     // callGAS() mengirim request ke Google Apps Script via fetch
 
-    function showNearbyProducts() {
-      showPage('homePage');
-      loadNearbyProducts();
-    }
+
 
     function editProduct(productId) {
       showToast('Fitur edit produk segera hadir', 'error');
