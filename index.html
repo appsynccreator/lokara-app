@@ -2138,7 +2138,7 @@
     // Helper: panggil Google Apps Script via fetch
     // POST ke doPost GAS — tidak perlu update Code.js di GAS
     function callGAS(action, data) {
-      if (!GAS_URL || GAS_URL === 'GANTI_DENGAN_URL_GAS_KAMU') {
+      if (!GAS_URL || GAS_URL === 'https://script.google.com/macros/s/AKfycbzWfX928Mm1tqoMEYep9No1ucEY5CgbkJ7PTvZMJkqjklZv8QkuJjybCOXFiNL1pJm3Kg/exec') {
         showToast('GAS_URL belum diisi! Edit index.html', 'error');
         return Promise.reject(new Error('GAS_URL belum diisi'));
       }
