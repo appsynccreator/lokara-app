@@ -4,12 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LOKARA - Solusi UMKM di Sekitarmu</title>
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
-  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1B5E20">
-  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root {
       --primary: #1B5E20;
@@ -2130,12 +2131,10 @@
     </div>
   </div>
 
-  <!-- Konfigurasi URL GAS — edit file ini saja, index.html tidak perlu diubah -->
-  <script src="config.js"></script>
   <script>
-    // URL GAS dibaca dari config.js — edit file config.js, bukan file ini
-    // Jika config.js tidak ada, isi GAS_URL di sini langsung
-    const GAS_URL = (typeof LOKARA_CONFIG !== 'undefined') ? LOKARA_CONFIG.GAS_URL : 'GANTI_DENGAN_URL_GAS_KAMU';
+    // ==================== KONFIGURASI BACKEND ====================
+    // ⚠️ GANTI URL DI BAWAH INI dengan URL deploy Google Apps Script kamu
+    const GAS_URL = 'GANTI_DENGAN_URL_GAS_KAMU';
 
     // Helper: panggil Google Apps Script via fetch
     // POST ke doPost GAS — tidak perlu update Code.js di GAS
@@ -2494,9 +2493,10 @@
                     <div class="seller-avatar"><i class="fas fa-store"></i></div>
                     <span>${product.sellerNama}</span>
                   </div>
-                  <div class="rating">
-                    <i class="fas fa-star"></i> 4.5
-                  </div>
+                  ${product.rating
+                    ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}</div>`
+                    : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`
+                  }
                 </div>
               </div>
             </div>
@@ -2520,9 +2520,6 @@
             return;
           }
           grid.innerHTML = products.map(product => {
-            const distanceHtml = product.distance
-              ? `<div class="distance-badge"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
-              : '';
             const ratingHtml = product.rating
               ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
               : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
@@ -2530,12 +2527,12 @@
               <div class="product-card" onclick="showProductDetail('${product.id}')">
                 <div class="product-image">
                   ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-                  ${distanceHtml}
                   <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
                     <i class="far fa-heart"></i>
                   </button>
                 </div>
                 <div class="product-info">
+                  ${product.distance ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>` : ''}
                   <div class="product-name">${product.nama}</div>
                   <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
                   <div class="product-meta">
@@ -3570,7 +3567,8 @@
   </script>
 
   <script>
-    if ('serviceWorker' in navigator) {
+    // Service Worker hanya aktif di GitHub Pages, tidak di GAS
+    if ('serviceWorker' in navigator && !location.hostname.includes('googleusercontent.com') && !location.hostname.includes('google.com')) {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js')
           .then(function(reg) {
