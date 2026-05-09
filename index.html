@@ -2130,10 +2130,12 @@
     </div>
   </div>
 
+  <!-- Konfigurasi URL GAS — edit file ini saja, index.html tidak perlu diubah -->
+  <script src="config.js"></script>
   <script>
-    // ==================== KONFIGURASI BACKEND ====================
-    // GANTI URL INI dengan URL deploy Google Apps Script kamu
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzWfX928Mm1tqoMEYep9No1ucEY5CgbkJ7PTvZMJkqjklZv8QkuJjybCOXFiNL1pJm3Kg/exec';
+    // URL GAS dibaca dari config.js — edit file config.js, bukan file ini
+    // Jika config.js tidak ada, isi GAS_URL di sini langsung
+    const GAS_URL = (typeof LOKARA_CONFIG !== 'undefined') ? LOKARA_CONFIG.GAS_URL : 'GANTI_DENGAN_URL_GAS_KAMU';
 
     // Helper: panggil Google Apps Script via fetch
     // POST ke doPost GAS — tidak perlu update Code.js di GAS
