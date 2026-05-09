@@ -282,8 +282,110 @@
       font-weight: 500;
     }
 
-    /* Banner */
-    .banner-section {
+    /* Banner Promo Carousel */
+    .promo-carousel {
+      margin: 0 20px 16px;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      height: 160px;
+      background: #eee;
+    }
+
+    .promo-slides {
+      display: flex;
+      height: 100%;
+      transition: transform 0.4s ease;
+    }
+
+    .promo-slide {
+      min-width: 100%;
+      height: 100%;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .promo-slide img, .promo-slide video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .promo-slide-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.6));
+      color: white;
+      padding: 12px 16px 10px;
+    }
+
+    .promo-slide-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .promo-slide-desc {
+      font-size: 11px;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .promo-dots {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      display: flex;
+      gap: 5px;
+    }
+
+    .promo-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      transition: background 0.2s, width 0.2s;
+    }
+
+    .promo-dot.active {
+      background: white;
+      width: 16px;
+      border-radius: 3px;
+    }
+
+    .promo-default {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      color: white;
+      gap: 16px;
+    }
+
+    .promo-default-text h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .promo-default-text p { font-size: 12px; opacity: 0.85; margin-bottom: 12px; }
+    .promo-default-text button {
+      background: white; color: var(--primary);
+      border: none; padding: 7px 18px;
+      border-radius: 20px; font-weight: 600;
+      font-size: 12px; cursor: pointer;
+    }
+    .promo-default-icon { font-size: 56px; opacity: 0.3; flex-shrink: 0; }
+    /* Banner Ad Page */
+    .banner-ad-section { padding: 0 20px; }
+    .banner-ad-card {
+      background: white; border-radius: 16px;
+      padding: 20px; margin-bottom: 16px;
+    }
+
+    /* Trial badge */
+    .trial-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #E8F5E9; color: var(--primary);
+      padding: 6px 14px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+    }
+
       padding: 0 20px;
       margin: 16px 0;
     }
@@ -1715,12 +1817,23 @@
         <div class="categories-grid" id="categoriesGrid"></div>
       </div>
 
-      <!-- Banner -->
-      <div class="banner-section">
-        <div class="banner">
-          <div class="banner-title">UMKM Lokal</div>
-          <div class="banner-subtitle">Dukung produk dari tetangga Anda!</div>
-          <button class="banner-btn" onclick="resetFilter()">Jelajahi Sekarang</button>
+      <!-- Promo Banner Carousel -->
+      <div class="promo-carousel" id="promoCarousel">
+        <div class="promo-slides" id="promoSlides">
+          <!-- Default slide kalau belum ada iklan -->
+          <div class="promo-slide">
+            <div class="promo-default">
+              <div class="promo-default-text">
+                <h3>Dukung UMKM Lokal</h3>
+                <p>Temukan produk terbaik di sekitarmu dalam radius 1 km</p>
+                <button onclick="resetFilter()">Jelajahi Sekarang</button>
+              </div>
+              <i class="fas fa-store promo-default-icon"></i>
+            </div>
+          </div>
+        </div>
+        <div class="promo-dots" id="promoDots">
+          <div class="promo-dot active"></div>
         </div>
       </div>
 
@@ -1829,6 +1942,15 @@
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
 
+        <div class="menu-item" onclick="showBannerAd()">
+          <div class="menu-icon" style="background:#E3F2FD; color:#1565C0;"><i class="fas fa-ad"></i></div>
+          <div class="menu-text">
+            <h4>Pasang Iklan</h4>
+            <p>Promosikan produkmu di banner beranda · Rp 5.000/minggu</p>
+          </div>
+          <i class="fas fa-chevron-right menu-arrow"></i>
+        </div>
+
         <div class="menu-item" onclick="showWishlist()">
           <div class="menu-icon"><i class="fas fa-heart"></i></div>
           <div class="menu-text">
@@ -1837,24 +1959,68 @@
           </div>
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
-
-        <div class="menu-item" onclick="showEditProfile()">
-          <div class="menu-icon"><i class="fas fa-user-edit"></i></div>
-          <div class="menu-text">
-            <h4>Edit Profil</h4>
-            <p>Ubah informasi akun</p>
+    <!-- Banner Ad Page -->
+    <div class="page" id="bannerAdPage" style="display:none;">
+      <div class="app-header" style="position:sticky; top:0; z-index:120;">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
+          <div class="logo-text">Pasang Iklan</div>
+          <div style="width:40px;"></div>
+        </div>
+      </div>
+      <div style="padding:20px 20px 100px;">
+        <div style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB); border-radius:16px; padding:16px; margin-bottom:20px; display:flex; gap:12px; align-items:center;">
+          <i class="fas fa-ad" style="font-size:32px; color:#1565C0;"></i>
+          <div>
+            <div style="font-weight:700; font-size:14px;">Iklan Banner Beranda</div>
+            <div style="font-size:12px; color:var(--text-light); margin-top:2px;">Tampil di carousel atas beranda semua pengguna</div>
+            <div style="font-size:13px; font-weight:700; color:#1565C0; margin-top:4px;">Rp 5.000 / minggu</div>
           </div>
-          <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
 
-        <div class="menu-item" onclick="logout()">
-          <div class="menu-icon" style="background: #FFEBEE; color: var(--danger);"><i class="fas fa-sign-out-alt"></i></div>
-          <div class="menu-text">
-            <h4>Keluar</h4>
-            <p>Logout dari aplikasi</p>
-          </div>
-          <i class="fas fa-chevron-right menu-arrow"></i>
+        <div class="form-group">
+          <label class="form-label">Judul Iklan</label>
+          <input type="text" class="form-input" id="bannerTitle" placeholder="Contoh: Promo Lebaran Bu Siti">
         </div>
+
+        <div class="form-group">
+          <label class="form-label">Deskripsi (opsional)</label>
+          <input type="text" class="form-input" id="bannerDesc" placeholder="Diskon 50% semua produk!">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">URL Gambar / Video</label>
+          <input type="text" class="form-input" id="bannerMedia" placeholder="https://...">
+          <div style="font-size:11px; color:var(--text-light); margin-top:4px;">Gunakan link gambar (JPG/PNG) atau video (MP4) dari Google Drive / hosting lain</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tipe Media</label>
+          <select class="form-input" id="bannerType">
+            <option value="image">Gambar</option>
+            <option value="video">Video</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Link Tujuan (opsional)</label>
+          <input type="text" class="form-input" id="bannerLink" placeholder="https://... (klik iklan menuju link ini)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Durasi Tayang</label>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;" id="bannerWeeksOptions">
+            <button onclick="selectWeeks(1)" class="btn" id="weeks1" style="flex:1; min-width:80px; background:var(--bg); color:var(--text); padding:10px; font-size:13px;">1 minggu<br><span style="font-weight:700;">Rp 5.000</span></button>
+            <button onclick="selectWeeks(2)" class="btn" id="weeks2" style="flex:1; min-width:80px; background:var(--bg); color:var(--text); padding:10px; font-size:13px;">2 minggu<br><span style="font-weight:700;">Rp 10.000</span></button>
+            <button onclick="selectWeeks(4)" class="btn" id="weeks4" style="flex:1; min-width:80px; background:var(--bg); color:var(--text); padding:10px; font-size:13px;">4 minggu<br><span style="font-weight:700;">Rp 20.000</span></button>
+          </div>
+        </div>
+
+        <div id="bannerTotal" style="display:none; background:#E8F5E9; border-radius:12px; padding:14px; margin-bottom:16px; font-size:14px;">
+          Total: <strong id="bannerTotalAmount"></strong>
+        </div>
+
+        <button class="btn btn-primary" onclick="submitBanner()">Pasang Iklan</button>
       </div>
     </div>
 
@@ -2221,6 +2387,7 @@
         loadAllProducts(); // load dulu tanpa koordinat
         getLocation();     // GPS menyusul, akan reload dengan jarak
         loadNotifications();
+        loadBanners();     // load iklan banner carousel
       } else {
         showPage('authPage');
       }
@@ -2406,6 +2573,156 @@
       } else {
         showPage('homePage');
       }
+    }
+
+    // ==================== PROMO BANNER CAROUSEL ====================
+    let promoSlideIndex = 0;
+    let promoSlideTimer = null;
+    let promoBanners = [];
+
+    function loadBanners() {
+      callGAS('getBanners', {})
+        .then(function(banners) {
+          promoBanners = banners;
+          renderBannerCarousel();
+        })
+        .catch(function(e) { console.log('loadBanners error:', e); });
+    }
+
+    function renderBannerCarousel() {
+      const slides = document.getElementById('promoSlides');
+      const dots = document.getElementById('promoDots');
+      if (!slides || !dots) return;
+
+      if (!promoBanners || promoBanners.length === 0) {
+        // Default slide sudah ada di HTML
+        return;
+      }
+
+      // Build slides dari data
+      slides.innerHTML = promoBanners.map(function(b, i) {
+        const media = b.mediaType === 'video'
+          ? `<video src="${b.mediaUrl}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video>`
+          : `<img src="${b.mediaUrl}" alt="${b.title}" style="width:100%;height:100%;object-fit:cover;">`;
+        return `
+          <div class="promo-slide" onclick="${b.linkUrl ? `window.open('${b.linkUrl}','_blank')` : ''}">
+            ${media}
+            <div class="promo-slide-overlay">
+              <div class="promo-slide-title">${b.title}</div>
+              ${b.description ? `<div class="promo-slide-desc">${b.description}</div>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+
+      // Build dots
+      dots.innerHTML = promoBanners.map(function(_, i) {
+        return `<div class="promo-dot ${i === 0 ? 'active' : ''}"></div>`;
+      }).join('');
+
+      promoSlideIndex = 0;
+      startCarousel();
+    }
+
+    function startCarousel() {
+      if (promoSlideTimer) clearInterval(promoSlideTimer);
+      if (promoBanners.length <= 1) return;
+      promoSlideTimer = setInterval(function() {
+        promoSlideIndex = (promoSlideIndex + 1) % promoBanners.length;
+        updateCarouselUI();
+      }, 4000);
+    }
+
+    function updateCarouselUI() {
+      const slides = document.getElementById('promoSlides');
+      const dots = document.querySelectorAll('.promo-dot');
+      if (slides) slides.style.transform = 'translateX(-' + (promoSlideIndex * 100) + '%)';
+      dots.forEach(function(d, i) {
+        d.classList.toggle('active', i === promoSlideIndex);
+      });
+    }
+
+    // ==================== BANNER AD ====================
+    let selectedWeeks = 0;
+
+    function showBannerAd() {
+      if (!currentUser) { showToast('Silakan login terlebih dahulu', 'error'); return; }
+      showPage('bannerAdPage');
+      selectedWeeks = 0;
+      // Reset form
+      ['bannerTitle','bannerDesc','bannerMedia','bannerLink'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      document.getElementById('bannerTotal').style.display = 'none';
+      document.querySelectorAll('#bannerWeeksOptions .btn').forEach(function(btn) {
+        btn.style.background = 'var(--bg)';
+        btn.style.color = 'var(--text)';
+      });
+    }
+
+    function selectWeeks(w) {
+      selectedWeeks = w;
+      const total = w * 5000;
+      document.querySelectorAll('#bannerWeeksOptions .btn').forEach(function(btn) {
+        btn.style.background = 'var(--bg)';
+        btn.style.color = 'var(--text)';
+        btn.style.borderColor = 'transparent';
+      });
+      const sel = document.getElementById('weeks' + w);
+      if (sel) {
+        sel.style.background = 'var(--primary)';
+        sel.style.color = 'white';
+      }
+      const totalEl = document.getElementById('bannerTotal');
+      totalEl.style.display = 'block';
+      document.getElementById('bannerTotalAmount').textContent = 'Rp ' + total.toLocaleString('id-ID') + ' (' + w + ' minggu)';
+    }
+
+    function submitBanner() {
+      if (!currentUser) return;
+      const title = document.getElementById('bannerTitle').value.trim();
+      const media = document.getElementById('bannerMedia').value.trim();
+      const desc = document.getElementById('bannerDesc').value.trim();
+      const link = document.getElementById('bannerLink').value.trim();
+      const type = document.getElementById('bannerType').value;
+
+      if (!title) { showToast('Judul iklan wajib diisi', 'error'); return; }
+      if (!media) { showToast('URL gambar/video wajib diisi', 'error'); return; }
+      if (!selectedWeeks) { showToast('Pilih durasi tayang', 'error'); return; }
+
+      const btn = document.querySelector('#bannerAdPage .btn-primary');
+      if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
+
+      callGAS('createBanner', {
+        userId: currentUser.id,
+        title: title,
+        description: desc,
+        mediaUrl: media,
+        mediaType: type,
+        linkUrl: link,
+        weeks: selectedWeeks
+      })
+      .then(function(result) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Pasang Iklan'; }
+        const amount = result.amount || (selectedWeeks * 5000);
+        showModal('Iklan Berhasil Dipasang! 🎉', `
+          <div style="text-align:center; padding:8px 0;">
+            <i class="fas fa-check-circle" style="font-size:48px; color:var(--success); margin-bottom:16px; display:block;"></i>
+            <p style="font-size:14px; margin-bottom:12px;">Iklan "<strong>${title}</strong>" akan tayang hingga <strong>${result.endDate}</strong></p>
+            <div style="background:#FFF8E1; border-radius:12px; padding:14px; text-align:left; margin-bottom:16px;">
+              <div style="font-weight:700; font-size:13px; margin-bottom:8px; color:#F57F17;">💳 Instruksi Pembayaran</div>
+              <div style="font-size:13px; margin-bottom:4px;">Total: <strong>Rp ${amount.toLocaleString('id-ID')}</strong></div>
+              <div style="font-size:12px; color:var(--text-light);">Transfer ke ewallet admin LOKARA, lalu konfirmasi via chat/WhatsApp admin.</div>
+            </div>
+            <button class="btn btn-primary" onclick="closeModal(); goBack();">Selesai</button>
+          </div>
+        `);
+        loadBanners(); // refresh carousel
+      })
+      .catch(function(error) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Pasang Iklan'; }
+        showToast(error.message || 'Gagal memasang iklan', 'error');
+      });
     }
 
     // ==================== UNIFIED PRODUCT SYSTEM ====================
@@ -2822,11 +3139,27 @@
       }
       if (!currentProduct) return;
 
-      // Tampilkan modal pilih pembayaran
+      const harga = parseInt(currentProduct.harga);
+      const biayaLayanan = 1000;
+      const total = harga + biayaLayanan;
+
       const modalBody = `
         <div style="margin-bottom:16px;">
-          <div style="font-size:15px; font-weight:600; margin-bottom:4px;">${currentProduct.nama}</div>
-          <div style="font-size:20px; font-weight:700; color:var(--primary);">Rp ${parseInt(currentProduct.harga).toLocaleString('id-ID')}</div>
+          <div style="font-size:15px; font-weight:600; margin-bottom:12px;">${currentProduct.nama}</div>
+          <div style="background:var(--bg); border-radius:12px; padding:12px; font-size:13px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+              <span style="color:var(--text-light);">Harga produk</span>
+              <span>Rp ${harga.toLocaleString('id-ID')}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <span style="color:var(--text-light);">Biaya layanan</span>
+              <span>Rp ${biayaLayanan.toLocaleString('id-ID')}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:10px; font-weight:700; font-size:15px;">
+              <span>Total</span>
+              <span style="color:var(--primary);">Rp ${total.toLocaleString('id-ID')}</span>
+            </div>
+          </div>
         </div>
         <div style="margin-bottom:16px;">
           <div class="form-label" style="margin-bottom:10px;">Pilih Metode Pembayaran</div>
@@ -2841,7 +3174,7 @@
             </label>
             <label style="display:flex; align-items:center; gap:12px; padding:14px; border:2px solid var(--border); border-radius:12px; cursor:pointer;" onclick="selectPayment(this,'DANA')">
               <input type="radio" name="payment" value="DANA" style="display:none;">
-              <div style="width:40px; height:40px; background:#E3F2FD; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; color:#1565C0; font-size:13px;">DANA</div>
+              <div style="width:40px; height:40px; background:#E3F2FD; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; color:#1565C0; font-size:13px;">DANA</div>
               <div>
                 <div style="font-weight:600; font-size:14px;">DANA</div>
                 <div style="font-size:12px; color:var(--text-light);">Transfer ke dompet DANA</div>
@@ -2857,7 +3190,7 @@
             </label>
           </div>
         </div>
-        <button class="btn btn-primary" onclick="confirmOrder()">Konfirmasi Pesanan</button>
+        <button class="btn btn-primary" onclick="confirmOrder()">Konfirmasi Pesanan — Rp ${total.toLocaleString('id-ID')}</button>
       `;
       showModal('Beli Sekarang', modalBody);
     }
