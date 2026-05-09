@@ -282,158 +282,149 @@
       font-weight: 500;
     }
 
-    /* Banner Promo Carousel */
-    .promo-carousel {
+    /* ===== PROMO BANNER ===== */
+    .promo-wrap {
       margin: 0 20px 16px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+
+    /* Mobile: single slide */
+    .promo-track {
+      display: flex;
+      transition: transform 0.45s cubic-bezier(.4,0,.2,1);
+      height: 130px;
+    }
+
+    .promo-card {
+      flex-shrink: 0;
+      width: 100%;
+      height: 130px;
       border-radius: 16px;
       overflow: hidden;
       position: relative;
-      height: 160px;
-      background: #eee;
-    }
-
-    .promo-slides {
-      display: flex;
-      height: 100%;
-      transition: transform 0.4s ease;
-    }
-
-    .promo-slide {
-      min-width: 100%;
-      height: 100%;
-      position: relative;
       cursor: pointer;
-      flex-shrink: 0;
     }
 
-    .promo-slide img, .promo-slide video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    /* Desktop: show multiple cards */
+    @media (min-width: 768px) {
+      .promo-wrap { margin: 0 0 16px; }
+      .promo-track {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 12px;
+        height: auto;
+        transform: none !important; /* disable slide on desktop */
+      }
+      .promo-card { width: 100%; height: 130px; }
+      .promo-dots { display: none !important; }
     }
 
-    .promo-slide-overlay {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.6));
-      color: white;
-      padding: 12px 16px 10px;
-    }
-
-    .promo-slide-title {
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .promo-slide-desc {
-      font-size: 11px;
-      opacity: 0.85;
-      margin-top: 2px;
-    }
-
-    .promo-dots {
-      position: absolute;
-      bottom: 8px;
-      right: 10px;
-      display: flex;
-      gap: 5px;
-    }
-
-    .promo-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.5);
-      transition: background 0.2s, width 0.2s;
-    }
-
-    .promo-dot.active {
-      background: white;
-      width: 16px;
-      border-radius: 3px;
-    }
-
-    .promo-default {
+    /* Default card (no ads) */
+    .promo-card-default {
       background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-      height: 100%;
       display: flex;
       align-items: center;
-      padding: 20px;
+      padding: 0 20px;
+      gap: 12px;
+      height: 100%;
       color: white;
-      gap: 16px;
+      overflow: hidden;
+      position: relative;
     }
 
-    .promo-default-text h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-    .promo-default-text p { font-size: 12px; opacity: 0.85; margin-bottom: 12px; }
-    .promo-default-text button {
+    /* Scrolling ticker text */
+    .promo-ticker-wrap {
+      overflow: hidden;
+      flex: 1;
+    }
+    .promo-ticker {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .promo-ticker h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0;
+      white-space: nowrap;
+      animation: ticker-slide 12s linear infinite alternate;
+    }
+    .promo-ticker p {
+      font-size: 12px;
+      opacity: 0.85;
+      margin: 0 0 10px;
+      white-space: nowrap;
+      animation: ticker-slide 16s linear infinite alternate-reverse;
+    }
+    @keyframes ticker-slide {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-30%); }
+    }
+    .promo-card-default button {
       background: white; color: var(--primary);
-      border: none; padding: 7px 18px;
+      border: none; padding: 7px 16px;
       border-radius: 20px; font-weight: 600;
       font-size: 12px; cursor: pointer;
+      white-space: nowrap; flex-shrink: 0;
     }
-    .promo-default-icon { font-size: 56px; opacity: 0.3; flex-shrink: 0; }
+    .promo-card-default .promo-bg-icon {
+      font-size: 80px;
+      opacity: 0.12;
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    /* Ad card */
+    .promo-card-ad img,
+    .promo-card-ad video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .promo-card-ad-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.65));
+      padding: 20px 14px 10px;
+      color: white;
+    }
+    .promo-card-ad-overlay strong { font-size: 13px; display: block; }
+    .promo-card-ad-overlay span  { font-size: 11px; opacity: 0.85; }
+    .promo-ad-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(0,0,0,0.45);
+      color: white; font-size: 10px; font-weight: 600;
+      padding: 2px 8px; border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Dots indicator (mobile only) */
+    .promo-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .promo-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--border);
+      transition: background 0.2s, width 0.2s;
+    }
+    .promo-dot.active {
+      background: var(--primary);
+      width: 18px; border-radius: 3px;
+    }
+
     /* Banner Ad Page */
     .banner-ad-section { padding: 0 20px; }
     .banner-ad-card {
       background: white; border-radius: 16px;
       padding: 20px; margin-bottom: 16px;
-    }
-
-    /* Trial badge */
-    .trial-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #E8F5E9; color: var(--primary);
-      padding: 6px 14px; border-radius: 20px;
-      font-size: 12px; font-weight: 600;
-    }
-
-      padding: 0 20px;
-      margin: 16px 0;
-    }
-
-    .banner {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-      border-radius: 16px;
-      padding: 20px;
-      color: white;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .banner::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -20%;
-      width: 200px;
-      height: 200px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 50%;
-    }
-
-    .banner-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 6px;
-      position: relative;
-    }
-
-    .banner-subtitle {
-      font-size: 13px;
-      opacity: 0.9;
-      margin-bottom: 12px;
-      position: relative;
-    }
-
-    .banner-btn {
-      background: white;
-      color: var(--primary);
-      border: none;
-      padding: 8px 20px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-      position: relative;
     }
 
     /* Products Grid */
@@ -1817,20 +1808,23 @@
         <div class="categories-grid" id="categoriesGrid"></div>
       </div>
 
-      <!-- Promo Banner Carousel -->
-      <div class="promo-carousel" id="promoCarousel">
-        <div class="promo-slides" id="promoSlides">
-          <!-- Default slide kalau belum ada iklan -->
-          <div class="promo-slide">
-            <div class="promo-default">
-              <div class="promo-default-text">
-                <h3>Dukung UMKM Lokal</h3>
-                <p>Temukan produk terbaik di sekitarmu dalam radius 1 km</p>
-                <button onclick="resetFilter()">Jelajahi Sekarang</button>
+      <!-- Promo Banner -->
+      <div class="promo-wrap">
+        <div class="promo-track" id="promoTrack">
+          <!-- Default card — selalu ada, disembunyikan kalau ada iklan -->
+          <div class="promo-card" id="promoDefaultCard">
+            <div class="promo-card-default">
+              <i class="fas fa-store promo-bg-icon"></i>
+              <div class="promo-ticker-wrap">
+                <div class="promo-ticker">
+                  <h3>🛍️ Dukung UMKM Lokal</h3>
+                  <p>Temukan produk terbaik di sekitarmu dalam radius 1 km</p>
+                </div>
               </div>
-              <i class="fas fa-store promo-default-icon"></i>
+              <button onclick="resetFilter()">Jelajahi Sekarang</button>
             </div>
           </div>
+          <!-- Iklan akan di-inject di sini oleh JS -->
         </div>
         <div class="promo-dots" id="promoDots">
           <div class="promo-dot active"></div>
@@ -2597,70 +2591,128 @@
     }
 
     // ==================== PROMO BANNER CAROUSEL ====================
-    let promoSlideIndex = 0;
-    let promoSlideTimer = null;
-    let promoBanners = [];
+    let promoIndex = 0;
+    let promoTimer = null;
+    let promoAds = [];
+    let promoTotal = 0; // total cards (default + ads)
 
     function loadBanners() {
       callGAS('getBanners', {})
         .then(function(banners) {
-          promoBanners = banners;
-          renderBannerCarousel();
+          promoAds = banners || [];
+          buildBanner();
         })
-        .catch(function(e) { console.log('loadBanners error:', e); });
+        .catch(function() { buildBanner(); });
     }
 
-    function renderBannerCarousel() {
-      const slides = document.getElementById('promoSlides');
-      const dots = document.getElementById('promoDots');
-      if (!slides || !dots) return;
+    function buildBanner() {
+      const track = document.getElementById('promoTrack');
+      const dots  = document.getElementById('promoDots');
+      const defCard = document.getElementById('promoDefaultCard');
+      if (!track) return;
 
-      if (!promoBanners || promoBanners.length === 0) {
-        // Default slide sudah ada di HTML
+      const isDesktop = window.innerWidth >= 768;
+
+      if (promoAds.length === 0) {
+        // Tidak ada iklan — tampilkan hanya default card
+        if (defCard) defCard.style.display = '';
+        dots.innerHTML = '';
+        promoTotal = 1;
         return;
       }
 
-      // Build slides dari data
-      slides.innerHTML = promoBanners.map(function(b, i) {
-        const media = b.mediaType === 'video'
-          ? `<video src="${b.mediaUrl}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video>`
-          : `<img src="${b.mediaUrl}" alt="${b.title}" style="width:100%;height:100%;object-fit:cover;">`;
-        return `
-          <div class="promo-slide" onclick="${b.linkUrl ? `window.open('${b.linkUrl}','_blank')` : ''}">
-            ${media}
-            <div class="promo-slide-overlay">
-              <div class="promo-slide-title">${b.title}</div>
-              ${b.description ? `<div class="promo-slide-desc">${b.description}</div>` : ''}
-            </div>
-          </div>`;
-      }).join('');
+      // Ada iklan — sembunyikan default card di mobile, tampilkan di desktop
+      if (defCard) defCard.style.display = isDesktop ? '' : 'none';
 
-      // Build dots
-      dots.innerHTML = promoBanners.map(function(_, i) {
-        return `<div class="promo-dot ${i === 0 ? 'active' : ''}"></div>`;
-      }).join('');
+      // Hapus ad cards lama (bukan default)
+      track.querySelectorAll('.promo-card-ad').forEach(function(el) { el.remove(); });
 
-      promoSlideIndex = 0;
-      startCarousel();
+      // Inject ad cards
+      promoAds.forEach(function(ad) {
+        const card = document.createElement('div');
+        card.className = 'promo-card promo-card-ad';
+        if (ad.linkUrl) card.onclick = function() { window.open(ad.linkUrl, '_blank'); };
+
+        const media = ad.mediaType === 'video'
+          ? `<video src="${ad.mediaUrl}" autoplay muted loop playsinline></video>`
+          : `<img src="${ad.mediaUrl}" alt="${ad.title}" loading="lazy">`;
+
+        card.innerHTML = `
+          ${media}
+          <div class="promo-card-ad-overlay">
+            <strong>${ad.title}</strong>
+            ${ad.description ? `<span>${ad.description}</span>` : ''}
+          </div>
+          <div class="promo-ad-badge">IKLAN</div>`;
+        track.appendChild(card);
+      });
+
+      // Hitung total cards untuk slide
+      const allCards = track.querySelectorAll('.promo-card');
+      promoTotal = isDesktop ? 1 : allCards.length; // desktop tidak slide
+
+      // Build dots (mobile only)
+      if (!isDesktop && promoTotal > 1) {
+        dots.innerHTML = Array.from({ length: promoTotal }, function(_, i) {
+          return `<div class="promo-dot ${i === 0 ? 'active' : ''}"></div>`;
+        }).join('');
+      } else {
+        dots.innerHTML = '';
+      }
+
+      promoIndex = 0;
+      if (!isDesktop) {
+        track.style.transform = 'translateX(0)';
+        startPromoTimer();
+      }
     }
 
-    function startCarousel() {
-      if (promoSlideTimer) clearInterval(promoSlideTimer);
-      if (promoBanners.length <= 1) return;
-      promoSlideTimer = setInterval(function() {
-        promoSlideIndex = (promoSlideIndex + 1) % promoBanners.length;
-        updateCarouselUI();
-      }, 4000);
+    function startPromoTimer() {
+      if (promoTimer) clearInterval(promoTimer);
+      if (promoTotal <= 1) return;
+      promoTimer = setInterval(function() {
+        promoIndex = (promoIndex + 1) % promoTotal;
+        slidePromo();
+      }, 4500);
     }
 
-    function updateCarouselUI() {
-      const slides = document.getElementById('promoSlides');
-      const dots = document.querySelectorAll('.promo-dot');
-      if (slides) slides.style.transform = 'translateX(-' + (promoSlideIndex * 100) + '%)';
-      dots.forEach(function(d, i) {
-        d.classList.toggle('active', i === promoSlideIndex);
+    function slidePromo() {
+      const track = document.getElementById('promoTrack');
+      if (track) track.style.transform = 'translateX(-' + (promoIndex * 100) + '%)';
+      document.querySelectorAll('.promo-dot').forEach(function(d, i) {
+        d.classList.toggle('active', i === promoIndex);
       });
     }
+
+    // Rebuild on resize (mobile <-> desktop)
+    window.addEventListener('resize', function() {
+      if (promoTimer) clearInterval(promoTimer);
+      promoIndex = 0;
+      const track = document.getElementById('promoTrack');
+      if (track) track.style.transform = '';
+      buildBanner();
+    });
+
+    // Touch swipe support for mobile
+    (function() {
+      let startX = 0;
+      document.addEventListener('touchstart', function(e) {
+        const wrap = e.target.closest('.promo-wrap');
+        if (wrap) startX = e.touches[0].clientX;
+      }, { passive: true });
+      document.addEventListener('touchend', function(e) {
+        const wrap = e.target.closest('.promo-wrap');
+        if (!wrap || promoTotal <= 1 || window.innerWidth >= 768) return;
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) {
+          promoIndex = diff > 0
+            ? Math.min(promoIndex + 1, promoTotal - 1)
+            : Math.max(promoIndex - 1, 0);
+          slidePromo();
+          startPromoTimer(); // reset timer
+        }
+      }, { passive: true });
+    })();
 
     // ==================== BANNER AD ====================
     let selectedWeeks = 0;
