@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LOKARA - Solusi UMKM di Sekitarmu</title>
-  <link rel="icon" type="image/png" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="shortcut icon" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -2527,12 +2529,12 @@
               <div class="product-card" onclick="showProductDetail('${product.id}')">
                 <div class="product-image">
                   ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+                  ${product.distance ? `<div class="distance-badge"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>` : ''}
                   <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
                     <i class="far fa-heart"></i>
                   </button>
                 </div>
                 <div class="product-info">
-                  ${product.distance ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>` : ''}
                   <div class="product-name">${product.nama}</div>
                   <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
                   <div class="product-meta">
@@ -2647,12 +2649,12 @@
                 <div class="product-card" onclick="showProductDetail('${product.id}')">
                   <div class="product-image">
                     ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+                    ${product.distance ? `<div class="distance-badge"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>` : ''}
                     <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
                       <i class="far fa-heart"></i>
                     </button>
                   </div>
                   <div class="product-info">
-                    ${product.distance ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>` : ''}
                     <div class="product-name">${product.nama}</div>
                     <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
                     <div class="product-meta">
