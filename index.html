@@ -118,7 +118,64 @@
       top: 0;
       z-index: 100;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: relative; /* for dropdown */
     }
+
+    /* Search dropdown */
+    .search-dd-section {
+      padding: 8px 0 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-dd-section:last-child { border-bottom: none; }
+    .search-dd-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 0 14px 4px;
+    }
+    .search-dd-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .search-dd-item:hover { background: var(--bg); }
+    .search-dd-icon {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--primary);
+      flex-shrink: 0;
+    }
+    .search-dd-icon img {
+      width: 100%; height: 100%;
+      object-fit: cover; border-radius: 10px;
+    }
+    .search-dd-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .search-dd-sub  { font-size: 11px; color: var(--text-light); margin-top: 1px; }
+
+    /* Store page */
+    .store-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .store-avatar {
+      width: 72px; height: 72px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; margin: 0 auto 12px;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .store-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .store-sub  { font-size: 13px; opacity: 0.85; }
 
     .header-top {
       display: flex;
@@ -1753,10 +1810,16 @@
           <i class="far fa-heart" onclick="showWishlist()"></i>
         </div>
       </div>
-      <div class="search-bar">
-        <i class="fas fa-search"></i>
-        <input type="text" placeholder="Cari produk di sekitarmu..." id="searchInput" onkeyup="searchProducts(event)">
+      <div class="search-bar" style="position:relative;">
+        <i class="fas fa-search" style="color:var(--text-light); flex-shrink:0;"></i>
+        <input type="text" placeholder="Cari produk atau toko..." id="searchInput"
+          oninput="onSearchInput(this.value)"
+          onkeyup="if(event.key==='Enter') doSearch(this.value)"
+          autocomplete="off">
+        <i class="fas fa-times" id="searchClear" style="display:none; color:var(--text-light); cursor:pointer; flex-shrink:0;" onclick="clearSearch()"></i>
       </div>
+      <!-- Search dropdown -->
+      <div id="searchDropdown" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border-radius:0 0 16px 16px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:200; max-height:320px; overflow-y:auto; margin:0 0 0 0;"></div>
     </div>
 
     <!-- Location Bar -->
@@ -2021,12 +2084,13 @@
           <div class="detail-price" id="detailPrice">Rp 0</div>
         </div>
 
-        <div class="detail-seller" id="detailSeller">
+        <div class="detail-seller" id="detailSeller" onclick="showStorePage(currentProduct && currentProduct.sellerId, currentProduct && currentProduct.sellerNama)" style="cursor:pointer;">
           <div class="seller-avatar"><i class="fas fa-store"></i></div>
           <div class="seller-info">
             <h4 id="sellerName">Nama Penjual</h4>
             <p id="sellerDistance"><i class="fas fa-map-marker-alt"></i> 0.5 km</p>
           </div>
+          <i class="fas fa-chevron-right" style="margin-left:auto; color:var(--text-light); font-size:14px;"></i>
         </div>
 
         <div class="detail-section">
@@ -2143,6 +2207,29 @@
       <div class="chat-input-bar">
         <input type="text" id="chatInput" placeholder="Ketik pesan..." onkeyup="if(event.key==='Enter') sendChatMessage()">
         <button class="chat-send" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <!-- Store Page -->
+    <div class="page" id="storePage" style="display:none;">
+      <div class="app-header" style="position:sticky; top:0; z-index:120;">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
+          <div class="logo-text" id="storePageTitle">Toko</div>
+          <div style="width:40px;"></div>
+        </div>
+      </div>
+      <div class="store-header">
+        <div class="store-avatar" id="storeAvatar"><i class="fas fa-store"></i></div>
+        <div class="store-name" id="storeNameDisplay">Nama Toko</div>
+        <div class="store-sub" id="storeSubDisplay">Penjual UMKM</div>
+      </div>
+      <div class="products-section">
+        <div class="section-title" style="margin-bottom:12px;">
+          <i class="fas fa-box" style="color:var(--primary);"></i>
+          Produk Toko
+        </div>
+        <div class="products-grid" id="storeProductsGrid"></div>
       </div>
     </div>
 
@@ -2347,7 +2434,7 @@
           const tp = document.getElementById(prev);
           if (tp) { tp.style.display = 'block'; tp.classList.add('active'); }
           const bottomNav = document.getElementById('bottomNav');
-          const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage'];
+          const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage'];
           if (bottomNav) bottomNav.style.display = hideNav.includes(prev) ? 'none' : 'flex';
           document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
           const navMap = { homePage: 0, ordersPage: 1, profilePage: 4 };
@@ -2529,7 +2616,7 @@
 
       // Sembunyikan bottom nav di halaman tertentu
       const bottomNav = document.getElementById('bottomNav');
-      const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage'];
+      const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage'];
       bottomNav.style.display = hideNav.includes(pageId) ? 'none' : 'flex';
 
       // Simpan history untuk tombol back
@@ -2885,7 +2972,7 @@
               <div class="product-name">${product.nama}</div>
               <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
               <div class="product-meta">
-                <div class="product-seller">
+                <div class="product-seller" onclick="event.stopPropagation(); showStorePage('${product.sellerId}', '${(product.sellerNama||'').replace(/'/g,"\\'")}')">
                   <div class="seller-avatar"><i class="fas fa-store"></i></div>
                   <span>${product.sellerNama || 'UMKM'}</span>
                 </div>
@@ -2924,49 +3011,256 @@
     }
 
     // Update search to filter from cache
-    function searchProducts(event) {
-      if (event.key !== 'Enter') return;
-      const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
-      if (!keyword) { renderProducts(); return; }
+    // ==================== SEARCH SYSTEM ====================
+    let searchTimer = null;
 
-      const grid = document.getElementById('mainProductsGrid');
-      const filtered = allProductsCache.filter(p =>
-        (p.nama || '').toLowerCase().includes(keyword) ||
-        (p.deskripsi || '').toLowerCase().includes(keyword) ||
-        (p.kategori || '').toLowerCase().includes(keyword)
-      );
+    function onSearchInput(val) {
+      const clear = document.getElementById('searchClear');
+      clear.style.display = val ? '' : 'none';
 
-      if (filtered.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-search"></i><h3>Produk tidak ditemukan</h3><p>Coba kata kunci lain</p></div>`;
+      if (!val.trim()) {
+        closeDropdown();
+        renderProducts();
         return;
       }
 
-      grid.innerHTML = filtered.map(product => `
-        <div class="product-card" onclick="showProductDetail('${product.id}')">
-          <div class="product-image">
-            ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-            <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
-              <i class="far fa-heart"></i>
-            </button>
-          </div>
-          <div class="product-info">
-            ${product.distance !== null
-              ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${product.distance} km</div>`
-              : ''}
-            <div class="product-name">${product.nama}</div>
-            <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-            <div class="product-meta">
-              <div class="product-seller">
-                <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                <span>${product.sellerNama || 'UMKM'}</span>
+      // Debounce dropdown
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function() { showDropdown(val.trim()); }, 200);
+    }
+
+    function clearSearch() {
+      const inp = document.getElementById('searchInput');
+      inp.value = '';
+      inp.focus();
+      document.getElementById('searchClear').style.display = 'none';
+      closeDropdown();
+      renderProducts();
+    }
+
+    function closeDropdown() {
+      const dd = document.getElementById('searchDropdown');
+      dd.style.display = 'none';
+      dd.innerHTML = '';
+    }
+
+    function showDropdown(keyword) {
+      const kw = keyword.toLowerCase();
+      const dd = document.getElementById('searchDropdown');
+
+      // Search produk dari cache
+      const matchProducts = allProductsCache.filter(function(p) {
+        return (p.nama || '').toLowerCase().includes(kw) ||
+               (p.deskripsi || '').toLowerCase().includes(kw) ||
+               (p.kategori || '').toLowerCase().includes(kw);
+      }).slice(0, 4);
+
+      // Search toko (unique sellers) dari cache
+      const sellerMap = {};
+      allProductsCache.forEach(function(p) {
+        if (!sellerMap[p.sellerId]) {
+          sellerMap[p.sellerId] = { id: p.sellerId, nama: p.sellerNama, count: 0 };
+        }
+        sellerMap[p.sellerId].count++;
+      });
+      const matchSellers = Object.values(sellerMap).filter(function(s) {
+        return (s.nama || '').toLowerCase().includes(kw);
+      }).slice(0, 3);
+
+      if (matchProducts.length === 0 && matchSellers.length === 0) {
+        dd.innerHTML = `<div style="padding:16px; text-align:center; color:var(--text-light); font-size:13px;">Tidak ada hasil untuk "<strong>${keyword}</strong>"</div>`;
+        dd.style.display = 'block';
+        return;
+      }
+
+      let html = '';
+
+      // Toko section
+      if (matchSellers.length > 0) {
+        html += `<div class="search-dd-section">
+          <div class="search-dd-label"><i class="fas fa-store"></i> Toko</div>`;
+        matchSellers.forEach(function(s) {
+          html += `
+            <div class="search-dd-item" onclick="showStorePage('${s.id}', '${(s.nama||'').replace(/'/g,"\\'")}')">
+              <div class="search-dd-icon"><i class="fas fa-store"></i></div>
+              <div>
+                <div class="search-dd-name">${s.nama || 'Toko'}</div>
+                <div class="search-dd-sub">${s.count} produk</div>
               </div>
-              ${product.rating
-                ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}</div>`
-                : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`}
+            </div>`;
+        });
+        html += `</div>`;
+      }
+
+      // Produk section
+      if (matchProducts.length > 0) {
+        html += `<div class="search-dd-section">
+          <div class="search-dd-label"><i class="fas fa-box"></i> Produk</div>`;
+        matchProducts.forEach(function(p) {
+          const dist = parseFloat(p.distance);
+          const distStr = !isNaN(dist) ? ` · ${dist.toFixed(2)} km` : '';
+          html += `
+            <div class="search-dd-item" onclick="closeDropdown(); showProductDetail('${p.id}')">
+              <div class="search-dd-icon">
+                ${p.foto ? `<img src="${p.foto}" alt="${p.nama}">` : '<i class="fas fa-box"></i>'}
+              </div>
+              <div>
+                <div class="search-dd-name">${p.nama}</div>
+                <div class="search-dd-sub">Rp ${parseInt(p.harga).toLocaleString('id-ID')} · ${p.sellerNama || 'UMKM'}${distStr}</div>
+              </div>
+            </div>`;
+        });
+        // Lihat semua hasil
+        html += `
+          <div class="search-dd-item" onclick="doSearch(document.getElementById('searchInput').value)" style="justify-content:center; color:var(--primary); font-size:13px; font-weight:600;">
+            <i class="fas fa-search" style="margin-right:6px;"></i> Lihat semua hasil
+          </div>`;
+        html += `</div>`;
+      }
+
+      dd.innerHTML = html;
+      dd.style.display = 'block';
+    }
+
+    function doSearch(keyword) {
+      closeDropdown();
+      if (!keyword || !keyword.trim()) { renderProducts(); return; }
+      const kw = keyword.trim().toLowerCase();
+      const grid = document.getElementById('mainProductsGrid');
+
+      const filtered = allProductsCache.filter(function(p) {
+        return (p.nama || '').toLowerCase().includes(kw) ||
+               (p.deskripsi || '').toLowerCase().includes(kw) ||
+               (p.kategori || '').toLowerCase().includes(kw) ||
+               (p.sellerNama || '').toLowerCase().includes(kw);
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-search"></i><h3>Tidak ada hasil</h3><p>Coba kata kunci lain</p></div>`;
+        return;
+      }
+
+      // Kelompokkan: toko yang cocok duluan
+      const sellerMatch = [];
+      const sellerIds = new Set();
+      filtered.forEach(function(p) {
+        if ((p.sellerNama || '').toLowerCase().includes(kw) && !sellerIds.has(p.sellerId)) {
+          sellerIds.add(p.sellerId);
+          sellerMatch.push(p);
+        }
+      });
+
+      const label = document.getElementById('productSectionLabel');
+      if (label) label.textContent = `Hasil: "${keyword.trim()}"`;
+
+      grid.innerHTML = filtered.map(function(product) {
+        const dist = parseFloat(product.distance);
+        const distHtml = !isNaN(dist)
+          ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${dist.toFixed(2)} km</div>` : '';
+        const ratingHtml = product.rating
+          ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}</div>`
+          : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
+        // Highlight seller name jika cocok
+        const sellerStyle = sellerIds.has(product.sellerId) ? 'color:var(--primary);font-weight:600;' : '';
+        return `
+          <div class="product-card" onclick="showProductDetail('${product.id}')">
+            <div class="product-image">
+              ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+              <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
+                <i class="far fa-heart"></i>
+              </button>
             </div>
-          </div>
-        </div>
-      `).join('');
+            <div class="product-info">
+              ${distHtml}
+              <div class="product-name">${product.nama}</div>
+              <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
+              <div class="product-meta">
+                <div class="product-seller" onclick="event.stopPropagation(); showStorePage('${product.sellerId}', '${(product.sellerNama||'').replace(/'/g,"\\'")}')">
+                  <div class="seller-avatar"><i class="fas fa-store"></i></div>
+                  <span style="${sellerStyle}">${product.sellerNama || 'UMKM'}</span>
+                </div>
+                ${ratingHtml}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-bar') && !e.target.closest('#searchDropdown')) {
+        closeDropdown();
+      }
+    });
+
+    // ==================== STORE PAGE ====================
+    function showStorePage(sellerId, sellerNama) {
+      closeDropdown();
+      showPage('storePage');
+
+      document.getElementById('storePageTitle').textContent = sellerNama || 'Toko';
+      document.getElementById('storeNameDisplay').textContent = sellerNama || 'Toko';
+      document.getElementById('storeSubDisplay').textContent = 'Penjual UMKM LOKARA';
+
+      const grid = document.getElementById('storeProductsGrid');
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text-light);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>`;
+
+      // Filter produk dari cache milik seller ini
+      const storeProducts = allProductsCache.filter(function(p) {
+        return p.sellerId === sellerId;
+      });
+
+      if (storeProducts.length === 0) {
+        // Belum ada di cache — ambil dari GAS
+        callGAS('getSellerProducts', { sellerId: sellerId })
+          .then(function(products) { renderStoreProducts(products, sellerNama); })
+          .catch(function() {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open"></i><h3>Belum ada produk</h3></div>`;
+          });
+      } else {
+        renderStoreProducts(storeProducts, sellerNama);
+      }
+    }
+
+    function renderStoreProducts(products, sellerNama) {
+      const grid = document.getElementById('storeProductsGrid');
+      document.getElementById('storeSubDisplay').textContent =
+        products.length + ' produk · Penjual UMKM LOKARA';
+
+      if (products.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open"></i><h3>Belum ada produk</h3></div>`;
+        return;
+      }
+
+      grid.innerHTML = products.map(function(product) {
+        const dist = parseFloat(product.distance);
+        const distHtml = !isNaN(dist)
+          ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${dist.toFixed(2)} km</div>` : '';
+        const ratingHtml = product.rating
+          ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
+          : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
+        return `
+          <div class="product-card" onclick="showProductDetail('${product.id}')">
+            <div class="product-image">
+              ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+              <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
+                <i class="far fa-heart"></i>
+              </button>
+            </div>
+            <div class="product-info">
+              ${distHtml}
+              <div class="product-name">${product.nama}</div>
+              <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
+              <div class="product-meta">
+                <div class="product-seller">
+                  <div class="seller-avatar"><i class="fas fa-store"></i></div>
+                  <span>${sellerNama || product.sellerNama || 'UMKM'}</span>
+                </div>
+                ${ratingHtml}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
     }
 
     // ==================== CATEGORIES ====================
