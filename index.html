@@ -2356,7 +2356,11 @@
 
     function callGAS(action, data) {
       if (!GAS_URL) {
-        showToast('GAS_URL belum diisi di config.js', 'error');
+        console.error('GAS_URL belum diisi di config.js');
+        // showToast akan dipanggil setelah halaman siap
+        setTimeout(function() {
+          if (typeof showToast === 'function') showToast('GAS_URL belum diisi di config.js', 'error');
+        }, 2500);
         return Promise.reject(new Error('GAS_URL kosong'));
       }
       return fetch(GAS_URL, {
@@ -2394,6 +2398,7 @@
     let currentProduct = null;
     let currentChatUser = null;
     let cart = [];
+    let allProductsCache = [];
 
     // ==================== INITIALIZATION ====================
     document.addEventListener('DOMContentLoaded', function() {
@@ -3747,7 +3752,7 @@
     }
 
     // ==================== UNIFIED PRODUCT SYSTEM ====================
-    var radiusOnly = true, activeCategory = null, allProductsCache = [];
+    var radiusOnly = true, activeCategory = null;
 
     function toggleRadius() {
       radiusOnly=!radiusOnly;
@@ -3788,12 +3793,12 @@
         var discBadge=p.diskon>0?'<div class="discount-badge">-'+p.diskon+'%</div>':'';
         var priceHtml=p.hargaAsli?'<span class="price-original">Rp '+parseInt(p.hargaAsli).toLocaleString('id-ID')+'</span>':'';
         var sn=(p.sellerNama||'').replace(/'/g,"\'");
-        return '<div class="product-card" onclick="showProductDetail(''+p.id+'')"><div class="product-image" style="position:relative;">'
+        return '<div class="product-card" onclick="showProductDetail(\'+p.id+\')"><div class="product-image" style="position:relative;">'
           +(p.foto?'<img src="'+p.foto+'" alt="'+p.nama+'">':'<i class="fas fa-box"></i>')+discBadge
-          +'<button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist(''+p.id+'')"><i class="far fa-heart"></i></button></div>'
+          +'<button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist(\'+p.id+\')"><i class="far fa-heart"></i></button></div>'
           +'<div class="product-info">'+distHtml+'<div class="product-name">'+p.nama+'</div>'
           +'<div class="product-price">'+priceHtml+'Rp '+parseInt(p.harga).toLocaleString('id-ID')+'</div>'
-          +'<div class="product-meta"><div class="product-seller" onclick="event.stopPropagation();showStorePage(''+p.sellerId+'',''+sn+'')">'
+          +'<div class="product-meta"><div class="product-seller" onclick="event.stopPropagation();showStorePage(\'+p.sellerId+\',\'+sn+\')">'
           +'<div class="seller-avatar"><i class="fas fa-store"></i></div><span>'+(p.sellerNama||'UMKM')+'</span></div>'+ratingHtml+'</div></div></div>';
       }).join('');
     }
@@ -3812,7 +3817,12 @@
     function loadCategories() {
       callGAS('getCategories',{}).then(function(categories){
         var grid=document.getElementById('categoriesGrid');
-        grid.innerHTML=categories.map(function(cat){return '<div class="category-item" data-cat="'+cat.nama+'" onclick="setCategory(''+cat.nama+'')"><div class="category-icon">'+cat.icon+'</div><div class="category-name">'+cat.nama+'</div></div>';}).join('');
+        grid.innerHTML=categories.map(function(cat){
+            var escapedNama = cat.nama.replace(/'/g, "\\'");
+            return '<div class="category-item" data-cat="'+cat.nama+'" onclick="setCategory(\''+escapedNama+'\')">'
+              +'<div class="category-icon">'+cat.icon+'</div>'
+              +'<div class="category-name">'+cat.nama+'</div></div>';
+          }).join('');
         var select=document.getElementById('productCategory');
         select.innerHTML='<option value="">Pilih Kategori</option>'+categories.map(function(cat){return '<option value="'+cat.nama+'">'+cat.icon+' '+cat.nama+'</option>';}).join('');
       }).catch(function(error){console.error('Error loading categories:',error);});
@@ -3839,8 +3849,8 @@
       var matchSellers=Object.values(sellerMap).filter(function(s){return (s.nama||'').toLowerCase().includes(kw);}).slice(0,3);
       if(!matchProducts.length&&!matchSellers.length){dd.innerHTML='<div style="padding:16px;text-align:center;color:var(--text-light);font-size:13px;">Tidak ada hasil untuk "<strong>'+keyword+'</strong>"</div>';dd.style.display='block';return;}
       var html='';
-      if(matchSellers.length){html+='<div class="search-dd-section"><div class="search-dd-label"><i class="fas fa-store"></i> Toko</div>';matchSellers.forEach(function(s){html+='<div class="search-dd-item" onclick="showStorePage(''+s.id+'',''+s.nama+'')"><div class="search-dd-icon"><i class="fas fa-store"></i></div><div><div class="search-dd-name">'+s.nama+'</div><div class="search-dd-sub">'+s.count+' produk</div></div></div>';});html+='</div>';}
-      if(matchProducts.length){html+='<div class="search-dd-section"><div class="search-dd-label"><i class="fas fa-box"></i> Produk</div>';matchProducts.forEach(function(p){var dist=parseFloat(p.distance),distStr=!isNaN(dist)?' · '+dist.toFixed(2)+' km':'';html+='<div class="search-dd-item" onclick="closeDropdown();showProductDetail(''+p.id+'')"><div class="search-dd-icon">'+(p.foto?'<img src="'+p.foto+'">':'<i class="fas fa-box"></i>')+'</div><div><div class="search-dd-name">'+p.nama+'</div><div class="search-dd-sub">Rp '+parseInt(p.harga).toLocaleString('id-ID')+' · '+(p.sellerNama||'UMKM')+distStr+'</div></div></div>';});html+='<div class="search-dd-item" onclick="doSearch(document.getElementById('searchInput').value)" style="justify-content:center;color:var(--primary);font-size:13px;font-weight:600;"><i class="fas fa-search" style="margin-right:6px;"></i> Lihat semua hasil</div></div>';}
+      if(matchSellers.length){html+='<div class="search-dd-section"><div class="search-dd-label"><i class="fas fa-store"></i> Toko</div>';matchSellers.forEach(function(s){var sid=encodeURIComponent(s.id),sname=encodeURIComponent(s.nama);html+='<div class="search-dd-item" onclick="showStorePage(decodeURIComponent(''+sid+''),decodeURIComponent(''+sname+''))"><div class="search-dd-icon"><i class="fas fa-store"></i></div><div><div class="search-dd-name">'+s.nama+'</div><div class="search-dd-sub">'+s.count+' produk</div></div></div>';});html+='</div>';}
+      if(matchProducts.length){html+='<div class="search-dd-section"><div class="search-dd-label"><i class="fas fa-box"></i> Produk</div>';matchProducts.forEach(function(p){var dist=parseFloat(p.distance),distStr=!isNaN(dist)?' · '+dist.toFixed(2)+' km':'';html+='<div class="search-dd-item" onclick="closeDropdown();showProductDetail(\'+p.id+\')"><div class="search-dd-icon">'+(p.foto?'<img src="'+p.foto+'">':'<i class="fas fa-box"></i>')+'</div><div><div class="search-dd-name">'+p.nama+'</div><div class="search-dd-sub">Rp '+parseInt(p.harga).toLocaleString('id-ID')+' · '+(p.sellerNama||'UMKM')+distStr+'</div></div></div>';});html+='<div class="search-dd-item" onclick="doSearch(document.getElementById('searchInput').value)" style="justify-content:center;color:var(--primary);font-size:13px;font-weight:600;"><i class="fas fa-search" style="margin-right:6px;"></i> Lihat semua hasil</div></div>';}
       dd.innerHTML=html; dd.style.display='block';
     }
     function doSearch(keyword){
@@ -3856,7 +3866,7 @@
         var discBadge=p.diskon>0?'<div class="discount-badge">-'+p.diskon+'%</div>':'';
         var priceHtml=p.hargaAsli?'<span class="price-original">Rp '+parseInt(p.hargaAsli).toLocaleString('id-ID')+'</span>':'';
         var sn=(p.sellerNama||'').replace(/'/g,"\'");
-        return '<div class="product-card" onclick="showProductDetail(''+p.id+'')"><div class="product-image" style="position:relative;">'+(p.foto?'<img src="'+p.foto+'" alt="'+p.nama+'">':'<i class="fas fa-box"></i>')+discBadge+'<button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist(''+p.id+'')"><i class="far fa-heart"></i></button></div><div class="product-info">'+distHtml+'<div class="product-name">'+p.nama+'</div><div class="product-price">'+priceHtml+'Rp '+parseInt(p.harga).toLocaleString('id-ID')+'</div><div class="product-meta"><div class="product-seller" onclick="event.stopPropagation();showStorePage(''+p.sellerId+'',''+sn+'')" ><div class="seller-avatar"><i class="fas fa-store"></i></div><span>'+(p.sellerNama||'UMKM')+'</span></div>'+ratingHtml+'</div></div></div>';
+        return '<div class="product-card" onclick="showProductDetail(\'+p.id+\')"><div class="product-image" style="position:relative;">'+(p.foto?'<img src="'+p.foto+'" alt="'+p.nama+'">':'<i class="fas fa-box"></i>')+discBadge+'<button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist(\'+p.id+\')"><i class="far fa-heart"></i></button></div><div class="product-info">'+distHtml+'<div class="product-name">'+p.nama+'</div><div class="product-price">'+priceHtml+'Rp '+parseInt(p.harga).toLocaleString('id-ID')+'</div><div class="product-meta"><div class="product-seller" onclick="event.stopPropagation();showStorePage(\'+p.sellerId+\',\'+sn+\')" ><div class="seller-avatar"><i class="fas fa-store"></i></div><span>'+(p.sellerNama||'UMKM')+'</span></div>'+ratingHtml+'</div></div></div>';
       }).join('');
     }
     document.addEventListener('click',function(e){if(!e.target.closest('.search-bar')&&!e.target.closest('#searchDropdown'))closeDropdown();});
@@ -3882,7 +3892,7 @@
         var ratingHtml=p.rating?'<div class="rating"><i class="fas fa-star"></i> '+p.rating+(p.ratingCount>0?' <span style="color:var(--text-light);font-size:10px;">('+p.ratingCount+')</span>':'')+'</div>':'<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>';
         var discBadge=p.diskon>0?'<div class="discount-badge">-'+p.diskon+'%</div>':'';
         var priceHtml=p.hargaAsli?'<span class="price-original">Rp '+parseInt(p.hargaAsli).toLocaleString('id-ID')+'</span>':'';
-        return '<div class="product-card" onclick="showProductDetail(''+p.id+'')"><div class="product-image" style="position:relative;">'+(p.foto?'<img src="'+p.foto+'" alt="'+p.nama+'">':'<i class="fas fa-box"></i>')+discBadge+'<button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist(''+p.id+'')"><i class="far fa-heart"></i></button></div><div class="product-info">'+distHtml+'<div class="product-name">'+p.nama+'</div><div class="product-price">'+priceHtml+'Rp '+parseInt(p.harga).toLocaleString('id-ID')+'</div><div class="product-meta"><div class="product-seller"><div class="seller-avatar"><i class="fas fa-store"></i></div><span>'+(sellerNama||p.sellerNama||'UMKM')+'</span></div>'+ratingHtml+'</div></div></div>';
+        return '<div class="product-card" onclick="showProductDetail(\'+p.id+\')"><div class="product-image" style="position:relative;">'+(p.foto?'<img src="'+p.foto+'" alt="'+p.nama+'">':'<i class="fas fa-box"></i>')+discBadge+'<button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist(\'+p.id+\')"><i class="far fa-heart"></i></button></div><div class="product-info">'+distHtml+'<div class="product-name">'+p.nama+'</div><div class="product-price">'+priceHtml+'Rp '+parseInt(p.harga).toLocaleString('id-ID')+'</div><div class="product-meta"><div class="product-seller"><div class="seller-avatar"><i class="fas fa-store"></i></div><span>'+(sellerNama||p.sellerNama||'UMKM')+'</span></div>'+ratingHtml+'</div></div></div>';
       }).join('');
     }
 
