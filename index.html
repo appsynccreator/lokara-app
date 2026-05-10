@@ -2399,11 +2399,11 @@
     </div>
 
     <div class="bottom-nav" id="bottomNav">
-      <div class="nav-item active" onclick="showPage('homePage')">
+      <div class="nav-item active" id="navHome" onclick="showPage('homePage')">
         <i class="fas fa-home"></i>
         <span>Beranda</span>
       </div>
-      <div class="nav-item" onclick="showPage('ordersPage')">
+      <div class="nav-item" id="navOrders" onclick="showPage('ordersPage')">
         <i class="fas fa-shopping-bag"></i>
         <span>Pesanan</span>
       </div>
@@ -2415,11 +2415,11 @@
         <i class="fas fa-cogs"></i>
         <span>Master</span>
       </div>
-      <div class="nav-item" onclick="showPage('chatPage')">
+      <div class="nav-item" id="navChat" onclick="showPage('chatPage')">
         <i class="fas fa-comment"></i>
         <span>Chat</span>
       </div>
-      <div class="nav-item" onclick="showPage('profilePage')">
+      <div class="nav-item" id="navProfile" onclick="showPage('profilePage')">
         <i class="fas fa-user"></i>
         <span>Akun</span>
       </div>
@@ -2518,6 +2518,15 @@
     let currentChatUser = null;
     let cart = [];
 
+    // Peta pageId → ID nav-item untuk highlight aktif
+    const PAGE_NAV_MAP = {
+      homePage: 'navHome',
+      ordersPage: 'navOrders',
+      masterDataPage: 'navMaster',
+      chatPage: 'navChat',
+      profilePage: 'navProfile'
+    };
+
     // ==================== INITIALIZATION ====================
     document.addEventListener('DOMContentLoaded', function() {
       checkAuth();
@@ -2542,8 +2551,8 @@
           const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage'];
           if (bottomNav) bottomNav.style.display = hideNav.includes(prev) ? 'none' : 'flex';
           document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-          const navMap = { homePage: 0, ordersPage: 1, masterDataPage: 3, profilePage: 4 };
-          if (navMap[prev] !== undefined) document.querySelectorAll('.nav-item')[navMap[prev]].classList.add('active');
+          var activeNavId2 = PAGE_NAV_MAP[prev];
+          if (activeNavId2) { var an2 = document.getElementById(activeNavId2); if (an2) an2.classList.add('active'); }
           window.scrollTo(0, 0);
           // Push state baru supaya bisa back lagi
           window.history.pushState({ page: prev }, '');
@@ -2577,12 +2586,18 @@
       document.getElementById('authPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       updateProfileUI();
-      // Admin nav toggle
+
       if (currentUser && currentUser.role === 'admin') {
+        // Admin: tampilkan Master nav, sembunyikan Jual nav
         var navJual   = document.getElementById('navJual');
         var navMaster = document.getElementById('navMaster');
         if (navJual)   navJual.style.display   = 'none';
         if (navMaster) navMaster.style.display = 'flex';
+        // Set halaman awal admin ke profile
+        showPage('profilePage');
+      } else {
+        // User biasa: pastikan homePage aktif
+        showPage('homePage');
       }
     }
 
@@ -2711,42 +2726,40 @@
         return;
       }
 
-      // Sembunyikan SEMUA page tanpa kecuali
-      document.querySelectorAll('#mainApp .page').forEach(page => {
+      // Sembunyikan SEMUA page
+      document.querySelectorAll('#mainApp .page').forEach(function(page) {
         page.style.display = 'none';
         page.classList.remove('active');
       });
 
       // Tampilkan page yang dituju
-      const targetPage = document.getElementById(pageId);
+      var targetPage = document.getElementById(pageId);
       if (targetPage) {
         targetPage.style.display = 'block';
         targetPage.classList.add('active');
-        // Chat page pakai flex wrapper
-        if (pageId === 'chatPage') {
-          targetPage.style.display = 'block';
-        }
       }
 
-      // Update nav active state
-      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-      const navMap = { homePage: 0, ordersPage: 1, profilePage: 4 };
-      if (navMap[pageId] !== undefined) {
-        document.querySelectorAll('.nav-item')[navMap[pageId]].classList.add('active');
+      // Update nav active state — pakai ID nav bukan array index
+      document.querySelectorAll('.nav-item').forEach(function(item) {
+        item.classList.remove('active');
+      });
+      var activeNavId = PAGE_NAV_MAP[pageId];
+      if (activeNavId) {
+        var activeNav = document.getElementById(activeNavId);
+        if (activeNav) activeNav.classList.add('active');
       }
 
       // Sembunyikan bottom nav di halaman tertentu
-      const bottomNav = document.getElementById('bottomNav');
-      const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage'];
-      bottomNav.style.display = hideNav.includes(pageId) ? 'none' : 'flex';
+      var bottomNav = document.getElementById('bottomNav');
+      var hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage'];
+      if (bottomNav) bottomNav.style.display = hideNav.includes(pageId) ? 'none' : 'flex';
 
-      // Simpan history untuk tombol back
+      // Simpan history
       if (currentPage && currentPage !== pageId) {
         pageHistory.push(currentPage);
       }
       currentPage = pageId;
 
-      // Scroll to top
       window.scrollTo(0, 0);
     }
 
@@ -4158,10 +4171,14 @@
       if (currentUser.role === 'seller') {
         document.getElementById('sellerProductsMenu').style.display = 'flex';
         document.getElementById('statsGrid').style.display = 'grid';
-        const locMenu = document.getElementById('sellerLocationMenu');
+        var locMenu = document.getElementById('sellerLocationMenu');
         if (locMenu) locMenu.style.display = 'flex';
         updateProfileLocationUI();
         loadDashboardStats();
+      } else if (currentUser.role === 'admin') {
+        // Admin: tampilkan menu Master Data, sembunyikan menu seller
+        document.getElementById('sellerProductsMenu').style.display = 'none';
+        document.getElementById('statsGrid').style.display = 'none';
       }
     }
 
