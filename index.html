@@ -452,8 +452,12 @@
       background: white; border-radius: 16px;
       padding: 20px; margin-bottom: 16px;
     }
-
-    /* Products Grid */
+    /* Diskon form */
+    .discount-info-card {
+      background: #FFEBEE; border-radius: 12px;
+      padding: 12px; margin-top: 8px; font-size: 13px;
+      color: #C62828; display: flex; gap: 8px; align-items: flex-start;
+    }
     .products-section {
       padding: 16px 20px;
     }
@@ -520,6 +524,25 @@
       color: var(--primary);
       font-weight: 600;
       margin-bottom: 4px;
+    }
+
+    /* Diskon badge */
+    .discount-badge {
+      position: absolute;
+      top: 8px; left: 8px;
+      background: #E53935;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 8px;
+      z-index: 2;
+    }
+    .price-original {
+      font-size: 11px;
+      color: var(--text-light);
+      text-decoration: line-through;
+      margin-right: 4px;
     }
 
     .wishlist-btn {
@@ -1940,6 +1963,9 @@
         </div>
       </div>
 
+      <!-- Trial / Komisi info (seller only) -->
+      <div id="trialInfoCard" style="display:none; margin:0 20px 12px; border-radius:14px; padding:14px 16px; font-size:13px;"></div>
+
       <div class="profile-menu">
         <div class="menu-item" onclick="showOrders()">
           <div class="menu-icon"><i class="fas fa-shopping-bag"></i></div>
@@ -1955,6 +1981,15 @@
           <div class="menu-text">
             <h4>Produk Saya</h4>
             <p>Kelola produk yang dijual</p>
+          </div>
+          <i class="fas fa-chevron-right menu-arrow"></i>
+        </div>
+
+        <div class="menu-item" id="discountMenu" style="display:none;" onclick="showDiscountPage()">
+          <div class="menu-icon" style="background:#FFEBEE; color:#E53935;"><i class="fas fa-tag"></i></div>
+          <div class="menu-text">
+            <h4>Diskon Produk</h4>
+            <p>Atur diskon untuk produkmu</p>
           </div>
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
@@ -2003,6 +2038,7 @@
           </div>
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
+
       </div>
     </div>
 
@@ -2207,6 +2243,62 @@
       <div class="chat-input-bar">
         <input type="text" id="chatInput" placeholder="Ketik pesan..." onkeyup="if(event.key==='Enter') sendChatMessage()">
         <button class="chat-send" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+    <!-- Discount Page (Seller) -->
+    <div class="page" id="discountPage" style="display:none;">
+      <div class="app-header" style="position:sticky; top:0; z-index:120;">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
+          <div class="logo-text">Atur Diskon Produk</div>
+          <div style="width:40px;"></div>
+        </div>
+      </div>
+      <div style="padding:16px 20px 100px;">
+        <div style="background:white; border-radius:16px; padding:16px; margin-bottom:16px;">
+          <div class="form-group">
+            <label class="form-label">Pilih Produk</label>
+            <select class="form-input" id="discountProductSelect" onchange="checkExistingDiscount()">
+              <option value="">-- Pilih produk --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Diskon (%)</label>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;" id="discountPresets">
+              <button onclick="setDiscountPct(5)"  class="btn" style="padding:8px 14px; font-size:13px; background:var(--bg);">5%</button>
+              <button onclick="setDiscountPct(10)" class="btn" style="padding:8px 14px; font-size:13px; background:var(--bg);">10%</button>
+              <button onclick="setDiscountPct(15)" class="btn" style="padding:8px 14px; font-size:13px; background:var(--bg);">15%</button>
+              <button onclick="setDiscountPct(20)" class="btn" style="padding:8px 14px; font-size:13px; background:var(--bg);">20%</button>
+              <button onclick="setDiscountPct(25)" class="btn" style="padding:8px 14px; font-size:13px; background:var(--bg);">25%</button>
+              <button onclick="setDiscountPct(30)" class="btn" style="padding:8px 14px; font-size:13px; background:var(--bg);">30%</button>
+              <button onclick="setDiscountPct(50)" class="btn" style="padding:8px 14px; font-size:13px; background:var(--bg);">50%</button>
+            </div>
+            <input type="number" class="form-input" id="discountPct" min="1" max="90" placeholder="Atau ketik langsung (1-90)" oninput="previewDiscount()">
+          </div>
+          <div id="discountPreview" style="display:none; background:#E8F5E9; border-radius:12px; padding:14px; margin-bottom:12px; font-size:13px;">
+            <div style="font-weight:700; margin-bottom:8px; color:var(--primary);">Preview Harga</div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span style="color:var(--text-light);">Harga asli</span>
+              <span id="prevHargaAsli">-</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span style="color:#E53935;">Diskon</span>
+              <span id="prevPotongan" style="color:#E53935;">-</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-weight:700; border-top:1px solid var(--border); padding-top:8px; margin-top:4px;">
+              <span>Harga setelah diskon</span>
+              <span id="prevHargaDiskon" style="color:var(--primary);">-</span>
+            </div>
+          </div>
+          <div id="existingDiscountInfo" style="display:none;" class="discount-info-card">
+            <i class="fas fa-tag"></i>
+            <div id="existingDiscountText">Produk ini sudah memiliki diskon.</div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn btn-primary" onclick="saveDiscount()" style="flex:2;">Pasang Diskon</button>
+            <button class="btn" onclick="removeDiscount()" id="removeDiscountBtn" style="flex:1; background:#FFEBEE; color:#C62828; display:none;">Hapus</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2434,7 +2526,7 @@
           const tp = document.getElementById(prev);
           if (tp) { tp.style.display = 'block'; tp.classList.add('active'); }
           const bottomNav = document.getElementById('bottomNav');
-          const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage'];
+          const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage', 'discountPage'];
           if (bottomNav) bottomNav.style.display = hideNav.includes(prev) ? 'none' : 'flex';
           document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
           const navMap = { homePage: 0, ordersPage: 1, profilePage: 4 };
@@ -2559,1738 +2651,103 @@
       location.reload();
     }
 
-    // ==================== LOCATION ====================
-    function getLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          function(position) {
-            currentLocation.lat = position.coords.latitude;
-            currentLocation.lng = position.coords.longitude;
-            document.getElementById('locationText').innerHTML =
-              `<i class="fas fa-check-circle" style="color: var(--success);"></i> Lokasi aktif`;
-            // Reload produk dengan koordinat agar jarak dihitung
-            loadAllProducts();
-          },
-          function(error) {
-            document.getElementById('locationText').innerHTML =
-              `<i class="fas fa-exclamation-circle" style="color: var(--warning);"></i> Izinkan akses lokasi`;
-            // Tetap tampilkan semua produk meski tanpa jarak
-            if (allProductsCache.length === 0) loadAllProducts();
-            else renderProducts();
-          }
-        );
-      }
-    }
+    // ==================== DISKON (SELLER) ====================
+    let sellerProductsForDiscount = [];
+
+    function showDiscountPage() {
+      showPage('discountPage');
+      document.getElementById('discountProductSelect').innerHTML = '<option value="">Memuat produk...</option>';
+      document.getElementById('discountPct').value = '';
+      document.getElementById('discountPreview').style.display = 'none';
+      document.getElementById('existingDiscountInfo').style.display = 'none';
+      document.getElementById('removeDiscountBtn').style.display = 'none';
 
-    // ==================== NAVIGATION ====================
-    function showPage(pageId) {
-      if (pageId === 'authPage') {
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('authPage').style.display = 'flex';
-        return;
-      }
-
-      // Sembunyikan SEMUA page tanpa kecuali
-      document.querySelectorAll('#mainApp .page').forEach(page => {
-        page.style.display = 'none';
-        page.classList.remove('active');
-      });
-
-      // Tampilkan page yang dituju
-      const targetPage = document.getElementById(pageId);
-      if (targetPage) {
-        targetPage.style.display = 'block';
-        targetPage.classList.add('active');
-        // Chat page pakai flex wrapper
-        if (pageId === 'chatPage') {
-          targetPage.style.display = 'block';
-        }
-      }
-
-      // Update nav active state
-      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-      const navMap = { homePage: 0, ordersPage: 1, profilePage: 4 };
-      if (navMap[pageId] !== undefined) {
-        document.querySelectorAll('.nav-item')[navMap[pageId]].classList.add('active');
-      }
-
-      // Sembunyikan bottom nav di halaman tertentu
-      const bottomNav = document.getElementById('bottomNav');
-      const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage'];
-      bottomNav.style.display = hideNav.includes(pageId) ? 'none' : 'flex';
-
-      // Simpan history untuk tombol back
-      if (currentPage && currentPage !== pageId) {
-        pageHistory.push(currentPage);
-      }
-      currentPage = pageId;
-
-      // Scroll to top
-      window.scrollTo(0, 0);
-    }
-
-    function goBack() {
-      if (pageHistory.length > 0) {
-        const prev = pageHistory.pop();
-        // Jangan push ke history lagi saat goBack
-        const tmp = currentPage;
-        currentPage = prev;
-        showPage(prev);
-        // Perbaiki: hapus entry yang baru ditambah showPage
-        if (pageHistory[pageHistory.length - 1] === prev) {
-          pageHistory.pop();
-        }
-        currentPage = prev;
-      } else {
-        showPage('homePage');
-      }
-    }
-
-    // ==================== PROMO BANNER ====================
-    let promoIndex = 0;
-    let promoTimer = null;
-    let promoAds = [];
-
-    // Default slides (shown when no ads or cycling through)
-    const promoDefaults = [
-      { title: '🛍️ Dukung UMKM Lokal', desc: 'Temukan produk terbaik di sekitarmu dalam radius 1 km', cta: 'Jelajahi Sekarang', ctaFn: 'resetFilter()' },
-      { title: '📍 Produk Terdekat', desc: 'Belanja dari UMKM tetangga, hemat ongkos kirim!', cta: 'Lihat Produk', ctaFn: 'resetFilter()' },
-      { title: '💬 Chat Langsung', desc: 'Tanya penjual sebelum beli — respons cepat!', cta: 'Mulai Chat', ctaFn: "showPage('chatPage')" }
-    ];
-    let defaultIndex = 0;
-
-    function loadBanners() {
-      callGAS('getBanners', {})
-        .then(function(banners) {
-          promoAds = banners || [];
-          startPromoBanner();
-        })
-        .catch(function() { startPromoBanner(); });
-    }
-
-    function startPromoBanner() {
-      if (promoTimer) clearInterval(promoTimer);
-
-      // Build all slides: defaults + ads
-      const allSlides = buildAllSlides();
-
-      if (allSlides.length <= 1) {
-        showPromoSlide(allSlides[0] || promoDefaults[0]);
-        return;
-      }
-
-      // Show dots if >1
-      renderPromoDots(allSlides.length);
-
-      promoIndex = 0;
-      showPromoSlide(allSlides[0]);
-
-      promoTimer = setInterval(function() {
-        promoIndex = (promoIndex + 1) % allSlides.length;
-        updatePromoDots(promoIndex);
-        fadePromoSlide(allSlides[promoIndex]);
-      }, 4000);
-    }
-
-    function buildAllSlides() {
-      // Mix: default messages + ad slides
-      const slides = [];
-      promoDefaults.forEach(function(d) { slides.push({ type: 'default', data: d }); });
-      promoAds.forEach(function(a) { slides.push({ type: 'ad', data: a }); });
-      return slides;
-    }
-
-    function showPromoSlide(slide) {
-      if (!slide) return;
-      const thumb = document.getElementById('promoAdThumb');
-      const inner = document.getElementById('promoTextInner');
-      const cta   = document.getElementById('promoCTA');
-      const bgIcon = document.getElementById('promoBgIcon');
-
-      if (slide.type === 'ad') {
-        const ad = slide.data;
-        // Show thumbnail
-        thumb.style.display = 'block';
-        thumb.innerHTML = (ad.mediaType === 'video'
-          ? `<video src="${ad.mediaUrl}" autoplay muted loop playsinline></video>`
-          : `<img src="${ad.mediaUrl}" alt="${ad.title}" loading="lazy">`)
-          + '<div class="promo-ad-label">IKLAN</div>';
-        if (ad.linkUrl) {
-          document.getElementById('promoCard').onclick = function() { window.open(ad.linkUrl, '_blank'); };
-        } else {
-          document.getElementById('promoCard').onclick = null;
-        }
-        // Update text
-        inner.innerHTML = `<h3>${ad.title}</h3>${ad.description ? `<p>${ad.description}</p>` : ''}`;
-        cta.style.display = 'none';
-        bgIcon.style.display = 'none';
-      } else {
-        // Default slide
-        const d = slide.data;
-        thumb.style.display = 'none';
-        document.getElementById('promoCard').onclick = null;
-        inner.innerHTML = `<h3>${d.title}</h3><p>${d.desc}</p>`;
-        cta.textContent = d.cta;
-        cta.setAttribute('onclick', d.ctaFn);
-        cta.style.display = '';
-        bgIcon.style.display = '';
-      }
-    }
-
-    function fadePromoSlide(slide) {
-      const inner = document.getElementById('promoTextInner');
-      const thumb = document.getElementById('promoAdThumb');
-
-      // Fade out
-      inner.style.opacity = '0';
-      inner.style.transform = 'translateY(-6px)';
-      if (thumb.style.display !== 'none') {
-        thumb.style.opacity = '0';
-      }
-
-      setTimeout(function() {
-        showPromoSlide(slide);
-        // Fade in
-        inner.style.transition = 'opacity 0.4s, transform 0.4s';
-        inner.style.opacity = '1';
-        inner.style.transform = 'translateY(0)';
-        thumb.style.transition = 'opacity 0.4s';
-        thumb.style.opacity = '1';
-      }, 350);
-    }
-
-    function renderPromoDots(count) {
-      const dots = document.getElementById('promoDots');
-      if (count <= 1) { dots.style.display = 'none'; return; }
-      dots.style.display = 'flex';
-      dots.innerHTML = Array.from({ length: count }, function(_, i) {
-        return `<div class="promo-dot ${i === 0 ? 'active' : ''}"></div>`;
-      }).join('');
-    }
-
-    function updatePromoDots(idx) {
-      document.querySelectorAll('.promo-dot').forEach(function(d, i) {
-        d.classList.toggle('active', i === idx);
-      });
-    }
-
-    // ==================== BANNER AD ====================
-    let selectedWeeks = 0;
-
-    function showBannerAd() {
-      if (!currentUser) { showToast('Silakan login terlebih dahulu', 'error'); return; }
-      showPage('bannerAdPage');
-      selectedWeeks = 0;
-      // Reset form
-      ['bannerTitle','bannerDesc','bannerMedia','bannerLink'].forEach(function(id) {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-      document.getElementById('bannerTotal').style.display = 'none';
-      document.querySelectorAll('#bannerWeeksOptions .btn').forEach(function(btn) {
-        btn.style.background = 'var(--bg)';
-        btn.style.color = 'var(--text)';
-      });
-    }
-
-    function selectWeeks(w) {
-      selectedWeeks = w;
-      const total = w * 5000;
-      document.querySelectorAll('#bannerWeeksOptions .btn').forEach(function(btn) {
-        btn.style.background = 'var(--bg)';
-        btn.style.color = 'var(--text)';
-        btn.style.borderColor = 'transparent';
-      });
-      const sel = document.getElementById('weeks' + w);
-      if (sel) {
-        sel.style.background = 'var(--primary)';
-        sel.style.color = 'white';
-      }
-      const totalEl = document.getElementById('bannerTotal');
-      totalEl.style.display = 'block';
-      document.getElementById('bannerTotalAmount').textContent = 'Rp ' + total.toLocaleString('id-ID') + ' (' + w + ' minggu)';
-    }
-
-    function submitBanner() {
-      if (!currentUser) return;
-      const title = document.getElementById('bannerTitle').value.trim();
-      const media = document.getElementById('bannerMedia').value.trim();
-      const desc = document.getElementById('bannerDesc').value.trim();
-      const link = document.getElementById('bannerLink').value.trim();
-      const type = document.getElementById('bannerType').value;
-
-      if (!title) { showToast('Judul iklan wajib diisi', 'error'); return; }
-      if (!media) { showToast('URL gambar/video wajib diisi', 'error'); return; }
-      if (!selectedWeeks) { showToast('Pilih durasi tayang', 'error'); return; }
-
-      const btn = document.querySelector('#bannerAdPage .btn-primary');
-      if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
-
-      callGAS('createBanner', {
-        userId: currentUser.id,
-        title: title,
-        description: desc,
-        mediaUrl: media,
-        mediaType: type,
-        linkUrl: link,
-        weeks: selectedWeeks
-      })
-      .then(function(result) {
-        if (btn) { btn.disabled = false; btn.textContent = 'Pasang Iklan'; }
-        const amount = result.amount || (selectedWeeks * 5000);
-        showModal('Iklan Berhasil Dipasang! 🎉', `
-          <div style="text-align:center; padding:8px 0;">
-            <i class="fas fa-check-circle" style="font-size:48px; color:var(--success); margin-bottom:16px; display:block;"></i>
-            <p style="font-size:14px; margin-bottom:12px;">Iklan "<strong>${title}</strong>" akan tayang hingga <strong>${result.endDate}</strong></p>
-            <div style="background:#FFF8E1; border-radius:12px; padding:14px; text-align:left; margin-bottom:16px;">
-              <div style="font-weight:700; font-size:13px; margin-bottom:8px; color:#F57F17;">💳 Instruksi Pembayaran</div>
-              <div style="font-size:13px; margin-bottom:4px;">Total: <strong>Rp ${amount.toLocaleString('id-ID')}</strong></div>
-              <div style="font-size:12px; color:var(--text-light);">Transfer ke ewallet admin LOKARA, lalu konfirmasi via chat/WhatsApp admin.</div>
-            </div>
-            <button class="btn btn-primary" onclick="closeModal(); goBack();">Selesai</button>
-          </div>
-        `);
-        loadBanners(); // refresh carousel
-      })
-      .catch(function(error) {
-        if (btn) { btn.disabled = false; btn.textContent = 'Pasang Iklan'; }
-        showToast(error.message || 'Gagal memasang iklan', 'error');
-      });
-    }
-
-    // ==================== UNIFIED PRODUCT SYSTEM ====================
-    let radiusOnly = true;        // true = < 1km, false = semua
-    let activeCategory = null;    // null = semua kategori
-    let allProductsCache = [];    // cache semua produk dari GAS
-
-    function toggleRadius() {
-      radiusOnly = !radiusOnly;
-      const thumb = document.getElementById('radiusToggleThumb');
-      const toggle = document.getElementById('radiusToggle');
-      const label = document.getElementById('toggleLabel');
-      if (radiusOnly) {
-        thumb.style.left = '22px';
-        toggle.style.background = 'var(--primary)';
-        label.textContent = '< 1 KM';
-      } else {
-        thumb.style.left = '2px';
-        toggle.style.background = '#ccc';
-        label.textContent = 'Semua';
-      }
-      renderProducts();
-    }
-
-    function setCategory(cat) {
-      activeCategory = (activeCategory === cat) ? null : cat;
-      // Update UI semua category item
-      document.querySelectorAll('.category-item').forEach(el => {
-        el.style.opacity = (!activeCategory || el.dataset.cat === activeCategory) ? '1' : '0.4';
-      });
-      // Tampilkan pill filter aktif
-      const filterDiv = document.getElementById('activeCategoryFilter');
-      const filterName = document.getElementById('activeCategoryName');
-      if (activeCategory) {
-        filterDiv.style.display = 'block';
-        filterName.textContent = activeCategory;
-      } else {
-        filterDiv.style.display = 'none';
-      }
-      renderProducts();
-    }
-
-    function resetFilter() {
-      activeCategory = null;
-      document.querySelectorAll('.category-item').forEach(el => el.style.opacity = '1');
-      document.getElementById('activeCategoryFilter').style.display = 'none';
-      renderProducts();
-    }
-
-    function renderProducts() {
-      const grid = document.getElementById('mainProductsGrid');
-      const label = document.getElementById('productSectionLabel');
-
-      let filtered = allProductsCache.slice(); // copy array
-
-      // Filter radius — hanya kalau lokasi sudah ada DAN toggle ON
-      if (radiusOnly) {
-        if (currentLocation.lat && currentLocation.lng) {
-          filtered = filtered.filter(function(p) {
-            const d = parseFloat(p.distance);
-            return !isNaN(d) && d <= 1;
-          });
-          label.textContent = 'Produk Terdekat (< 1 KM)';
-        } else {
-          // Lokasi belum ready — tampilkan semua sambil tunggu GPS
-          label.textContent = 'Produk Terdekat (< 1 KM)';
-        }
-      } else {
-        label.textContent = 'Semua Produk';
-      }
-
-      // Filter kategori
-      if (activeCategory) {
-        filtered = filtered.filter(function(p) {
-          return p.kategori === activeCategory;
-        });
-      }
-
-      if (filtered.length === 0) {
-        const msg = radiusOnly && currentLocation.lat
-          ? 'Belum ada UMKM yang mendaftar di radius 1 km'
-          : !currentLocation.lat
-          ? 'Aktifkan GPS untuk melihat produk terdekat'
-          : activeCategory
-          ? 'Tidak ada produk di kategori ini'
-          : 'Belum ada produk terdaftar';
-        grid.innerHTML = `
-          <div class="empty-state" style="grid-column:1/-1;">
-            <i class="fas fa-search-location"></i>
-            <h3>${radiusOnly ? 'Tidak ada produk terdekat' : 'Tidak ada produk'}</h3>
-            <p>${msg}</p>
-          </div>`;
-        return;
-      }
-
-      grid.innerHTML = filtered.map(function(product) {
-        const dist = parseFloat(product.distance);
-        const distHtml = !isNaN(dist)
-          ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${dist.toFixed(2)} km</div>`
-          : '';
-        const ratingHtml = product.rating
-          ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
-          : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
-        return `
-          <div class="product-card" onclick="showProductDetail('${product.id}')">
-            <div class="product-image">
-              ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-              <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
-                <i class="far fa-heart"></i>
-              </button>
-            </div>
-            <div class="product-info">
-              ${distHtml}
-              <div class="product-name">${product.nama}</div>
-              <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-              <div class="product-meta">
-                <div class="product-seller" onclick="event.stopPropagation(); showStorePage('${product.sellerId}', '${(product.sellerNama||'').replace(/'/g,"\\'")}')">
-                  <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                  <span>${product.sellerNama || 'UMKM'}</span>
-                </div>
-                ${ratingHtml}
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    function loadAllProducts() {
-      const grid = document.getElementById('mainProductsGrid');
-      grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-light);"><i class="fas fa-spinner fa-spin" style="font-size:32px;"></i><p style="margin-top:12px;">Memuat produk...</p></div>`;
-
-      callGAS('getProducts', {
-        latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
-        longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : ''
-      })
-      .then(function(products) {
-        allProductsCache = products;
-        renderProducts();
-      })
-      .catch(function(error) {
-        console.error('loadAllProducts error:', error);
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-exclamation-circle"></i><h3>Gagal memuat produk</h3><p>Cek koneksi internet</p></div>`;
-      });
-    }
-
-    // Alias untuk kompatibilitas fungsi lama
-    function loadNearbyProducts() { loadAllProducts(); }
-    function showAllProducts() { showPage('homePage'); loadAllProducts(); }
-    function showNearbyProducts() { showPage('homePage'); }
-    function filterByCategory(category) {
-      showPage('homePage');
-      setCategory(category);
-    }
-
-    // Update search to filter from cache
-    // ==================== SEARCH SYSTEM ====================
-    let searchTimer = null;
-
-    function onSearchInput(val) {
-      const clear = document.getElementById('searchClear');
-      clear.style.display = val ? '' : 'none';
-
-      if (!val.trim()) {
-        closeDropdown();
-        renderProducts();
-        return;
-      }
-
-      // Debounce dropdown
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(function() { showDropdown(val.trim()); }, 200);
-    }
-
-    function clearSearch() {
-      const inp = document.getElementById('searchInput');
-      inp.value = '';
-      inp.focus();
-      document.getElementById('searchClear').style.display = 'none';
-      closeDropdown();
-      renderProducts();
-    }
-
-    function closeDropdown() {
-      const dd = document.getElementById('searchDropdown');
-      dd.style.display = 'none';
-      dd.innerHTML = '';
-    }
-
-    function showDropdown(keyword) {
-      const kw = keyword.toLowerCase();
-      const dd = document.getElementById('searchDropdown');
-
-      // Search produk dari cache
-      const matchProducts = allProductsCache.filter(function(p) {
-        return (p.nama || '').toLowerCase().includes(kw) ||
-               (p.deskripsi || '').toLowerCase().includes(kw) ||
-               (p.kategori || '').toLowerCase().includes(kw);
-      }).slice(0, 4);
-
-      // Search toko (unique sellers) dari cache
-      const sellerMap = {};
-      allProductsCache.forEach(function(p) {
-        if (!sellerMap[p.sellerId]) {
-          sellerMap[p.sellerId] = { id: p.sellerId, nama: p.sellerNama, count: 0 };
-        }
-        sellerMap[p.sellerId].count++;
-      });
-      const matchSellers = Object.values(sellerMap).filter(function(s) {
-        return (s.nama || '').toLowerCase().includes(kw);
-      }).slice(0, 3);
-
-      if (matchProducts.length === 0 && matchSellers.length === 0) {
-        dd.innerHTML = `<div style="padding:16px; text-align:center; color:var(--text-light); font-size:13px;">Tidak ada hasil untuk "<strong>${keyword}</strong>"</div>`;
-        dd.style.display = 'block';
-        return;
-      }
-
-      let html = '';
-
-      // Toko section
-      if (matchSellers.length > 0) {
-        html += `<div class="search-dd-section">
-          <div class="search-dd-label"><i class="fas fa-store"></i> Toko</div>`;
-        matchSellers.forEach(function(s) {
-          html += `
-            <div class="search-dd-item" onclick="showStorePage('${s.id}', '${(s.nama||'').replace(/'/g,"\\'")}')">
-              <div class="search-dd-icon"><i class="fas fa-store"></i></div>
-              <div>
-                <div class="search-dd-name">${s.nama || 'Toko'}</div>
-                <div class="search-dd-sub">${s.count} produk</div>
-              </div>
-            </div>`;
-        });
-        html += `</div>`;
-      }
-
-      // Produk section
-      if (matchProducts.length > 0) {
-        html += `<div class="search-dd-section">
-          <div class="search-dd-label"><i class="fas fa-box"></i> Produk</div>`;
-        matchProducts.forEach(function(p) {
-          const dist = parseFloat(p.distance);
-          const distStr = !isNaN(dist) ? ` · ${dist.toFixed(2)} km` : '';
-          html += `
-            <div class="search-dd-item" onclick="closeDropdown(); showProductDetail('${p.id}')">
-              <div class="search-dd-icon">
-                ${p.foto ? `<img src="${p.foto}" alt="${p.nama}">` : '<i class="fas fa-box"></i>'}
-              </div>
-              <div>
-                <div class="search-dd-name">${p.nama}</div>
-                <div class="search-dd-sub">Rp ${parseInt(p.harga).toLocaleString('id-ID')} · ${p.sellerNama || 'UMKM'}${distStr}</div>
-              </div>
-            </div>`;
-        });
-        // Lihat semua hasil
-        html += `
-          <div class="search-dd-item" onclick="doSearch(document.getElementById('searchInput').value)" style="justify-content:center; color:var(--primary); font-size:13px; font-weight:600;">
-            <i class="fas fa-search" style="margin-right:6px;"></i> Lihat semua hasil
-          </div>`;
-        html += `</div>`;
-      }
-
-      dd.innerHTML = html;
-      dd.style.display = 'block';
-    }
-
-    function doSearch(keyword) {
-      closeDropdown();
-      if (!keyword || !keyword.trim()) { renderProducts(); return; }
-      const kw = keyword.trim().toLowerCase();
-      const grid = document.getElementById('mainProductsGrid');
-
-      const filtered = allProductsCache.filter(function(p) {
-        return (p.nama || '').toLowerCase().includes(kw) ||
-               (p.deskripsi || '').toLowerCase().includes(kw) ||
-               (p.kategori || '').toLowerCase().includes(kw) ||
-               (p.sellerNama || '').toLowerCase().includes(kw);
-      });
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-search"></i><h3>Tidak ada hasil</h3><p>Coba kata kunci lain</p></div>`;
-        return;
-      }
-
-      // Kelompokkan: toko yang cocok duluan
-      const sellerMatch = [];
-      const sellerIds = new Set();
-      filtered.forEach(function(p) {
-        if ((p.sellerNama || '').toLowerCase().includes(kw) && !sellerIds.has(p.sellerId)) {
-          sellerIds.add(p.sellerId);
-          sellerMatch.push(p);
-        }
-      });
-
-      const label = document.getElementById('productSectionLabel');
-      if (label) label.textContent = `Hasil: "${keyword.trim()}"`;
-
-      grid.innerHTML = filtered.map(function(product) {
-        const dist = parseFloat(product.distance);
-        const distHtml = !isNaN(dist)
-          ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${dist.toFixed(2)} km</div>` : '';
-        const ratingHtml = product.rating
-          ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}</div>`
-          : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
-        // Highlight seller name jika cocok
-        const sellerStyle = sellerIds.has(product.sellerId) ? 'color:var(--primary);font-weight:600;' : '';
-        return `
-          <div class="product-card" onclick="showProductDetail('${product.id}')">
-            <div class="product-image">
-              ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-              <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
-                <i class="far fa-heart"></i>
-              </button>
-            </div>
-            <div class="product-info">
-              ${distHtml}
-              <div class="product-name">${product.nama}</div>
-              <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-              <div class="product-meta">
-                <div class="product-seller" onclick="event.stopPropagation(); showStorePage('${product.sellerId}', '${(product.sellerNama||'').replace(/'/g,"\\'")}')">
-                  <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                  <span style="${sellerStyle}">${product.sellerNama || 'UMKM'}</span>
-                </div>
-                ${ratingHtml}
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.search-bar') && !e.target.closest('#searchDropdown')) {
-        closeDropdown();
-      }
-    });
-
-    // ==================== STORE PAGE ====================
-    function showStorePage(sellerId, sellerNama) {
-      closeDropdown();
-      showPage('storePage');
-
-      document.getElementById('storePageTitle').textContent = sellerNama || 'Toko';
-      document.getElementById('storeNameDisplay').textContent = sellerNama || 'Toko';
-      document.getElementById('storeSubDisplay').textContent = 'Penjual UMKM LOKARA';
-
-      const grid = document.getElementById('storeProductsGrid');
-      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text-light);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>`;
-
-      // Filter produk dari cache milik seller ini
-      const storeProducts = allProductsCache.filter(function(p) {
-        return p.sellerId === sellerId;
-      });
-
-      if (storeProducts.length === 0) {
-        // Belum ada di cache — ambil dari GAS
-        callGAS('getSellerProducts', { sellerId: sellerId })
-          .then(function(products) { renderStoreProducts(products, sellerNama); })
-          .catch(function() {
-            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open"></i><h3>Belum ada produk</h3></div>`;
-          });
-      } else {
-        renderStoreProducts(storeProducts, sellerNama);
-      }
-    }
-
-    function renderStoreProducts(products, sellerNama) {
-      const grid = document.getElementById('storeProductsGrid');
-      document.getElementById('storeSubDisplay').textContent =
-        products.length + ' produk · Penjual UMKM LOKARA';
-
-      if (products.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open"></i><h3>Belum ada produk</h3></div>`;
-        return;
-      }
-
-      grid.innerHTML = products.map(function(product) {
-        const dist = parseFloat(product.distance);
-        const distHtml = !isNaN(dist)
-          ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${dist.toFixed(2)} km</div>` : '';
-        const ratingHtml = product.rating
-          ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
-          : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
-        return `
-          <div class="product-card" onclick="showProductDetail('${product.id}')">
-            <div class="product-image">
-              ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-              <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
-                <i class="far fa-heart"></i>
-              </button>
-            </div>
-            <div class="product-info">
-              ${distHtml}
-              <div class="product-name">${product.nama}</div>
-              <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-              <div class="product-meta">
-                <div class="product-seller">
-                  <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                  <span>${sellerNama || product.sellerNama || 'UMKM'}</span>
-                </div>
-                ${ratingHtml}
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    // ==================== CATEGORIES ====================
-    function loadCategories() {
-      callGAS('getCategories', {})
-        .then(function(categories) {
-          const grid = document.getElementById('categoriesGrid');
-          grid.innerHTML = categories.map(cat => `
-            <div class="category-item" data-cat="${cat.nama}" onclick="setCategory('${cat.nama}')">
-              <div class="category-icon">${cat.icon}</div>
-              <div class="category-name">${cat.nama}</div>
-            </div>
-          `).join('');
-          const select = document.getElementById('productCategory');
-          select.innerHTML = '<option value="">Pilih Kategori</option>' +
-            categories.map(cat => `<option value="${cat.nama}">${cat.icon} ${cat.nama}</option>`).join('');
-        })
-        .catch(function(error) {
-          console.error('Error loading categories:', error);
-        });
-    }
-
-    // OLD loadNearbyProducts stub - replaced by unified system above
-    function showProductDetail(productId) {
-      callGAS('getProductDetail', { productId: productId })
-        .then(function(product) {
-          currentProduct = product;
-          document.getElementById('detailName').textContent = product.nama;
-          document.getElementById('detailPrice').textContent = 'Rp ' + parseInt(product.harga).toLocaleString('id-ID');
-          document.getElementById('detailDescription').textContent = product.deskripsi || 'Tidak ada deskripsi';
-          document.getElementById('detailInfo').textContent = `Stok: ${product.stok} | Kategori: ${product.kategori}`;
-          document.getElementById('sellerName').textContent = product.sellerNama;
-
-          const distance = currentLocation.lat ? 
-            calculateDistance(currentLocation.lat, currentLocation.lng, product.latitude, product.longitude).toFixed(2) : '?';
-          document.getElementById('sellerDistance').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${distance} km`;
-
-          const imageDiv = document.getElementById('detailImage');
-          if (product.foto) {
-            imageDiv.innerHTML = `
-              <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
-              <img src="${product.foto}" alt="${product.nama}">
-            `;
-          } else {
-            imageDiv.innerHTML = `
-              <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
-              <i class="fas fa-image" style="font-size: 60px; color: var(--primary-light);"></i>
-            `;
-          }
-
-          const reviewsList = document.getElementById('reviewsList');
-          if (product.reviews && product.reviews.length > 0) {
-            reviewsList.innerHTML = product.reviews.map(r => `
-              <div style="padding: 12px; background: var(--bg); border-radius: 12px; margin-bottom: 8px;">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                  <div class="seller-avatar" style="width:28px; height:28px;"><i class="fas fa-user"></i></div>
-                  <span style="font-weight:600; font-size:13px;">${r.buyerNama}</span>
-                  <span style="color: var(--warning); margin-left:auto;"><i class="fas fa-star"></i> ${r.rating}</span>
-                </div>
-                <p style="font-size:13px; color: var(--text-light);">${r.komentar}</p>
-              </div>
-            `).join('');
-          } else {
-            reviewsList.innerHTML = '<p style="color: var(--text-light); font-size:14px;">Belum ada ulasan</p>';
-          }
-
-          showPage('productDetailPage');
-        })
-        .catch(function(error) {
-          console.error('showProductDetail error:', error);
-          showToast('Gagal memuat detail produk', 'error');
-        });
-    }
-
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-    }
-
-    // ==================== WISHLIST ====================
-    function toggleWishlist(productId) {
-      if (!currentUser) {
-        showToast('Silakan login terlebih dahulu', 'error');
-        return;
-      }
-
-      callGAS('toggleWishlist', { userId: currentUser.id, productId: productId })
-        .then(function(result) {
-          showToast(result.message || 'Wishlist diperbarui', 'success');
-        })
-        .catch(function(error) {
-          showToast(error.message || 'Gagal update wishlist', 'error');
-        });
-    }
-
-    function showWishlist() {
-      if (!currentUser) {
-        showToast('Silakan login terlebih dahulu', 'error');
-        return;
-      }
-
-      showPage('wishlistPage');
-      callGAS('getWishlist', { userId: currentUser.id })
-        .then(function(items) {
-          const grid = document.getElementById('wishlistGrid');
-          if (items.length === 0) {
-            grid.innerHTML = `
-              <div class="empty-state" style="grid-column: 1/-1;">
-                <i class="fas fa-heart"></i>
-                <h3>Wishlist kosong</h3>
-                <p>Simpan produk favorit Anda</p>
-              </div>
-            `;
-            return;
-          }
-
-          grid.innerHTML = items.map(item => `
-            <div class="product-card" onclick="showProductDetail('${item.productId}')">
-              <div class="product-image">
-                ${item.product.foto ? `<img src="${item.product.foto}" alt="${item.product.nama}">` : '<i class="fas fa-box"></i>'}
-              </div>
-              <div class="product-info">
-                <div class="product-name">${item.product.nama}</div>
-                <div class="product-price">Rp ${parseInt(item.product.harga).toLocaleString('id-ID')}</div>
-              </div>
-            </div>
-          `).join('');
-        })
-        .catch(function(error) {
-          console.error('showWishlist error:', error);
-        });
-    }
-
-    // ==================== ORDERS ====================
-    function showOrders() {
-      if (!currentUser) {
-        showToast('Silakan login terlebih dahulu', 'error');
-        return;
-      }
-
-      showPage('ordersPage');
-      loadOrders();
-    }
-
-    function loadOrders() {
-      callGAS('getOrders', { userId: currentUser.id })
-        .then(function(orders) {
-          const list = document.getElementById('ordersList');
-          if (orders.length === 0) {
-            list.innerHTML = `
-              <div class="empty-state">
-                <i class="fas fa-shopping-bag"></i>
-                <h3>Belum ada pesanan</h3>
-                <p>Mulai belanja produk lokal</p>
-              </div>
-            `;
-            return;
-          }
-
-          list.innerHTML = orders.map(order => `
-            <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <span style="font-weight:600; font-size:14px;">Order #${order.id.substr(-6)}</span>
-                <span class="status-badge status-${order.status}">${order.status}</span>
-              </div>
-              <div style="font-size:13px; color: var(--text-light); margin-bottom:8px;">
-                ${currentUser.role === 'buyer' ? `Penjual: ${order.sellerNama}` : `Pembeli: ${order.buyerNama}`}
-              </div>
-              <div style="font-size:13px; color: var(--text-light); margin-bottom:12px;">
-                ${new Date(order.createdAt).toLocaleDateString('id-ID')}
-              </div>
-              <div style="border-top: 1px solid var(--border); padding-top: 12px;">
-                ${order.items.map(item => `
-                  <div style="display:flex; gap:10px; margin-bottom:8px;">
-                    <div style="width:40px; height:40px; background: var(--bg); border-radius:8px; display:flex; align-items:center; justify-content:center;">
-                      <i class="fas fa-box" style="color: var(--primary);"></i>
-                    </div>
-                    <div style="flex:1;">
-                      <div style="font-size:13px; font-weight:500;">${item.productNama}</div>
-                      <div style="font-size:12px; color: var(--text-light);">${item.quantity} x Rp ${parseInt(item.hargaSatuan).toLocaleString('id-ID')}</div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top: 1px solid var(--border);">
-                <span style="font-weight:600;">Total</span>
-                <span style="font-weight:700; color: var(--primary); font-size:16px;">Rp ${parseInt(order.total).toLocaleString('id-ID')}</span>
-              </div>
-              ${currentUser.role === 'seller' && order.status === 'pending' ? `
-                <div style="display:flex; gap:8px; margin-top:12px;">
-                  <button class="btn" style="flex:1; background: var(--success); color: white;" onclick="updateOrderStatus('${order.id}', 'processing')">Terima</button>
-                  <button class="btn" style="flex:1; background: var(--danger); color: white;" onclick="updateOrderStatus('${order.id}', 'cancelled')">Tolak</button>
-                </div>
-              ` : ''}
-              ${currentUser.role === 'buyer' && order.status === 'processing' ? `
-                <button class="btn btn-primary" style="margin-top:12px;" onclick="updateOrderStatus('${order.id}', 'completed')">Pesanan Diterima</button>
-              ` : ''}
-            </div>
-          `).join('');
-        })
-        .catch(function(error) {
-          console.error('loadOrders error:', error);
-        });
-    }
-
-    function buyNow() {
-      if (!currentUser) {
-        showToast('Silakan login terlebih dahulu', 'error');
-        return;
-      }
-      if (!currentProduct) return;
-
-      const harga = parseInt(currentProduct.harga);
-      const biayaLayanan = 1000;
-      const total = harga + biayaLayanan;
-
-      const modalBody = `
-        <div style="margin-bottom:16px;">
-          <div style="font-size:15px; font-weight:600; margin-bottom:12px;">${currentProduct.nama}</div>
-          <div style="background:var(--bg); border-radius:12px; padding:12px; font-size:13px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-              <span style="color:var(--text-light);">Harga produk</span>
-              <span>Rp ${harga.toLocaleString('id-ID')}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-              <span style="color:var(--text-light);">Biaya layanan</span>
-              <span>Rp ${biayaLayanan.toLocaleString('id-ID')}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:10px; font-weight:700; font-size:15px;">
-              <span>Total</span>
-              <span style="color:var(--primary);">Rp ${total.toLocaleString('id-ID')}</span>
-            </div>
-          </div>
-        </div>
-        <div style="margin-bottom:16px;">
-          <div class="form-label" style="margin-bottom:10px;">Pilih Metode Pembayaran</div>
-          <div id="paymentOptions" style="display:flex; flex-direction:column; gap:10px;">
-            <label style="display:flex; align-items:center; gap:12px; padding:14px; border:2px solid var(--border); border-radius:12px; cursor:pointer;" onclick="selectPayment(this,'COD')">
-              <input type="radio" name="payment" value="COD" style="display:none;">
-              <div style="width:40px; height:40px; background:#FFF3E0; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px;">💵</div>
-              <div>
-                <div style="font-weight:600; font-size:14px;">COD (Bayar di Tempat)</div>
-                <div style="font-size:12px; color:var(--text-light);">Bayar saat barang tiba</div>
-              </div>
-            </label>
-            <label style="display:flex; align-items:center; gap:12px; padding:14px; border:2px solid var(--border); border-radius:12px; cursor:pointer;" onclick="selectPayment(this,'DANA')">
-              <input type="radio" name="payment" value="DANA" style="display:none;">
-              <div style="width:40px; height:40px; background:#E3F2FD; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; color:#1565C0; font-size:13px;">DANA</div>
-              <div>
-                <div style="font-weight:600; font-size:14px;">DANA</div>
-                <div style="font-size:12px; color:var(--text-light);">Transfer ke dompet DANA</div>
-              </div>
-            </label>
-            <label style="display:flex; align-items:center; gap:12px; padding:14px; border:2px solid var(--border); border-radius:12px; cursor:pointer;" onclick="selectPayment(this,'OVO')">
-              <input type="radio" name="payment" value="OVO" style="display:none;">
-              <div style="width:40px; height:40px; background:#F3E5F5; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; color:#6A1B9A; font-size:13px;">OVO</div>
-              <div>
-                <div style="font-weight:600; font-size:14px;">OVO</div>
-                <div style="font-size:12px; color:var(--text-light);">Transfer ke dompet OVO</div>
-              </div>
-            </label>
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="confirmOrder()">Konfirmasi Pesanan — Rp ${total.toLocaleString('id-ID')}</button>
-      `;
-      showModal('Beli Sekarang', modalBody);
-    }
-
-    let selectedPayment = 'COD';
-
-    function selectPayment(el, method) {
-      selectedPayment = method;
-      document.querySelectorAll('#paymentOptions label').forEach(function(label) {
-        label.style.borderColor = 'var(--border)';
-        label.style.background = 'white';
-      });
-      el.style.borderColor = 'var(--primary)';
-      el.style.background = '#F1F8E9';
-    }
-
-    function confirmOrder() {
-      if (!currentProduct || !currentUser) return;
-
-      const items = [{ productId: currentProduct.id, quantity: 1 }];
-      const btn = document.querySelector('#modalBody .btn-primary');
-      if (btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }
-
-      callGAS('createOrder', {
-          buyerId: currentUser.id,
-          sellerId: currentProduct.sellerId,
-          items: items,
-          alamatPengiriman: currentUser.alamat || '',
-          latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
-          longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : '',
-          metodePembayaran: selectedPayment
-        })
-        .then(function(result) {
-          closeModal();
-          showToast('Pesanan berhasil dibuat!', 'success');
-          showOrders();
-        })
-        .catch(function(error) {
-          if (btn) { btn.disabled = false; btn.textContent = 'Konfirmasi Pesanan'; }
-          showToast(error.message || 'Gagal membuat pesanan', 'error');
-        });
-    }
-
-    function updateOrderStatus(orderId, status) {
-      callGAS('updateOrderStatus', { orderId: orderId, status: status })
-        .then(function(result) {
-          showToast(result.message || 'Status diperbarui', 'success');
-          loadOrders();
-        })
-        .catch(function(error) {
-          showToast(error.message || 'Gagal memperbarui status', 'error');
-        });
-    }
-
-    // ==================== SELLER FUNCTIONS ====================
-    function showAddProduct() {
-      if (!currentUser) {
-        showToast('Silakan login terlebih dahulu', 'error');
-        return;
-      }
-
-      if (currentUser.role !== 'seller') {
-        showToast('Hanya penjual yang dapat menambah produk', 'error');
-        return;
-      }
-
-      showPage('addProductPage');
-      // Reset form
-      document.getElementById('productName').value = '';
-      document.getElementById('productDesc').value = '';
-      document.getElementById('productPrice').value = '';
-      document.getElementById('productStock').value = '';
-      document.getElementById('productCategory').value = '';
-      const uploadDiv = document.getElementById('productImageUpload');
-      uploadDiv.innerHTML = `<i class="fas fa-camera"></i><span>Tambah Foto Produk</span><input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">`;
-      delete uploadDiv.dataset.image;
-      // Update lokasi
-      updateProductLocationUI();
-    }
-
-    function previewProductImage(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const uploadDiv = document.getElementById('productImageUpload');
-          uploadDiv.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius:16px;">`;
-          uploadDiv.classList.add('has-image');
-          uploadDiv.dataset.image = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    function saveProduct() {
-      const nama = document.getElementById('productName').value;
-      const deskripsi = document.getElementById('productDesc').value;
-      const harga = document.getElementById('productPrice').value;
-      const stok = document.getElementById('productStock').value;
-      const kategori = document.getElementById('productCategory').value;
-      const foto = document.getElementById('productImageUpload').dataset.image || '';
-
-      if (!nama || !harga || !stok || !kategori) {
-        showToast('Mohon lengkapi semua field', 'error');
-        return;
-      }
-
-      callGAS('addProduct', {
-          sellerId: currentUser.id,
-          nama: nama, deskripsi: deskripsi, harga: harga, stok: stok, kategori: kategori, foto: foto,
-          latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
-          longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : '',
-          alamat: currentUser.alamat || ''
-        })
-        .then(function(result) {
-          showToast('Produk berhasil ditambahkan!', 'success');
-          showPage('homePage');
-          loadNearbyProducts();
-        })
-        .catch(function(error) {
-          showToast(error.message || 'Gagal menambah produk', 'error');
-        });
-    }
-
-    function showSellerProducts() {
-      showPage('sellerProductsPage');
       callGAS('getSellerProducts', { sellerId: currentUser.id })
         .then(function(products) {
-          const grid = document.getElementById('sellerProductsGrid');
-          if (products.length === 0) {
-            grid.innerHTML = `
-              <div class="empty-state" style="grid-column: 1/-1;">
-                <i class="fas fa-box-open"></i>
-                <h3>Belum ada produk</h3>
-                <p>Tambah produk pertama Anda</p>
-              </div>
-            `;
-            return;
+          sellerProductsForDiscount = products;
+          const sel = document.getElementById('discountProductSelect');
+          sel.innerHTML = '<option value="">-- Pilih produk --</option>' +
+            products.map(function(p) {
+              return `<option value="${p.id}" data-harga="${p.harga}">${p.nama} — Rp ${parseInt(p.harga).toLocaleString('id-ID')}</option>`;
+            }).join('');
+        })
+        .catch(function() { showToast('Gagal memuat produk', 'error'); });
+    }
+
+    function setDiscountPct(pct) {
+      document.getElementById('discountPct').value = pct;
+      document.querySelectorAll('#discountPresets .btn').forEach(function(b) {
+        b.style.background = b.textContent.trim() === pct + '%' ? 'var(--primary)' : 'var(--bg)';
+        b.style.color = b.textContent.trim() === pct + '%' ? 'white' : 'var(--text)';
+      });
+      previewDiscount();
+    }
+
+    function previewDiscount() {
+      const sel = document.getElementById('discountProductSelect');
+      const pct = parseInt(document.getElementById('discountPct').value);
+      const opt = sel.options[sel.selectedIndex];
+      if (!opt || !opt.dataset.harga || !pct || pct < 1) {
+        document.getElementById('discountPreview').style.display = 'none';
+        return;
+      }
+      const harga = parseInt(opt.dataset.harga);
+      const potongan = Math.round(harga * pct / 100);
+      const setelahDiskon = harga - potongan;
+      document.getElementById('prevHargaAsli').textContent = 'Rp ' + harga.toLocaleString('id-ID');
+      document.getElementById('prevPotongan').textContent = '- Rp ' + potongan.toLocaleString('id-ID') + ' (' + pct + '%)';
+      document.getElementById('prevHargaDiskon').textContent = 'Rp ' + setelahDiskon.toLocaleString('id-ID');
+      document.getElementById('discountPreview').style.display = 'block';
+    }
+
+    function checkExistingDiscount() {
+      const productId = document.getElementById('discountProductSelect').value;
+      document.getElementById('discountPreview').style.display = 'none';
+      document.getElementById('existingDiscountInfo').style.display = 'none';
+      document.getElementById('removeDiscountBtn').style.display = 'none';
+      document.getElementById('discountPct').value = '';
+      if (!productId) return;
+      previewDiscount();
+      callGAS('getDiscount', { productId: productId })
+        .then(function(discounts) {
+          if (discounts && discounts.length > 0) {
+            const d = discounts[0];
+            document.getElementById('existingDiscountInfo').style.display = 'flex';
+            document.getElementById('existingDiscountText').textContent =
+              'Sudah ada diskon ' + d.persen + '%' + (d.endDate ? ' (s/d ' + d.endDate + ')' : '') + '. Pasang baru akan menggantikan.';
+            document.getElementById('discountPct').value = d.persen;
+            document.getElementById('removeDiscountBtn').style.display = 'block';
+            previewDiscount();
           }
-
-          grid.innerHTML = products.map(product => `
-            <div class="product-card">
-              <div class="product-image">
-                ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-              </div>
-              <div class="product-info">
-                <div class="product-name">${product.nama}</div>
-                <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-                <div style="display:flex; gap:8px; margin-top:8px;">
-                  <button class="btn" style="flex:1; padding:8px; font-size:12px; background: var(--info); color: white;" onclick="editProduct('${product.id}')">Edit</button>
-                  <button class="btn" style="flex:1; padding:8px; font-size:12px; background: var(--danger); color: white;" onclick="deleteProduct('${product.id}')">Hapus</button>
-                </div>
-              </div>
-            </div>
-          `).join('');
-        })
-        .catch(function(error) {
-          console.error('showSellerProducts error:', error);
-        });
+        }).catch(function() {});
     }
 
-    function deleteProduct(productId) {
-      if (!confirm('Yakin ingin menghapus produk ini?')) return;
-
-      callGAS('deleteProduct', { productId: productId, sellerId: currentUser.id })
-        .then(function(result) {
-          showToast('Produk dihapus', 'success');
-          showSellerProducts();
-        })
-        .catch(function(error) {
-          showToast(error.message || 'Gagal menghapus produk', 'error');
-        });
-    }
-
-    // ==================== CHAT ====================
-    function chatWithSeller() {
-      if (!currentUser || !currentProduct) return;
-
-      currentChatUser = currentProduct.sellerId;
-      document.getElementById('chatTitle').textContent = currentProduct.sellerNama;
-      showPage('chatPage');
-      loadMessages();
-    }
-
-    function loadMessages() {
-      if (!currentChatUser) return;
-
-      callGAS('getMessages', { userId: currentUser.id, otherId: currentChatUser })
-        .then(function(messages) {
-          const container = document.getElementById('chatMessages');
-          container.innerHTML = messages.map(msg => `
-            <div class="chat-bubble ${msg.senderId === currentUser.id ? 'sent' : 'received'}">
-              ${msg.pesan}
-            </div>
-          `).join('');
-          container.scrollTop = container.scrollHeight;
-        })
-        .catch(function(error) {
-          console.error('loadMessages error:', error);
-        });
-    }
-
-    function sendChatMessage() {
-      const input = document.getElementById('chatInput');
-      const pesan = input.value.trim();
-      if (!pesan || !currentChatUser) return;
-
-      callGAS('sendMessage', {
-          senderId: currentUser.id,
-          receiverId: currentChatUser,
-          pesan: pesan
-        })
+    function saveDiscount() {
+      const productId = document.getElementById('discountProductSelect').value;
+      const pct = parseInt(document.getElementById('discountPct').value);
+      if (!productId) { showToast('Pilih produk terlebih dahulu', 'error'); return; }
+      if (!pct || pct < 1 || pct > 90) { showToast('Diskon harus 1-90%', 'error'); return; }
+      callGAS('setDiscount', { productId: productId, sellerId: currentUser.id, persen: pct })
         .then(function() {
-          input.value = '';
-          loadMessages();
+          showToast('Diskon ' + pct + '% berhasil dipasang! 🏷️', 'success');
+          loadAllProducts();
+          goBack();
         })
-        .catch(function(error) {
-          showToast(error.message || 'Gagal mengirim pesan', 'error');
-        });
+        .catch(function(e) { showToast(e.message || 'Gagal pasang diskon', 'error'); });
     }
 
-    // ==================== NOTIFICATIONS ====================
-    function showNotifications() {
-      showPage('notificationsPage');
-      loadNotifications();
-    }
-
-    function loadNotifications() {
-      if (!currentUser) return;
-
-      callGAS('getNotifications', { userId: currentUser.id })
-        .then(function(notifications) {
-          const list = document.getElementById('notificationsList');
-          if (notifications.length === 0) {
-            list.innerHTML = `
-              <div class="empty-state">
-                <i class="fas fa-bell-slash"></i>
-                <h3>Tidak ada notifikasi</h3>
-              </div>
-            `;
-            return;
-          }
-
-          list.innerHTML = notifications.map(notif => {
-            // Pilih icon berdasarkan tipe
-            const icons = {
-              'order': 'fa-shopping-bag',
-              'order_update': 'fa-sync-alt',
-              'chat': 'fa-comment',
-              'welcome': 'fa-hand-wave'
-            };
-            const colors = {
-              'order': 'var(--primary)',
-              'order_update': 'var(--info)',
-              'chat': 'var(--warning)',
-              'welcome': 'var(--success)'
-            };
-            const icon = icons[notif.type] || 'fa-bell';
-            const color = colors[notif.type] || 'var(--primary)';
-            const timeStr = notif.createdAt ? new Date(notif.createdAt).toLocaleString('id-ID', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '';
-
-            return `
-              <div class="menu-item" 
-                   style="${notif.isRead ? '' : 'background: #E8F5E9; border-left: 3px solid var(--primary);'} cursor:pointer; margin-bottom:8px; border-radius:12px;"
-                   onclick="handleNotifClick('${notif.id}', '${notif.type}', '${notif.referenceId || ''}')">
-                <div class="menu-icon" style="background: ${notif.isRead ? '#F5F5F5' : '#E8F5E9'}; color: ${color};">
-                  <i class="fas ${icon}"></i>
-                </div>
-                <div class="menu-text" style="flex:1;">
-                  <h4 style="font-size:14px; ${notif.isRead ? '' : 'color: var(--primary);'}">${notif.judul}</h4>
-                  <p style="font-size:12px; margin-top:2px;">${notif.pesan}</p>
-                  <p style="font-size:11px; color:var(--text-light); margin-top:4px;">${timeStr}</p>
-                </div>
-                ${!notif.isRead ? '<div style="width:10px; height:10px; background: var(--primary); border-radius:50%; flex-shrink:0;"></div>' : ''}
-              </div>
-            `;
-          }).join('');
-
-          // Update badge
-          const unread = notifications.filter(n => !n.isRead).length;
-          const badge = document.getElementById('notifBadge');
-          if (unread > 0) {
-            badge.textContent = unread;
-            badge.style.display = 'flex';
-          } else {
-            badge.style.display = 'none';
-          }
+    function removeDiscount() {
+      const productId = document.getElementById('discountProductSelect').value;
+      if (!productId) return;
+      callGAS('removeDiscount', { productId: productId, sellerId: currentUser.id })
+        .then(function() {
+          showToast('Diskon berhasil dihapus', 'success');
+          loadAllProducts();
+          goBack();
         })
-        .catch(function(error) {
-          console.error('loadNotifications error:', error);
-        });
+        .catch(function(e) { showToast(e.message || 'Gagal hapus diskon', 'error'); });
     }
 
-    function handleNotifClick(notifId, type, referenceId) {
-      // Tandai sudah dibaca dulu
-      callGAS('markNotificationRead', { notificationId: notifId })
-        .then(function() { loadNotifications(); })
-        .catch(function(e) { console.error('markRead error:', e); });
-
-      // Navigasi ke halaman yang relevan
-      switch(type) {
-        case 'chat':
-          // referenceId = senderId (lawan chat)
-          if (referenceId) {
-            currentChatUser = referenceId;
-            showPage('chatPage');
-            // Ambil nama pengirim untuk header chat
-            callGAS('getProfile', { userId: referenceId })
-              .then(function(user) {
-                document.getElementById('chatTitle').textContent = user.nama || 'Chat';
-              })
-              .catch(function() {
-                document.getElementById('chatTitle').textContent = 'Chat';
-              });
-            loadMessages();
-          } else {
-            showPage('chatPage');
-          }
-          break;
-
-        case 'order':
-        case 'order_update':
-          // referenceId = orderId — buka halaman pesanan
-          showOrders();
-          break;
-
-        case 'welcome':
-          showPage('profilePage');
-          break;
-
-        default:
-          // Notifikasi umum — tetap di halaman notifikasi
-          break;
-      }
-    }
-
-    function markRead(notifId) {
-      // Fungsi legacy — tetap ada untuk kompatibilitas
-      callGAS('markNotificationRead', { notificationId: notifId })
-        .then(function() { loadNotifications(); })
-        .catch(function(error) { console.error('markRead error:', error); });
-    }
-
-    // ==================== PROFILE ====================
-    function triggerPhotoUpload() {
-      document.getElementById('profilePhotoInput').click();
-    }
-
-    function uploadProfilePhoto(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      // Validasi tipe file
-      if (!file.type.startsWith('image/')) {
-        showToast('File harus berupa gambar', 'error');
-        return;
-      }
-
-      // Batas ukuran file 10MB sebelum kompresi
-      if (file.size > 10 * 1024 * 1024) {
-        showToast('Ukuran foto maksimal 10MB', 'error');
-        return;
-      }
-
-      showToast('Memproses foto...', '');
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          // Kompres ke canvas max 600x600
-          const MAX_SIZE = 600;
-          let w = img.width;
-          let h = img.height;
-          if (w > h) {
-            if (w > MAX_SIZE) { h = Math.round(h * MAX_SIZE / w); w = MAX_SIZE; }
-          } else {
-            if (h > MAX_SIZE) { w = Math.round(w * MAX_SIZE / h); h = MAX_SIZE; }
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          // Kompres ke JPEG kualitas 0.75
-          const base64 = canvas.toDataURL('image/jpeg', 0.75);
-
-          // Preview langsung
-          const icon = document.getElementById('profileAvatarIcon');
-          const imgEl = document.getElementById('profileAvatarImg');
-          if (icon) icon.style.display = 'none';
-          if (imgEl) { imgEl.src = base64; imgEl.style.display = 'block'; }
-
-          showToast('Menyimpan foto...', '');
-
-          callGAS('updateProfilePhoto', { userId: currentUser.id, foto: base64 })
-            .then(function(result) {
-              currentUser.foto = base64;
-              localStorage.setItem('lokara_user', JSON.stringify(currentUser));
-              showToast('Foto profil berhasil diperbarui!', 'success');
-            })
-            .catch(function(error) {
-              showToast(error.message || 'Gagal menyimpan foto', 'error');
-              updateProfileUI();
-            });
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function updateProfileUI() {
-      if (!currentUser) return;
-
-      document.getElementById('profileName').textContent = currentUser.nama;
-      document.getElementById('profileRole').textContent = currentUser.role === 'seller' ? 'Penjual UMKM' : 'Pembeli';
-
-      // Foto profil
-      const icon = document.getElementById('profileAvatarIcon');
-      const img = document.getElementById('profileAvatarImg');
-      if (currentUser.foto && currentUser.foto.length > 0) {
-        if (icon) icon.style.display = 'none';
-        if (img) { img.src = currentUser.foto; img.style.display = 'block'; }
-      } else {
-        if (icon) icon.style.display = 'block';
-        if (img) img.style.display = 'none';
-      }
-
-      if (currentUser.role === 'seller') {
-        document.getElementById('sellerProductsMenu').style.display = 'flex';
-        document.getElementById('statsGrid').style.display = 'grid';
-        const locMenu = document.getElementById('sellerLocationMenu');
-        if (locMenu) locMenu.style.display = 'flex';
-        updateProfileLocationUI();
-        loadDashboardStats();
-      }
-    }
-
-    function loadDashboardStats() {
-      callGAS('getDashboardStats', { userId: currentUser.id, role: currentUser.role })
-        .then(function(stats) {
-          document.getElementById('statProducts').textContent = stats.totalProducts;
-          document.getElementById('statOrders').textContent = stats.totalOrders;
-          document.getElementById('statSales').textContent = 'Rp ' + parseInt(stats.totalSales).toLocaleString('id-ID');
-          document.getElementById('statRating').textContent = stats.averageRating;
-        })
-        .catch(function(error) {
-          console.error('loadDashboardStats error:', error);
-        });
-    }
-
-    function showEditProfile() {
-      document.getElementById('editName').value = currentUser.nama;
-      document.getElementById('editPhone').value = currentUser.telepon || '';
-      document.getElementById('editAddress').value = currentUser.alamat || '';
-      showPage('editProfilePage');
-    }
-
-    function saveProfile() {
-      const nama = document.getElementById('editName').value.trim();
-      const telepon = document.getElementById('editPhone').value.trim();
-      const alamat = document.getElementById('editAddress').value.trim();
-
-      if (!nama) {
-        showToast('Nama tidak boleh kosong', 'error');
-        return;
-      }
-
-      const btn = document.querySelector('#editProfilePage .btn-primary');
-      if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
-
-      callGAS('updateProfile', {
-          userId: currentUser.id,
-          nama: nama,
-          telepon: telepon,
-          alamat: alamat
-        })
-        .then(function(result) {
-          if (btn) { btn.disabled = false; btn.textContent = 'Simpan Perubahan'; }
-          currentUser.nama = nama;
-          currentUser.telepon = telepon;
-          currentUser.alamat = alamat;
-          localStorage.setItem('lokara_user', JSON.stringify(currentUser));
-          updateProfileUI();
-          showToast('Profil diperbarui', 'success');
-          showPage('profilePage');
-        })
-        .catch(function(error) {
-          if (btn) { btn.disabled = false; btn.textContent = 'Simpan Perubahan'; }
-          showToast(error.message || 'Gagal menyimpan profil', 'error');
-        });
-    }
-
-    // ==================== UTILITIES ====================
-    function showToast(message, type = '') {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.className = 'toast show ' + type;
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
-    }
-
-    function showModal(title, content) {
-      document.getElementById('modalTitle').textContent = title;
-      document.getElementById('modalBody').innerHTML = content;
-      document.getElementById('modalOverlay').classList.add('active');
-    }
-
-    function closeModal(event) {
-      if (!event || event.target === document.getElementById('modalOverlay')) {
-        document.getElementById('modalOverlay').classList.remove('active');
-      }
-    }
-
-    // ==================== PROCESS REQUEST WRAPPER ====================
-    // callGAS() mengirim request ke Google Apps Script via fetch
-
-
-
-    function editProduct(productId) {
-      showToast('Fitur edit produk segera hadir', 'error');
-    }
-
-    // Toggle info lokasi saat pilih role seller di registrasi
-    function toggleSellerLocationInfo(role) {
-      const info = document.getElementById('sellerLocationInfo');
-      if (info) info.style.display = (role === 'seller') ? 'block' : 'none';
-    }
-
-    // Refresh/deteksi ulang lokasi di halaman tambah produk
-    function refreshProductLocation() {
-      const status = document.getElementById('productLocationStatus');
-      const coords = document.getElementById('productLocationCoords');
-      const box = document.getElementById('productLocationBox');
-
-      if (status) status.textContent = 'Mendeteksi lokasi...';
-      if (coords) coords.textContent = 'Mohon tunggu...';
-
-      if (!navigator.geolocation) {
-        if (status) status.textContent = 'GPS tidak tersedia';
-        if (coords) coords.textContent = 'Browser tidak mendukung geolocation';
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        function(position) {
-          currentLocation.lat = position.coords.latitude;
-          currentLocation.lng = position.coords.longitude;
-          const accuracy = Math.round(position.coords.accuracy);
-          if (status) status.textContent = '✓ Lokasi terdeteksi';
-          if (coords) coords.textContent = `${currentLocation.lat.toFixed(5)}, ${currentLocation.lng.toFixed(5)} (±${accuracy}m)`;
-          if (box) box.style.borderColor = 'var(--primary)';
-          // Update location bar juga
-          const locText = document.getElementById('locationText');
-          if (locText) locText.innerHTML = `<i class="fas fa-check-circle" style="color: var(--success);"></i> Lokasi aktif`;
-          loadNearbyProducts();
-        },
-        function(err) {
-          if (status) status.textContent = '⚠ Lokasi tidak dapat dideteksi';
-          if (coords) {
-            const msgs = {1:'Izin ditolak — aktifkan di pengaturan browser', 2:'Sinyal GPS lemah', 3:'Waktu habis, coba lagi'};
-            coords.textContent = msgs[err.code] || 'Gagal mendeteksi lokasi';
-          }
-          if (box) box.style.borderColor = 'var(--warning)';
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    }
-
-    // Update tampilan lokasi di addProduct saat halaman dibuka
-    function updateProductLocationUI() {
-      const status = document.getElementById('productLocationStatus');
-      const coords = document.getElementById('productLocationCoords');
-      const box = document.getElementById('productLocationBox');
-
-      if (currentLocation && currentLocation.lat) {
-        if (status) status.textContent = '✓ Lokasi terdeteksi';
-        if (coords) coords.textContent = `${currentLocation.lat.toFixed(5)}, ${currentLocation.lng.toFixed(5)}`;
-        if (box) box.style.borderColor = 'var(--primary)';
-      } else {
-        if (status) status.textContent = 'Lokasi belum terdeteksi';
-        if (coords) coords.textContent = 'Klik "Pilih di Peta" untuk set lokasi';
-        if (box) box.style.borderColor = 'var(--warning)';
-        // Auto GPS dulu
-        refreshProductLocation();
-      }
-    }
   </script>
-
-  <!-- Leaflet JS (ringan, ~40KB) -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    // ==================== MAP PICKER ====================
-    let mapInstance = null;
-    let mapMarker = null;
-    let mapPickedLat = null;
-    let mapPickedLng = null;
-    let mapPickerCallback = null; // 'product' atau 'profile'
-
-    function openMapPicker(callbackType, title) {
-      mapPickerCallback = callbackType;
-      document.getElementById('mapPickerTitle').textContent = '📍 ' + (title || 'Pilih Lokasi');
-      document.getElementById('mapPickerOverlay').classList.add('active');
-
-      // Inisialisasi peta setelah overlay visible
-      setTimeout(function() {
-        if (mapInstance) {
-          mapInstance.remove();
-          mapInstance = null;
-        }
-
-        // Tentukan titik awal: lokasi saat ini atau default Jakarta
-        const startLat = (currentLocation && currentLocation.lat) ? currentLocation.lat : -6.2088;
-        const startLng = (currentLocation && currentLocation.lng) ? currentLocation.lng : 106.8456;
-
-        mapPickedLat = startLat;
-        mapPickedLng = startLng;
-
-        mapInstance = L.map('mapContainer').setView([startLat, startLng], 16);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap',
-          maxZoom: 19
-        }).addTo(mapInstance);
-
-        // Custom marker icon hijau
-        const greenIcon = L.divIcon({
-          html: '<div style="width:32px;height:32px;background:var(--primary);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
-          iconSize: [32, 32],
-          iconAnchor: [16, 32],
-          className: ''
-        });
-
-        mapMarker = L.marker([startLat, startLng], { draggable: true, icon: greenIcon }).addTo(mapInstance);
-
-        updateMapCoordsText(startLat, startLng);
-
-        // Saat marker digeser
-        mapMarker.on('dragend', function(e) {
-          const pos = e.target.getLatLng();
-          mapPickedLat = pos.lat;
-          mapPickedLng = pos.lng;
-          updateMapCoordsText(pos.lat, pos.lng);
-        });
-
-        // Klik peta untuk pindah marker
-        mapInstance.on('click', function(e) {
-          mapPickedLat = e.latlng.lat;
-          mapPickedLng = e.latlng.lng;
-          mapMarker.setLatLng(e.latlng);
-          updateMapCoordsText(e.latlng.lat, e.latlng.lng);
-        });
-
-        // Invalidate size karena container baru visible
-        mapInstance.invalidateSize();
-      }, 100);
-    }
-
-    function updateMapCoordsText(lat, lng) {
-      const el = document.getElementById('mapCoordsText');
-      if (el) el.textContent = lat.toFixed(6) + ', ' + lng.toFixed(6);
-    }
-
-    function closeMapPicker() {
-      document.getElementById('mapPickerOverlay').classList.remove('active');
-    }
-
-    function confirmMapLocation() {
-      if (mapPickedLat === null) { closeMapPicker(); return; }
-
-      if (mapPickerCallback === 'product') {
-        // Set lokasi produk
-        currentLocation.lat = mapPickedLat;
-        currentLocation.lng = mapPickedLng;
-        updateProductLocationUI();
-        showToast('Lokasi produk diperbarui', 'success');
-
-      } else if (mapPickerCallback === 'profile') {
-        // Simpan lokasi ke profil user
-        const lat = mapPickedLat;
-        const lng = mapPickedLng;
-        callGAS('updateProfile', {
-            userId: currentUser.id,
-            latitude: lat,
-            longitude: lng
-          })
-          .then(function() {
-            currentUser.latitude = lat;
-            currentUser.longitude = lng;
-            localStorage.setItem('lokara_user', JSON.stringify(currentUser));
-            updateProfileLocationUI();
-            showToast('Lokasi profil diperbarui', 'success');
-          })
-          .catch(function(err) {
-            showToast(err.message || 'Gagal menyimpan lokasi', 'error');
-          });
-      }
-
-      closeMapPicker();
-    }
-
-    // ==================== PROFILE LOCATION UI ====================
-    function updateProfileLocationUI() {
-      const el = document.getElementById('profileLocationText');
-      if (!el) return;
-      if (currentUser && currentUser.latitude && currentUser.longitude) {
-        el.textContent = parseFloat(currentUser.latitude).toFixed(5) + ', ' + parseFloat(currentUser.longitude).toFixed(5);
-        el.style.color = 'var(--primary)';
-      } else {
-        el.textContent = 'Belum diatur — klik untuk pilih di peta';
-        el.style.color = 'var(--text-light)';
-      }
-    }
-  </script>
-
-  <script>
-    // Service Worker — hanya aktif di GitHub Pages (bukan GAS URL)
-    if ('serviceWorker' in navigator &&
-        !location.hostname.includes('googleusercontent.com') &&
-        !location.hostname.includes('google.com')) {
-
-      navigator.serviceWorker.register('./sw.js')
-        .then(function(reg) {
-          console.log('[App] SW registered, scope:', reg.scope);
-
-          // Cek update setiap 30 detik
-          setInterval(function() { reg.update(); }, 30000);
-        })
-        .catch(function(err) {
-          console.log('[App] SW failed:', err);
-        });
-
-      // Saat SW baru kirim pesan SW_UPDATED → reload otomatis
-      navigator.serviceWorker.addEventListener('message', function(event) {
-        if (event.data && event.data.type === 'SW_UPDATED') {
-          console.log('[App] New version detected:', event.data.version, '— reloading');
-          // Tunda sedikit agar user tidak kaget
-          setTimeout(function() {
-            window.location.reload();
-          }, 1000);
-        }
-      });
-
-      // Deteksi kalau ada SW baru yang waiting
-      navigator.serviceWorker.ready.then(function(reg) {
-        if (reg.waiting) {
-          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        }
-        reg.addEventListener('updatefound', function() {
-          const newWorker = reg.installing;
-          newWorker.addEventListener('statechange', function() {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              newWorker.postMessage({ type: 'SKIP_WAITING' });
-            }
-          });
-        });
-      });
-    }
-  </script>
-
 </body>
 </html>
