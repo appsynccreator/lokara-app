@@ -2566,16 +2566,21 @@
     function checkAuth() {
       const user = localStorage.getItem('lokara_user');
       if (user) {
-        currentUser = JSON.parse(user);
+        try { currentUser = JSON.parse(user); } catch(e) { currentUser = null; }
+        if (!currentUser) { showPage('authPage'); return; }
+
         showMainApp();
-        if (currentUser.role !== 'admin') {
+
+        if (currentUser.role === 'admin') {
+          showPage('profilePage');
+          loadAdminMasterData();
+        } else {
+          showPage('homePage');
           loadCategories();
           loadAllProducts();
           getLocation();
           loadNotifications();
           loadBanners();
-        } else {
-          loadAdminMasterData();
         }
       } else {
         showPage('authPage');
@@ -2583,22 +2588,24 @@
     }
 
     function showMainApp() {
-      document.getElementById('authPage').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'block';
-      updateProfileUI();
+      // Sembunyikan auth, tampilkan app
+      var authEl = document.getElementById('authPage');
+      var appEl  = document.getElementById('mainApp');
+      if (authEl) authEl.style.display = 'none';
+      if (appEl)  appEl.style.display  = 'block';
 
+      // Toggle nav admin vs user
+      var navJual   = document.getElementById('navJual');
+      var navMaster = document.getElementById('navMaster');
       if (currentUser && currentUser.role === 'admin') {
-        // Admin: tampilkan Master nav, sembunyikan Jual nav
-        var navJual   = document.getElementById('navJual');
-        var navMaster = document.getElementById('navMaster');
         if (navJual)   navJual.style.display   = 'none';
         if (navMaster) navMaster.style.display = 'flex';
-        // Set halaman awal admin ke profile
-        showPage('profilePage');
       } else {
-        // User biasa: pastikan homePage aktif
-        showPage('homePage');
+        if (navJual)   navJual.style.display   = 'flex';
+        if (navMaster) navMaster.style.display = 'none';
       }
+
+      updateProfileUI();
     }
 
     // ==================== AUTHENTICATION ====================
@@ -2673,14 +2680,17 @@
           currentUser = result;
           localStorage.setItem('lokara_user', JSON.stringify(result));
           showMainApp();
-          if (result.role !== 'admin') {
+
+          if (result.role === 'admin') {
+            showPage('profilePage');
+            loadAdminMasterData();
+          } else {
+            showPage('homePage');
             getLocation();
             loadCategories();
             loadNearbyProducts();
             loadNotifications();
-          } else {
-            // Admin: langsung ke profil
-            loadAdminMasterData();
+            loadBanners();
           }
           showToast('Selamat datang, ' + result.nama + '!', 'success');
         })
