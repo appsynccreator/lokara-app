@@ -1751,9 +1751,6 @@
           <div class="auth-footer">
             Belum punya akun? <a onclick="showRegister()">Daftar sekarang</a>
           </div>
-          <div class="auth-footer" style="margin-top:4px;">
-            <a onclick="showAdminLogin()" style="color:rgba(255,255,255,0.5); font-size:11px;">🔐 Login Admin</a>
-          </div>
         </div>
 
         <!-- Register Form -->
@@ -1791,95 +1788,11 @@
           </div>
         </div>
 
-        <!-- Admin Login Form -->
-        <div id="adminLoginForm" style="display:none;">
-          <div class="auth-title">Admin Panel 🔐</div>
-          <div class="form-group">
-            <label class="form-label">Email Admin</label>
-            <input type="email" class="form-input" id="adminEmail" placeholder="admin@lokara.id">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Password Admin</label>
-            <input type="password" class="form-input" id="adminPassword" placeholder="••••••••">
-          </div>
-          <button class="btn btn-primary" onclick="loginAdmin()">Masuk sebagai Admin</button>
-          <div class="auth-footer">
-            <a onclick="showLogin()">← Kembali ke Login</a>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
 
-  <!-- Admin Panel (terpisah dari mainApp) -->
-  <div id="adminPanel" style="display:none; min-height:100vh; background:#F5F5F5; padding-bottom:40px;">
-    <div style="background:linear-gradient(135deg,#1B5E20,#0D3312); color:white; padding:20px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100;">
-      <div>
-        <div style="font-size:20px; font-weight:700;">⚙️ Admin LOKARA</div>
-        <div style="font-size:12px; opacity:0.8;" id="adminGreeting">Panel Manajemen</div>
-      </div>
-      <button onclick="logoutAdmin()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:8px 16px; border-radius:20px; font-size:13px; cursor:pointer;">Keluar</button>
-    </div>
-
-    <!-- Tab Navigation -->
-    <div style="display:flex; background:white; border-bottom:2px solid #E0E0E0; overflow-x:auto;">
-      <button class="admin-tab active" onclick="showAdminTab('tabKomisi')" id="btnTabKomisi" style="flex:1; padding:14px 10px; border:none; background:white; font-size:13px; font-weight:600; color:var(--primary); border-bottom:3px solid var(--primary); cursor:pointer; white-space:nowrap;">💰 Komisi & Biaya</button>
-      <button class="admin-tab" onclick="showAdminTab('tabUsers')" id="btnTabUsers" style="flex:1; padding:14px 10px; border:none; background:white; font-size:13px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">👥 Users</button>
-      <button class="admin-tab" onclick="showAdminTab('tabBanners')" id="btnTabBanners" style="flex:1; padding:14px 10px; border:none; background:white; font-size:13px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">📢 Iklan</button>
-    </div>
-
-    <!-- Tab: Komisi & Biaya -->
-    <div id="tabKomisi" style="padding:20px;">
-      <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:16px;">
-        <div style="font-size:16px; font-weight:700; margin-bottom:16px; color:#1B5E20;">⚙️ Pengaturan Komisi</div>
-        <div style="background:#E8F5E9; border-radius:12px; padding:14px; margin-bottom:16px; font-size:13px; color:#1B5E20; line-height:1.6;">
-          <strong>ℹ️ Cara kerja komisi:</strong><br>
-          Seller baru mendapatkan masa trial gratis. Setelah trial habis, komisi dipotong dari penerimaan seller (buyer tetap bayar harga normal).<br>
-          <strong>Contoh:</strong> Harga Rp 100.000, Komisi 3% = Rp 3.000 → Seller terima Rp 97.000
-        </div>
-        <div class="form-group">
-          <label class="form-label">Komisi (%)</label>
-          <input type="number" class="form-input" id="adminKomisiPersen" placeholder="3" min="0" max="30" step="0.5">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Masa Trial Seller (bulan)</label>
-          <input type="number" class="form-input" id="adminTrialBulan" placeholder="6" min="0" max="24">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Biaya Iklan per Minggu (Rp)</label>
-          <input type="number" class="form-input" id="adminBannerBiaya" placeholder="5000" min="0">
-        </div>
-        <button onclick="saveAdminSettings()" class="btn btn-primary" style="width:100%;">Simpan Pengaturan</button>
-      </div>
-    </div>
-
-    <!-- Tab: Users -->
-    <div id="tabUsers" style="padding:20px; display:none;">
-      <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <div style="font-size:16px; font-weight:700; color:#1B5E20;">👥 Manajemen User</div>
-          <button onclick="loadAdminUsers()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
-        </div>
-        <div id="adminUsersList">
-          <div style="text-align:center; padding:40px; color:#757575;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:12px;">Memuat data...</p></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab: Banners -->
-    <div id="tabBanners" style="padding:20px; display:none;">
-      <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <div style="font-size:16px; font-weight:700; color:#1B5E20;">📢 Manajemen Iklan</div>
-          <button onclick="loadAdminBanners()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
-        </div>
-        <div id="adminBannersList">
-          <div style="text-align:center; padding:40px; color:#757575;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:12px;">Memuat data...</p></div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Main App -->
   <div id="mainApp" style="display:none;">
     <!-- Header -->
     <div class="app-header">
@@ -2082,6 +1995,15 @@
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
 
+        <div class="menu-item" id="adminMasterMenu" style="display:none;" onclick="showPage('masterDataPage')">
+          <div class="menu-icon" style="background:#FFF3E0; color:#E65100;"><i class="fas fa-cogs"></i></div>
+          <div class="menu-text">
+            <h4>Master Data</h4>
+            <p>Kelola komisi, iklan & user</p>
+          </div>
+          <i class="fas fa-chevron-right menu-arrow"></i>
+        </div>
+
         <div class="menu-item" onclick="logout()">
           <div class="menu-icon" style="background: #FFEBEE; color: var(--danger);"><i class="fas fa-sign-out-alt"></i></div>
           <div class="menu-text">
@@ -2242,7 +2164,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Diskon (%) <span style="color:var(--text-light); font-weight:400; font-size:12px;">— Opsional, 0 = tidak ada diskon</span></label>
+          <label class="form-label">Diskon (%) <span style="color:var(--text-light);font-weight:400;font-size:12px;">opsional — 0 = tidak ada diskon</span></label>
           <input type="number" class="form-input" id="productDiskon" placeholder="0" min="0" max="99" step="1">
         </div>
 
@@ -2392,6 +2314,90 @@
     </div>
 
     <!-- Bottom Navigation -->
+    <!-- Bottom Nav: default untuk user/seller -->
+
+    <!-- ==================== MASTER DATA PAGE (Admin) ==================== -->
+    <div class="page" id="masterDataPage" style="display:none;">
+      <div class="app-header" style="position:sticky; top:0; z-index:120;">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
+          <div class="logo-text">⚙️ Master Data</div>
+          <div style="width:40px;"></div>
+        </div>
+        <div style="display:flex; gap:4px; background:rgba(255,255,255,0.12); border-radius:10px; padding:3px; margin-top:8px;">
+          <button id="mdTab1" onclick="showMdTab('mdKomisi')"
+            style="flex:1;padding:8px 4px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:white;color:var(--primary);">💰 Komisi</button>
+          <button id="mdTab2" onclick="showMdTab('mdUsers')"
+            style="flex:1;padding:8px 4px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:rgba(255,255,255,0.9);">👥 Users</button>
+          <button id="mdTab3" onclick="showMdTab('mdIklan')"
+            style="flex:1;padding:8px 4px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:rgba(255,255,255,0.9);">📢 Iklan</button>
+        </div>
+      </div>
+
+      <div style="padding:16px 16px 100px;">
+
+        <!-- TAB KOMISI -->
+        <div id="mdKomisi">
+          <div style="background:#E8F5E9;border-radius:14px;padding:14px;margin-bottom:16px;font-size:13px;color:#1B5E20;line-height:1.65;">
+            <strong>ℹ️ Cara kerja komisi:</strong><br>
+            Seller gratis komisi selama masa trial. Setelah trial habis, komisi dipotong dari penerimaan seller — buyer tetap bayar harga normal.<br>
+            <span style="display:inline-block;margin-top:4px;"><strong>Contoh:</strong> Harga Rp 100.000 · Komisi 3% = Rp 3.000 → Seller terima Rp 97.000</span>
+          </div>
+          <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <div style="font-weight:700;font-size:15px;margin-bottom:14px;color:var(--primary);">⚙️ Pengaturan Komisi & Biaya</div>
+            <div class="form-group">
+              <label class="form-label">Komisi (%)</label>
+              <input type="number" class="form-input" id="mdKomisiPersen" placeholder="3" min="0" max="30" step="0.5">
+              <div style="font-size:11px;color:var(--text-light);margin-top:4px;">Persentase yang dipotong dari penerimaan seller per transaksi</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Masa Trial Seller (bulan)</label>
+              <input type="number" class="form-input" id="mdTrialBulan" placeholder="6" min="0" max="24">
+              <div style="font-size:11px;color:var(--text-light);margin-top:4px;">Seller baru gratis komisi selama periode ini</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Biaya Iklan per Minggu (Rp)</label>
+              <input type="number" class="form-input" id="mdBannerBiaya" placeholder="5000" min="0">
+            </div>
+            <button onclick="saveMdSettings()" class="btn btn-primary" style="width:100%;">💾 Simpan Pengaturan</button>
+          </div>
+        </div>
+
+        <!-- TAB USERS -->
+        <div id="mdUsers" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-weight:700;font-size:15px;color:var(--primary);">👥 Daftar User</div>
+            <button onclick="loadMdUsers()" style="background:#E8F5E9;color:var(--primary);border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+          <div style="background:white;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <input type="text" id="mdUserSearch" class="form-input" placeholder="🔍 Cari nama atau email..."
+              oninput="filterMdUsers(this.value)" style="margin-bottom:12px;">
+            <div id="mdUsersList">
+              <div style="text-align:center;padding:30px;color:var(--text-light);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:10px;">Memuat data...</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB IKLAN -->
+        <div id="mdIklan" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-weight:700;font-size:15px;color:var(--primary);">📢 Manajemen Iklan</div>
+            <button onclick="loadMdBanners()" style="background:#E8F5E9;color:var(--primary);border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+          <div style="background:white;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <div id="mdBannersList">
+              <div style="text-align:center;padding:30px;color:var(--text-light);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:10px;">Memuat data...</p></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <div class="bottom-nav" id="bottomNav">
       <div class="nav-item active" onclick="showPage('homePage')">
         <i class="fas fa-home"></i>
@@ -2401,9 +2407,13 @@
         <i class="fas fa-shopping-bag"></i>
         <span>Pesanan</span>
       </div>
-      <div class="nav-item" onclick="showAddProduct()">
+      <div class="nav-item" id="navJual" onclick="showAddProduct()">
         <div class="sell-btn"><i class="fas fa-plus"></i></div>
         <span>Jual</span>
+      </div>
+      <div class="nav-item" id="navMaster" onclick="showPage('masterDataPage')" style="display:none;">
+        <i class="fas fa-cogs"></i>
+        <span>Master</span>
       </div>
       <div class="nav-item" onclick="showPage('chatPage')">
         <i class="fas fa-comment"></i>
@@ -2462,17 +2472,12 @@
         return Promise.reject(new Error('GAS_URL kosong'));
       }
 
-      // PENTING: GAS Web App harus menerima POST dengan body JSON.
-      // Content-Type harus 'text/plain;charset=utf-8' — GAS tidak support
-      // application/json di CORS preflight, tapi tetap parse body-nya sebagai JSON.
-      // Struktur: { action: '...', data: { ... } }
       const body = JSON.stringify({ action: action, data: data || {} });
-
       return fetch(GAS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: body,
-        redirect: 'follow'   // GAS redirect ke URL eksekusi — ikuti redirect
+        redirect: 'follow'
       })
       .then(function(r) {
         return r.text();
@@ -2491,10 +2496,7 @@
       })
       .then(function(res) {
         if (res && res.success === false) {
-          // FIX-16: backend pakai field 'error', bukan 'message'
-          var errMsg = res.error || res.message || 'Terjadi kesalahan';
-          // Bersihkan prefix "Error: " dari GAS
-          errMsg = errMsg.replace(/^Error:\s*/i, '');
+          var errMsg = (res.error || res.message || 'Terjadi kesalahan').replace(/^Error:\s*/i,'');
           return Promise.reject(new Error(errMsg));
         }
         return (res && res.data !== undefined) ? res.data : res;
@@ -2540,7 +2542,7 @@
           const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage'];
           if (bottomNav) bottomNav.style.display = hideNav.includes(prev) ? 'none' : 'flex';
           document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-          const navMap = { homePage: 0, ordersPage: 1, profilePage: 4 };
+          const navMap = { homePage: 0, ordersPage: 1, masterDataPage: 3, profilePage: 4 };
           if (navMap[prev] !== undefined) document.querySelectorAll('.nav-item')[navMap[prev]].classList.add('active');
           window.scrollTo(0, 0);
           // Push state baru supaya bisa back lagi
@@ -2557,11 +2559,15 @@
       if (user) {
         currentUser = JSON.parse(user);
         showMainApp();
-        loadCategories();
-        loadAllProducts(); // load dulu tanpa koordinat
-        getLocation();     // GPS menyusul, akan reload dengan jarak
-        loadNotifications();
-        loadBanners();     // load iklan banner carousel
+        if (currentUser.role !== 'admin') {
+          loadCategories();
+          loadAllProducts();
+          getLocation();
+          loadNotifications();
+          loadBanners();
+        } else {
+          loadAdminMasterData();
+        }
       } else {
         showPage('authPage');
       }
@@ -2571,6 +2577,13 @@
       document.getElementById('authPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       updateProfileUI();
+      // Admin nav toggle
+      if (currentUser && currentUser.role === 'admin') {
+        var navJual   = document.getElementById('navJual');
+        var navMaster = document.getElementById('navMaster');
+        if (navJual)   navJual.style.display   = 'none';
+        if (navMaster) navMaster.style.display = 'flex';
+      }
     }
 
     // ==================== AUTHENTICATION ====================
@@ -2645,11 +2658,16 @@
           currentUser = result;
           localStorage.setItem('lokara_user', JSON.stringify(result));
           showMainApp();
-          getLocation();
-          loadCategories();
-          loadNearbyProducts();
-          loadNotifications();
-          showToast('Selamat datang kembali!', 'success');
+          if (result.role !== 'admin') {
+            getLocation();
+            loadCategories();
+            loadNearbyProducts();
+            loadNotifications();
+          } else {
+            // Admin: langsung ke profil
+            loadAdminMasterData();
+          }
+          showToast('Selamat datang, ' + result.nama + '!', 'success');
         })
         .catch(function(error) {
           showToast(error.message || 'Login gagal', 'error');
@@ -3055,44 +3073,34 @@
       }
 
       grid.innerHTML = filtered.map(function(product) {
-        const dist = parseFloat(product.distance);
-        const distHtml = !isNaN(dist)
-          ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${dist.toFixed(2)} km</div>`
-          : '';
-        const ratingHtml = product.rating
-          ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
-          : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
-        const diskonBadge = product.diskonPersen > 0
-          ? `<div style="position:absolute;top:8px;left:8px;background:#F44336;color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;z-index:2;">-${product.diskonPersen}%</div>`
-          : '';
-        const hargaHtml = product.diskonPersen > 0
-          ? `<div style="display:flex;flex-direction:column;">
-               <span style="color:var(--text-light);font-size:11px;text-decoration:line-through;">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</span>
-               <span class="product-price" style="color:var(--danger);">Rp ${parseInt(product.hargaDiskon).toLocaleString('id-ID')}</span>
-             </div>`
-          : `<div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>`;
-        return `
-          <div class="product-card" onclick="showProductDetail('${product.id}')">
-            <div class="product-image" style="position:relative;">
-              ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-              ${diskonBadge}
-              <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
-                <i class="far fa-heart"></i>
-              </button>
-            </div>
-            <div class="product-info">
-              ${distHtml}
-              <div class="product-name">${product.nama}</div>
-              ${hargaHtml}
-              <div class="product-meta">
-                <div class="product-seller" onclick="event.stopPropagation(); showStorePage('${product.sellerId}', '${(product.sellerNama||'').replace(/'/g,"\\'")}')">
-                  <div class="seller-avatar"><i class="fas fa-store"></i></div>
-                  <span>${product.sellerNama || 'UMKM'}</span>
-                </div>
-                ${ratingHtml}
-              </div>
-            </div>
-          </div>`;
+        var dist = parseFloat(product.distance);
+        var distHtml = !isNaN(dist)
+          ? '<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ' + dist.toFixed(2) + ' km</div>' : '';
+        var ratingHtml = product.rating
+          ? '<div class="rating"><i class="fas fa-star"></i> ' + product.rating + (product.ratingCount > 0 ? ' <span style="color:var(--text-light);font-size:10px;">(' + product.ratingCount + ')</span>' : '') + '</div>'
+          : '<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>';
+        var diskonBadge = (product.diskonPersen > 0)
+          ? '<div style="position:absolute;top:8px;left:8px;background:#F44336;color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;z-index:2;">-' + product.diskonPersen + '%</div>' : '';
+        var hargaHtml = (product.diskonPersen > 0 && product.hargaDiskon)
+          ? '<div style="line-height:1.3;"><span style="text-decoration:line-through;color:var(--text-light);font-size:11px;">Rp ' + parseInt(product.harga).toLocaleString('id-ID') + '</span><br><span class="product-price" style="color:var(--danger);">Rp ' + parseInt(product.hargaDiskon).toLocaleString('id-ID') + '</span></div>'
+          : '<div class="product-price">Rp ' + parseInt(product.harga).toLocaleString('id-ID') + '</div>';
+        var sellerSafe = (product.sellerNama || 'UMKM').replace(/'/g, "\'");
+        return '<div class="product-card" onclick="showProductDetail(\'' + product.id + '\')">' +
+          '<div class="product-image" style="position:relative;">' +
+            (product.foto ? '<img src="' + product.foto + '" alt="' + product.nama + '">' : '<i class="fas fa-box"></i>') +
+            diskonBadge +
+            '<button class="wishlist-btn" onclick="event.stopPropagation();toggleWishlist(\'' + product.id + '\')"><i class="far fa-heart"></i></button>' +
+          '</div>' +
+          '<div class="product-info">' + distHtml +
+            '<div class="product-name">' + product.nama + '</div>' +
+            hargaHtml +
+            '<div class="product-meta">' +
+              '<div class="product-seller" onclick="event.stopPropagation();showStorePage(\'' + product.sellerId + '\',\'' + sellerSafe + '\')">' +
+                '<div class="seller-avatar"><i class="fas fa-store"></i></div>' +
+                '<span>' + (product.sellerNama || 'UMKM') + '</span>' +
+              '</div>' + ratingHtml +
+            '</div>' +
+          '</div></div>';
       }).join('');
     }
 
@@ -3402,12 +3410,11 @@
         .then(function(product) {
           currentProduct = product;
           document.getElementById('detailName').textContent = product.nama;
-          // FIX-14: tampilkan harga diskon jika ada
           if (product.diskonPersen > 0 && product.hargaDiskon) {
             document.getElementById('detailPrice').innerHTML =
-              `<span style="text-decoration:line-through; color:var(--text-light); font-size:13px;">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</span>
-               <span style="color:var(--danger); font-weight:700; margin-left:8px;">Rp ${parseInt(product.hargaDiskon).toLocaleString('id-ID')}</span>
-               <span style="background:#FFEBEE; color:var(--danger); font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; margin-left:6px;">-${product.diskonPersen}%</span>`;
+              '<span style="text-decoration:line-through;color:var(--text-light);font-size:13px;">Rp ' + parseInt(product.harga).toLocaleString('id-ID') + '</span>' +
+              ' <span style="color:var(--danger);font-weight:700;">Rp ' + parseInt(product.hargaDiskon).toLocaleString('id-ID') + '</span>' +
+              ' <span style="background:#FFEBEE;color:var(--danger);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:4px;">-' + product.diskonPersen + '%</span>';
           } else {
             document.getElementById('detailPrice').textContent = 'Rp ' + parseInt(product.harga).toLocaleString('id-ID');
           }
@@ -3593,107 +3600,83 @@
         });
     }
 
+    var buyNowHargaEfektif = 0;
+    var buyNowQty = 1;
+
     function buyNow() {
-      if (!currentUser) {
-        showToast('Silakan login terlebih dahulu', 'error');
-        return;
-      }
+      if (!currentUser) { showToast('Silakan login terlebih dahulu', 'error'); return; }
       if (!currentProduct) return;
 
-      // FIX-13: pakai hargaDiskon jika ada, tidak ada biaya layanan tambahan
-      const hargaNormal = parseInt(currentProduct.harga);
-      const hargaEfektif = currentProduct.hargaDiskon ? parseInt(currentProduct.hargaDiskon) : hargaNormal;
-      const adaDiskon = hargaEfektif < hargaNormal;
-
-      const hargaHtml = adaDiskon
-        ? `<span style="text-decoration:line-through; color:var(--text-light); font-size:12px;">Rp ${hargaNormal.toLocaleString('id-ID')}</span>
-           <span style="color:var(--danger); font-weight:700; margin-left:8px;">Rp ${hargaEfektif.toLocaleString('id-ID')}</span>
-           <span style="background:#FFEBEE; color:var(--danger); font-size:10px; font-weight:700; padding:2px 7px; border-radius:8px; margin-left:6px;">-${currentProduct.diskonPersen}%</span>`
-        : `<span>Rp ${hargaEfektif.toLocaleString('id-ID')}</span>`;
-
-      // FIX-15: input quantity
-      const modalBody = `
-        <div style="margin-bottom:16px;">
-          <div style="font-size:15px; font-weight:600; margin-bottom:12px;">${currentProduct.nama}</div>
-
-          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
-            <span style="font-size:13px; color:var(--text-light);">Jumlah:</span>
-            <div style="display:flex; align-items:center; gap:10px;">
-              <button onclick="changeQty(-1)" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:white;font-size:18px;cursor:pointer;line-height:1;">−</button>
-              <span id="qtyDisplay" style="font-weight:700; font-size:16px; min-width:24px; text-align:center;">1</span>
-              <button onclick="changeQty(1)" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:white;font-size:18px;cursor:pointer;line-height:1;">+</button>
-            </div>
-            <span style="font-size:12px; color:var(--text-light);">Stok: ${currentProduct.stok}</span>
-          </div>
-
-          <div style="background:var(--bg); border-radius:12px; padding:12px; font-size:13px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="color:var(--text-light);">Harga satuan</span>
-              <span>${hargaHtml}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:10px; font-weight:700; font-size:15px;" id="totalRow">
-              <span>Total</span>
-              <span style="color:var(--primary);" id="totalPrice">Rp ${hargaEfektif.toLocaleString('id-ID')}</span>
-            </div>
-          </div>
-        </div>
-        <div style="margin-bottom:16px;">
-          <div class="form-label" style="margin-bottom:10px;">Pilih Metode Pembayaran</div>
-          <div id="paymentOptions" style="display:flex; flex-direction:column; gap:10px;">
-            <label style="display:flex; align-items:center; gap:12px; padding:14px; border:2px solid var(--border); border-radius:12px; cursor:pointer;" onclick="selectPayment(this,'COD')">
-              <input type="radio" name="payment" value="COD" style="display:none;">
-              <div style="width:40px; height:40px; background:#FFF3E0; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px;">💵</div>
-              <div>
-                <div style="font-weight:600; font-size:14px;">COD (Bayar di Tempat)</div>
-                <div style="font-size:12px; color:var(--text-light);">Bayar saat barang tiba</div>
-              </div>
-            </label>
-            <label style="display:flex; align-items:center; gap:12px; padding:14px; border:2px solid var(--border); border-radius:12px; cursor:pointer;" onclick="selectPayment(this,'DANA')">
-              <input type="radio" name="payment" value="DANA" style="display:none;">
-              <div style="width:40px; height:40px; background:#E3F2FD; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; color:#1565C0; font-size:13px;">DANA</div>
-              <div>
-                <div style="font-weight:600; font-size:14px;">DANA</div>
-                <div style="font-size:12px; color:var(--text-light);">Transfer ke dompet DANA</div>
-              </div>
-            </label>
-            <label style="display:flex; align-items:center; gap:12px; padding:14px; border:2px solid var(--border); border-radius:12px; cursor:pointer;" onclick="selectPayment(this,'OVO')">
-              <input type="radio" name="payment" value="OVO" style="display:none;">
-              <div style="width:40px; height:40px; background:#F3E5F5; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; color:#6A1B9A; font-size:13px;">OVO</div>
-              <div>
-                <div style="font-weight:600; font-size:14px;">OVO</div>
-                <div style="font-size:12px; color:var(--text-light);">Transfer ke dompet OVO</div>
-              </div>
-            </label>
-          </div>
-        </div>
-        <button class="btn btn-primary" id="confirmOrderBtn" onclick="confirmOrder()">Konfirmasi Pesanan</button>
-      `;
+      var hargaNormal  = parseInt(currentProduct.harga);
+      var hargaEfektif = currentProduct.hargaDiskon ? parseInt(currentProduct.hargaDiskon) : hargaNormal;
       buyNowHargaEfektif = hargaEfektif;
       buyNowQty = 1;
-      showModal('Beli Sekarang', modalBody);
-      updateOrderTotal();
-    }
 
-    let buyNowHargaEfektif = 0;
-    let buyNowQty = 1;
+      var hargaSatuanHtml = hargaEfektif < hargaNormal
+        ? '<span style="text-decoration:line-through;color:var(--text-light);font-size:12px;">Rp ' + hargaNormal.toLocaleString('id-ID') + '</span> ' +
+          '<span style="color:var(--danger);font-weight:700;">Rp ' + hargaEfektif.toLocaleString('id-ID') + '</span>' +
+          '<span style="background:#FFEBEE;color:var(--danger);font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;">-' + currentProduct.diskonPersen + '%</span>'
+        : 'Rp ' + hargaEfektif.toLocaleString('id-ID');
+
+      var modalBody =
+        '<div style="margin-bottom:16px;">' +
+          '<div style="font-size:15px;font-weight:600;margin-bottom:12px;">' + currentProduct.nama + '</div>' +
+          '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">' +
+            '<span style="font-size:13px;color:var(--text-light);">Jumlah:</span>' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+              '<button onclick="changeQty(-1)" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:white;font-size:18px;cursor:pointer;">−</button>' +
+              '<span id="qtyDisplay" style="font-weight:700;font-size:16px;min-width:24px;text-align:center;">1</span>' +
+              '<button onclick="changeQty(1)" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:white;font-size:18px;cursor:pointer;">+</button>' +
+            '</div>' +
+            '<span style="font-size:12px;color:var(--text-light);">Stok: ' + currentProduct.stok + '</span>' +
+          '</div>' +
+          '<div style="background:var(--bg);border-radius:12px;padding:12px;font-size:13px;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+              '<span style="color:var(--text-light);">Harga satuan</span>' +
+              '<span>' + hargaSatuanHtml + '</span>' +
+            '</div>' +
+            '<div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:10px;font-weight:700;font-size:15px;">' +
+              '<span>Total</span><span style="color:var(--primary);" id="totalPrice">Rp ' + hargaEfektif.toLocaleString('id-ID') + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="margin-bottom:16px;">' +
+          '<div class="form-label" style="margin-bottom:10px;">Pilih Metode Pembayaran</div>' +
+          '<div id="paymentOptions" style="display:flex;flex-direction:column;gap:10px;">' +
+            '<label style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:12px;cursor:pointer;" onclick="selectPayment(this,'COD')">' +
+              '<input type="radio" name="payment" value="COD" style="display:none;">' +
+              '<div style="width:40px;height:40px;background:#FFF3E0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">💵</div>' +
+              '<div><div style="font-weight:600;font-size:14px;">COD (Bayar di Tempat)</div><div style="font-size:12px;color:var(--text-light);">Bayar saat barang tiba</div></div>' +
+            '</label>' +
+            '<label style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:12px;cursor:pointer;" onclick="selectPayment(this,'DANA')">' +
+              '<input type="radio" name="payment" value="DANA" style="display:none;">' +
+              '<div style="width:40px;height:40px;background:#E3F2FD;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#1565C0;font-size:13px;">DANA</div>' +
+              '<div><div style="font-weight:600;font-size:14px;">DANA</div><div style="font-size:12px;color:var(--text-light);">Transfer ke dompet DANA</div></div>' +
+            '</label>' +
+            '<label style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:12px;cursor:pointer;" onclick="selectPayment(this,'OVO')">' +
+              '<input type="radio" name="payment" value="OVO" style="display:none;">' +
+              '<div style="width:40px;height:40px;background:#F3E5F5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#6A1B9A;font-size:13px;">OVO</div>' +
+              '<div><div style="font-weight:600;font-size:14px;">OVO</div><div style="font-size:12px;color:var(--text-light);">Transfer ke dompet OVO</div></div>' +
+            '</label>' +
+          '</div>' +
+        '</div>' +
+        '<button class="btn btn-primary" id="confirmOrderBtn" onclick="confirmOrder()">Konfirmasi — Rp ' + hargaEfektif.toLocaleString('id-ID') + '</button>';
+
+      showModal('Beli Sekarang', modalBody);
+    }
 
     function changeQty(delta) {
-      const maxStok = currentProduct ? parseInt(currentProduct.stok) : 1;
+      var maxStok = currentProduct ? parseInt(currentProduct.stok) : 1;
       buyNowQty = Math.max(1, Math.min(maxStok, buyNowQty + delta));
-      const qtyEl = document.getElementById('qtyDisplay');
+      var qtyEl = document.getElementById('qtyDisplay');
       if (qtyEl) qtyEl.textContent = buyNowQty;
-      updateOrderTotal();
-    }
-
-    function updateOrderTotal() {
-      const total = buyNowHargaEfektif * buyNowQty;
-      const totalEl = document.getElementById('totalPrice');
-      const btnEl = document.getElementById('confirmOrderBtn');
+      var total = buyNowHargaEfektif * buyNowQty;
+      var totalEl = document.getElementById('totalPrice');
       if (totalEl) totalEl.textContent = 'Rp ' + total.toLocaleString('id-ID');
-      if (btnEl) btnEl.textContent = 'Konfirmasi Pesanan — Rp ' + total.toLocaleString('id-ID');
+      var btnEl = document.getElementById('confirmOrderBtn');
+      if (btnEl) btnEl.textContent = 'Konfirmasi — Rp ' + total.toLocaleString('id-ID');
     }
 
-    let selectedPayment = 'COD';
 
     function selectPayment(el, method) {
       selectedPayment = method;
@@ -3708,9 +3691,7 @@
     function confirmOrder() {
       if (!currentProduct || !currentUser) return;
 
-      // FIX-15: pakai quantity yang dipilih user
-      const qty = buyNowQty || 1;
-      const items = [{ productId: currentProduct.id, quantity: qty }];
+      const items = [{ productId: currentProduct.id, quantity: buyNowQty || 1 }];
       const btn = document.querySelector('#modalBody .btn-primary');
       if (btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }
 
@@ -3747,16 +3728,9 @@
 
     // ==================== SELLER FUNCTIONS ====================
     function showAddProduct() {
-      if (!currentUser) {
-        showToast('Silakan login terlebih dahulu', 'error');
-        return;
-      }
-      if (currentUser.role !== 'seller') {
-        showToast('Hanya penjual yang dapat menambah produk', 'error');
-        return;
-      }
-      // FIX-12: selalu reset form + editingProductId saat tambah produk baru
-      resetProductForm();
+      if (!currentUser) { showToast('Silakan login terlebih dahulu', 'error'); return; }
+      if (currentUser.role !== 'seller') { showToast('Hanya penjual yang dapat menambah produk', 'error'); return; }
+      resetProductForm(); // FIX: reset editingProductId & form state
       showPage('addProductPage');
       updateProductLocationUI();
     }
@@ -3775,6 +3749,10 @@
       }
     }
 
+    // Track mode edit produk
+    var editingProductId = null;
+    var editingProductFotoOld = ''; // simpan foto lama
+
     function saveProduct() {
       const nama     = document.getElementById('productName').value.trim();
       const deskripsi= document.getElementById('productDesc').value.trim();
@@ -3782,26 +3760,29 @@
       const stok     = document.getElementById('productStock').value;
       const kategori = document.getElementById('productCategory').value;
       const diskon   = parseFloat(document.getElementById('productDiskon').value) || 0;
-      const foto     = document.getElementById('productImageUpload').dataset.image || '';
+      // Ambil foto baru jika ada, fallback ke foto lama saat edit
+      const uploadDiv = document.getElementById('productImageUpload');
+      const foto = (uploadDiv && uploadDiv.dataset.image) ? uploadDiv.dataset.image : editingProductFotoOld;
 
       if (!nama || !harga || !stok || !kategori) {
         showToast('Mohon lengkapi semua field', 'error');
         return;
       }
       if (diskon < 0 || diskon >= 100) {
-        showToast('Diskon harus antara 0–99%', 'error');
+        showToast('Diskon harus antara 0-99%', 'error');
         return;
       }
 
       const saveBtn = document.querySelector('#addProductPage .btn-primary');
       if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Menyimpan...'; }
 
-      // MODE EDIT
       if (editingProductId) {
+        // MODE EDIT
         callGAS('editProduct', {
           productId: editingProductId,
           sellerId: currentUser.id,
-          nama, deskripsi, harga: parseFloat(harga), stok: parseInt(stok),
+          nama, deskripsi,
+          harga: parseFloat(harga), stok: parseInt(stok),
           kategori, foto, diskonPersen: diskon
         })
         .then(function() {
@@ -3809,16 +3790,17 @@
           resetProductForm();
           showSellerProducts();
         })
-        .catch(function(error) {
-          if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Update Produk'; }
-          showToast(error.message || 'Gagal memperbarui produk', 'error');
+        .catch(function(err) {
+          if (saveBtn) { saveBtn.disabled=false; saveBtn.textContent='Update Produk'; }
+          showToast(err.message || 'Gagal memperbarui produk', 'error');
         });
 
-      // MODE TAMBAH
       } else {
+        // MODE TAMBAH
         callGAS('addProduct', {
           sellerId: currentUser.id,
-          nama, deskripsi, harga: parseFloat(harga), stok: parseInt(stok),
+          nama, deskripsi,
+          harga: parseFloat(harga), stok: parseInt(stok),
           kategori, foto, diskonPersen: diskon,
           latitude:  (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
           longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : '',
@@ -3830,11 +3812,34 @@
           showPage('homePage');
           loadNearbyProducts();
         })
-        .catch(function(error) {
-          if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Simpan Produk'; }
-          showToast(error.message || 'Gagal menambah produk', 'error');
+        .catch(function(err) {
+          if (saveBtn) { saveBtn.disabled=false; saveBtn.textContent='Simpan Produk'; }
+          showToast(err.message || 'Gagal menambah produk', 'error');
         });
       }
+    }
+
+    function resetProductForm() {
+      editingProductId = null;
+      editingProductFotoOld = '';
+      document.getElementById('productName').value  = '';
+      document.getElementById('productDesc').value  = '';
+      document.getElementById('productPrice').value = '';
+      document.getElementById('productStock').value = '';
+      document.getElementById('productDiskon').value = 0;
+      var catSel = document.getElementById('productCategory');
+      if (catSel) catSel.value = '';
+      var uploadDiv = document.getElementById('productImageUpload');
+      if (uploadDiv) {
+        uploadDiv.innerHTML = '<i class="fas fa-camera"></i><span>Tambah Foto Produk</span>' +
+          '<input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">';
+        uploadDiv.classList.remove('has-image');
+        delete uploadDiv.dataset.image;
+      }
+      var headerTitle = document.querySelector('#addProductPage .logo-text');
+      if (headerTitle) headerTitle.textContent = 'Tambah Produk';
+      var saveBtn = document.querySelector('#addProductPage .btn-primary');
+      if (saveBtn) { saveBtn.textContent = 'Simpan Produk'; saveBtn.disabled = false; }
     }
 
     function showSellerProducts() {
@@ -3853,25 +3858,25 @@
             return;
           }
 
-          grid.innerHTML = products.map(product => {
-            const diskonBadge = product.diskonPersen > 0
-              ? `<span style="background:#F44336;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">-${product.diskonPersen}%</span>`
-              : '';
-            return `
-            <div class="product-card">
-              <div class="product-image" style="position:relative;">
-                ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
-                ${product.diskonPersen > 0 ? `<div style="position:absolute;top:8px;left:8px;background:#F44336;color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;">-${product.diskonPersen}%</div>` : ''}
-              </div>
-              <div class="product-info">
-                <div class="product-name">${product.nama}${diskonBadge}</div>
-                <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
-                <div style="display:flex; gap:8px; margin-top:8px;">
-                  <button class="btn" style="flex:1; padding:8px; font-size:12px; background: var(--info); color: white;" onclick="editProduct('${product.id}')">Edit</button>
-                  <button class="btn" style="flex:1; padding:8px; font-size:12px; background: var(--danger); color: white;" onclick="deleteProduct('${product.id}')">Hapus</button>
-                </div>
-              </div>
-            </div>`;
+          grid.innerHTML = products.map(function(product) {
+            var badge = product.diskonPersen > 0
+              ? '<div style="position:absolute;top:8px;left:8px;background:#F44336;color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;">-' + product.diskonPersen + '%</div>' : '';
+            var hargaHtml = product.diskonPersen > 0 && product.hargaDiskon
+              ? '<span style="text-decoration:line-through;color:var(--text-light);font-size:11px;">Rp ' + parseInt(product.harga).toLocaleString('id-ID') + '</span> <span style="color:var(--danger);font-weight:700;">Rp ' + parseInt(product.hargaDiskon).toLocaleString('id-ID') + '</span>'
+              : 'Rp ' + parseInt(product.harga).toLocaleString('id-ID');
+            return '<div class="product-card">' +
+              '<div class="product-image" style="position:relative;">' +
+                (product.foto ? '<img src="' + product.foto + '" alt="' + product.nama + '">' : '<i class="fas fa-box"></i>') +
+                badge +
+              '</div>' +
+              '<div class="product-info">' +
+                '<div class="product-name">' + product.nama + '</div>' +
+                '<div class="product-price">' + hargaHtml + '</div>' +
+                '<div style="display:flex;gap:8px;margin-top:8px;">' +
+                  '<button class="btn" style="flex:1;padding:8px;font-size:12px;background:var(--info);color:white;" onclick="editProduct('' + product.id + '')">Edit</button>' +
+                  '<button class="btn" style="flex:1;padding:8px;font-size:12px;background:var(--danger);color:white;" onclick="deleteProduct('' + product.id + '')">Hapus</button>' +
+                '</div>' +
+              '</div></div>';
           }).join('');
         })
         .catch(function(error) {
@@ -4133,7 +4138,8 @@
       if (!currentUser) return;
 
       document.getElementById('profileName').textContent = currentUser.nama;
-      document.getElementById('profileRole').textContent = currentUser.role === 'seller' ? 'Penjual UMKM' : 'Pembeli';
+      var roleLabel = currentUser.role === 'seller' ? 'Penjual UMKM' : currentUser.role === 'admin' ? '⚙️ Admin LOKARA' : 'Pembeli';
+      document.getElementById('profileRole').textContent = roleLabel;
 
       // Foto profil
       const icon = document.getElementById('profileAvatarIcon');
@@ -4145,6 +4151,9 @@
         if (icon) icon.style.display = 'block';
         if (img) img.style.display = 'none';
       }
+
+      var adminMenu = document.getElementById('adminMasterMenu');
+      if (adminMenu) adminMenu.style.display = currentUser.role === 'admin' ? 'flex' : 'none';
 
       if (currentUser.role === 'seller') {
         document.getElementById('sellerProductsMenu').style.display = 'flex';
@@ -4238,39 +4247,32 @@
 
 
 
-    // ==================== EDIT PRODUCT ====================
-    let editingProductId = null;
-
     function editProduct(productId) {
-      // Load detail produk, lalu tampilkan form edit
       callGAS('getProductDetail', { productId: productId })
         .then(function(product) {
           editingProductId = productId;
+          editingProductFotoOld = product.foto || '';
 
-          // Isi form addProduct dengan data existing
-          document.getElementById('productName').value  = product.nama || '';
-          document.getElementById('productDesc').value  = product.deskripsi || '';
-          document.getElementById('productPrice').value = product.harga || '';
-          document.getElementById('productStock').value = product.stok || '';
+          document.getElementById('productName').value   = product.nama || '';
+          document.getElementById('productDesc').value   = product.deskripsi || '';
+          document.getElementById('productPrice').value  = product.harga || '';
+          document.getElementById('productStock').value  = product.stok || '';
           document.getElementById('productDiskon').value = product.diskonPersen || 0;
 
-          // Set kategori
-          const catSel = document.getElementById('productCategory');
+          var catSel = document.getElementById('productCategory');
           if (catSel) catSel.value = product.kategori || '';
 
-          // Set foto preview jika ada
-          const uploadDiv = document.getElementById('productImageUpload');
+          var uploadDiv = document.getElementById('productImageUpload');
           if (product.foto && uploadDiv) {
-            uploadDiv.innerHTML = `<img src="${product.foto}" style="width:100%; height:100%; object-fit:cover; border-radius:16px;">`;
+            uploadDiv.innerHTML = '<img src="' + product.foto + '" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">';
             uploadDiv.classList.add('has-image');
             uploadDiv.dataset.image = product.foto;
           }
 
-          // Ubah judul halaman & tombol
-          const headerTitle = document.querySelector('#addProductPage .logo-text');
+          var headerTitle = document.querySelector('#addProductPage .logo-text');
           if (headerTitle) headerTitle.textContent = 'Edit Produk';
-          const saveBtn = document.querySelector('#addProductPage .btn-primary');
-          if (saveBtn) saveBtn.textContent = 'Update Produk';
+          var saveBtn = document.querySelector('#addProductPage .btn-primary');
+          if (saveBtn) { saveBtn.textContent = 'Update Produk'; saveBtn.disabled = false; }
 
           showPage('addProductPage');
           updateProductLocationUI();
@@ -4279,201 +4281,6 @@
           showToast(err.message || 'Gagal memuat produk', 'error');
         });
     }
-
-    function resetProductForm() {
-      editingProductId = null;
-      document.getElementById('productName').value  = '';
-      document.getElementById('productDesc').value  = '';
-      document.getElementById('productPrice').value = '';
-      document.getElementById('productStock').value = '';
-      document.getElementById('productDiskon').value = 0;
-      const catSel = document.getElementById('productCategory');
-      if (catSel) catSel.value = '';
-      const uploadDiv = document.getElementById('productImageUpload');
-      if (uploadDiv) {
-        uploadDiv.innerHTML = `<i class="fas fa-camera"></i><span>Tambah Foto Produk</span><input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">`;
-        uploadDiv.classList.remove('has-image');
-        delete uploadDiv.dataset.image;
-      }
-      const headerTitle = document.querySelector('#addProductPage .logo-text');
-      if (headerTitle) headerTitle.textContent = 'Tambah Produk';
-      const saveBtn = document.querySelector('#addProductPage .btn-primary');
-      if (saveBtn) saveBtn.textContent = 'Simpan Produk';
-    }
-    let currentAdmin = null;
-
-    function showAdminLogin() {
-      document.getElementById('loginForm').style.display = 'none';
-      document.getElementById('registerForm').style.display = 'none';
-      document.getElementById('adminLoginForm').style.display = 'block';
-    }
-
-    function loginAdmin() {
-      const email = document.getElementById('adminEmail').value.trim();
-      const password = document.getElementById('adminPassword').value;
-      if (!email || !password) { showToast('Isi email dan password admin', 'error'); return; }
-
-      const btn = document.querySelector('#adminLoginForm .btn-primary');
-      if (btn) { btn.disabled = true; btn.textContent = 'Memverifikasi...'; }
-
-      callGAS('adminLogin', { email, password })
-        .then(function(result) {
-          if (btn) { btn.disabled = false; btn.textContent = 'Masuk sebagai Admin'; }
-          currentAdmin = result;
-          sessionStorage.setItem('lokara_admin', JSON.stringify(result));
-          showAdminPanel();
-        })
-        .catch(function(err) {
-          if (btn) { btn.disabled = false; btn.textContent = 'Masuk sebagai Admin'; }
-          showToast(err.message || 'Login admin gagal', 'error');
-        });
-    }
-
-    function logoutAdmin() {
-      currentAdmin = null;
-      sessionStorage.removeItem('lokara_admin');
-      document.getElementById('adminPanel').style.display = 'none';
-      document.getElementById('authPage').style.display = 'flex';
-      document.getElementById('adminLoginForm').style.display = 'none';
-      document.getElementById('loginForm').style.display = 'block';
-    }
-
-    function showAdminPanel() {
-      document.getElementById('authPage').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'none';
-      document.getElementById('adminPanel').style.display = 'block';
-      document.getElementById('adminGreeting').textContent = 'Selamat datang, ' + (currentAdmin.nama || 'Admin');
-      loadAdminSettings();
-      loadAdminUsers();
-      loadAdminBanners();
-    }
-
-    function showAdminTab(tabId) {
-      ['tabKomisi', 'tabUsers', 'tabBanners'].forEach(function(t) {
-        document.getElementById(t).style.display = t === tabId ? 'block' : 'none';
-      });
-      const tabBtnMap = { tabKomisi: 'btnTabKomisi', tabUsers: 'btnTabUsers', tabBanners: 'btnTabBanners' };
-      Object.keys(tabBtnMap).forEach(function(t) {
-        const btn = document.getElementById(tabBtnMap[t]);
-        if (btn) {
-          btn.style.color = t === tabId ? 'var(--primary)' : '#757575';
-          btn.style.borderBottom = t === tabId ? '3px solid var(--primary)' : '3px solid transparent';
-        }
-      });
-    }
-
-    function loadAdminSettings() {
-      if (!currentAdmin) return;
-      callGAS('adminGetSettings', { adminRole: 'admin' })
-        .then(function(s) {
-          document.getElementById('adminKomisiPersen').value = s.komisiPersen;
-          document.getElementById('adminTrialBulan').value = s.trialBulan;
-          document.getElementById('adminBannerBiaya').value = s.bannerPerMinggu;
-        })
-        .catch(function(err) { showToast('Gagal muat settings', 'error'); });
-    }
-
-    function saveAdminSettings() {
-      if (!currentAdmin) return;
-      const komisiPersen = parseFloat(document.getElementById('adminKomisiPersen').value);
-      const trialBulan = parseInt(document.getElementById('adminTrialBulan').value);
-      const bannerPerMinggu = parseInt(document.getElementById('adminBannerBiaya').value);
-      if (isNaN(komisiPersen) || isNaN(trialBulan) || isNaN(bannerPerMinggu)) {
-        showToast('Isi semua pengaturan dengan benar', 'error'); return;
-      }
-      callGAS('adminUpdateSettings', { adminRole: 'admin', komisiPersen, trialBulan, bannerPerMinggu })
-        .then(function() { showToast('Pengaturan tersimpan!', 'success'); })
-        .catch(function(err) { showToast(err.message || 'Gagal simpan', 'error'); });
-    }
-
-    function loadAdminUsers() {
-      if (!currentAdmin) return;
-      const el = document.getElementById('adminUsersList');
-      el.innerHTML = '<div style="text-align:center;padding:30px;color:#757575;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>';
-      callGAS('adminGetUsers', { adminRole: 'admin' })
-        .then(function(users) {
-          if (!users.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:#757575;">Belum ada user</div>'; return; }
-          el.innerHTML = users.map(function(u) {
-            const statusColor = u.status === 'active' ? '#4CAF50' : '#F44336';
-            const statusLabel = u.status === 'active' ? 'Aktif' : 'Nonaktif';
-            const toggleLabel = u.status === 'active' ? 'Nonaktifkan' : 'Aktifkan';
-            const toggleStatus = u.status === 'active' ? 'inactive' : 'active';
-            return `<div style="border:1px solid #E0E0E0; border-radius:12px; padding:14px; margin-bottom:10px;">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div>
-                  <div style="font-weight:600; font-size:14px;">${u.nama}</div>
-                  <div style="font-size:12px; color:#757575;">${u.email} · ${u.role}</div>
-                  <div style="font-size:11px; color:#757575; margin-top:2px;">Trial: ${u.masaTrial}</div>
-                </div>
-                <div style="text-align:right;">
-                  <span style="background:${statusColor}22; color:${statusColor}; font-size:11px; font-weight:700; padding:3px 10px; border-radius:10px;">${statusLabel}</span>
-                  <br><button onclick="adminToggleUser('${u.id}','${toggleStatus}')" style="margin-top:6px; background:#F5F5F5; border:1px solid #E0E0E0; border-radius:8px; padding:5px 12px; font-size:11px; cursor:pointer;">${toggleLabel}</button>
-                </div>
-              </div>
-            </div>`;
-          }).join('');
-        })
-        .catch(function(err) { el.innerHTML = '<div style="color:red;padding:20px;">Gagal memuat: ' + err.message + '</div>'; });
-    }
-
-    function adminToggleUser(userId, newStatus) {
-      if (!currentAdmin) return;
-      callGAS('adminSetUserStatus', { adminRole: 'admin', userId: userId, status: newStatus })
-        .then(function() { showToast('Status user diperbarui', 'success'); loadAdminUsers(); })
-        .catch(function(err) { showToast(err.message || 'Gagal update', 'error'); });
-    }
-
-    function loadAdminBanners() {
-      if (!currentAdmin) return;
-      const el = document.getElementById('adminBannersList');
-      el.innerHTML = '<div style="text-align:center;padding:30px;color:#757575;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>';
-      callGAS('adminGetBanners', { adminRole: 'admin' })
-        .then(function(banners) {
-          if (!banners.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:#757575;">Belum ada iklan</div>'; return; }
-          el.innerHTML = banners.map(function(b) {
-            const statusColor = b.status === 'active' ? '#4CAF50' : '#F44336';
-            const toggleLabel = b.status === 'active' ? 'Nonaktifkan' : 'Aktifkan';
-            const toggleStatus = b.status === 'active' ? 'inactive' : 'active';
-            return `<div style="border:1px solid #E0E0E0; border-radius:12px; padding:14px; margin-bottom:10px;">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-                <div style="flex:1; min-width:0;">
-                  <div style="font-weight:600; font-size:14px;">${b.title}</div>
-                  <div style="font-size:12px; color:#757575;">${b.startDate} s/d ${b.endDate}</div>
-                  <div style="font-size:12px; color:var(--primary);">Rp ${parseInt(b.amount||0).toLocaleString('id-ID')}</div>
-                </div>
-                <div style="text-align:right; flex-shrink:0;">
-                  <span style="background:${statusColor}22; color:${statusColor}; font-size:11px; font-weight:700; padding:3px 10px; border-radius:10px;">${b.status}</span>
-                  <br><button onclick="adminToggleBanner('${b.id}','${toggleStatus}')" style="margin-top:6px; background:#F5F5F5; border:1px solid #E0E0E0; border-radius:8px; padding:5px 12px; font-size:11px; cursor:pointer;">${toggleLabel}</button>
-                </div>
-              </div>
-            </div>`;
-          }).join('');
-        })
-        .catch(function(err) { el.innerHTML = '<div style="color:red;padding:20px;">Gagal memuat: ' + err.message + '</div>'; });
-    }
-
-    function adminToggleBanner(bannerId, newStatus) {
-      if (!currentAdmin) return;
-      callGAS('adminSetBannerStatus', { adminRole: 'admin', bannerId: bannerId, status: newStatus })
-        .then(function() { showToast('Status iklan diperbarui', 'success'); loadAdminBanners(); })
-        .catch(function(err) { showToast(err.message || 'Gagal update', 'error'); });
-    }
-
-    // Cek sesi admin saat halaman dibuka
-    (function checkAdminSession() {
-      const admin = sessionStorage.getItem('lokara_admin');
-      if (admin) {
-        try {
-          currentAdmin = JSON.parse(admin);
-          // Akan di-check setelah checkAuth, jadi di-delay
-          setTimeout(function() {
-            if (currentAdmin && document.getElementById('adminPanel').style.display !== 'block') {
-              showAdminPanel();
-            }
-          }, 100);
-        } catch(e) {}
-      }
-    })();
 
     // Toggle info lokasi saat pilih role seller di registrasi
     function toggleSellerLocationInfo(role) {
@@ -4710,6 +4517,153 @@
         });
       });
     }
+  
+
+    // ==================== MASTER DATA (Admin) ====================
+    var mdUsersCache = [];
+
+    function loadAdminMasterData() {
+      // Called on admin login - preload settings
+      if (currentUser && currentUser.role === 'admin') {
+        callGAS('adminGetSettings', {})
+          .then(function(s) {
+            var kEl = document.getElementById('mdKomisiPersen');
+            var tEl = document.getElementById('mdTrialBulan');
+            var bEl = document.getElementById('mdBannerBiaya');
+            if (kEl) kEl.value = s.komisiPersen;
+            if (tEl) tEl.value = s.trialBulan;
+            if (bEl) bEl.value = s.bannerPerMinggu;
+          }).catch(function(){});
+      }
+    }
+
+    function showMdTab(tabId) {
+      ['mdKomisi','mdUsers','mdIklan'].forEach(function(t) {
+        var el = document.getElementById(t);
+        if (el) el.style.display = (t === tabId) ? 'block' : 'none';
+      });
+      var tabMap = { mdKomisi:'mdTab1', mdUsers:'mdTab2', mdIklan:'mdTab3' };
+      ['mdTab1','mdTab2','mdTab3'].forEach(function(btn) {
+        var el = document.getElementById(btn);
+        if (!el) return;
+        var active = tabMap[tabId] === btn;
+        el.style.background = active ? 'white' : 'transparent';
+        el.style.color = active ? 'var(--primary)' : 'rgba(255,255,255,0.9)';
+      });
+      // Load data on switch
+      if (tabId === 'mdUsers') loadMdUsers();
+      if (tabId === 'mdIklan') loadMdBanners();
+      if (tabId === 'mdKomisi') loadAdminMasterData();
+    }
+
+    function saveMdSettings() {
+      var komisi  = parseFloat(document.getElementById('mdKomisiPersen').value);
+      var trial   = parseInt(document.getElementById('mdTrialBulan').value);
+      var banner  = parseInt(document.getElementById('mdBannerBiaya').value);
+      if (isNaN(komisi) || isNaN(trial) || isNaN(banner)) {
+        showToast('Isi semua field pengaturan', 'error'); return;
+      }
+      callGAS('adminUpdateSettings', { komisiPersen: komisi, trialBulan: trial, bannerPerMinggu: banner })
+        .then(function() { showToast('Pengaturan berhasil disimpan!', 'success'); })
+        .catch(function(err) { showToast(err.message || 'Gagal simpan', 'error'); });
+    }
+
+    function loadMdUsers() {
+      var el = document.getElementById('mdUsersList');
+      if (!el) return;
+      el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-light);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>';
+      callGAS('adminGetUsers', {})
+        .then(function(users) {
+          mdUsersCache = users;
+          renderMdUsers(users);
+        })
+        .catch(function(err) {
+          el.innerHTML = '<div style="color:var(--danger);padding:16px;">Gagal memuat: ' + err.message + '</div>';
+        });
+    }
+
+    function filterMdUsers(q) {
+      if (!q) { renderMdUsers(mdUsersCache); return; }
+      var filtered = mdUsersCache.filter(function(u) {
+        return (u.nama || '').toLowerCase().includes(q.toLowerCase()) ||
+               (u.email || '').toLowerCase().includes(q.toLowerCase());
+      });
+      renderMdUsers(filtered);
+    }
+
+    function renderMdUsers(users) {
+      var el = document.getElementById('mdUsersList');
+      if (!el) return;
+      if (!users.length) { el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-light);">Tidak ada user</div>'; return; }
+      el.innerHTML = users.map(function(u) {
+        var statusColor = u.status === 'active' ? '#4CAF50' : '#F44336';
+        var statusLabel = u.status === 'active' ? 'Aktif' : 'Nonaktif';
+        var toggleLabel = u.status === 'active' ? 'Nonaktifkan' : 'Aktifkan';
+        var newStatus   = u.status === 'active' ? 'inactive' : 'active';
+        var roleBadge = u.role === 'seller'
+          ? '<span style="background:#E8F5E9;color:var(--primary);font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;margin-left:6px;">Seller</span>'
+          : '<span style="background:#E3F2FD;color:#1565C0;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;margin-left:6px;">Buyer</span>';
+        return '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
+            '<div style="flex:1;min-width:0;">' +
+              '<div style="font-weight:600;font-size:14px;">' + u.nama + roleBadge + '</div>' +
+              '<div style="font-size:12px;color:var(--text-light);margin-top:2px;">' + u.email + '</div>' +
+              '<div style="font-size:11px;color:var(--text-light);margin-top:2px;">Trial: ' + u.masaTrial + '</div>' +
+            '</div>' +
+            '<div style="text-align:right;flex-shrink:0;margin-left:8px;">' +
+              '<span style="background:' + statusColor + '22;color:' + statusColor + ';font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;">' + statusLabel + '</span>' +
+              '<br><button onclick="mdToggleUser('' + u.id + '','' + newStatus + '')" ' +
+                'style="margin-top:6px;background:#F5F5F5;border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;">' +
+                toggleLabel + '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function mdToggleUser(userId, newStatus) {
+      callGAS('adminSetUserStatus', { userId: userId, status: newStatus })
+        .then(function() { showToast('Status user diperbarui', 'success'); loadMdUsers(); })
+        .catch(function(err) { showToast(err.message || 'Gagal update', 'error'); });
+    }
+
+    function loadMdBanners() {
+      var el = document.getElementById('mdBannersList');
+      if (!el) return;
+      el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-light);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>';
+      callGAS('adminGetBanners', {})
+        .then(function(banners) {
+          if (!banners.length) { el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-light);">Belum ada iklan</div>'; return; }
+          el.innerHTML = banners.map(function(b) {
+            var statusColor = b.status === 'active' ? '#4CAF50' : '#F44336';
+            var toggleLabel = b.status === 'active' ? 'Nonaktifkan' : 'Aktifkan';
+            var newStatus   = b.status === 'active' ? 'inactive' : 'active';
+            return '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">' +
+              '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
+                '<div style="flex:1;min-width:0;">' +
+                  '<div style="font-weight:600;font-size:14px;">' + b.title + '</div>' +
+                  '<div style="font-size:12px;color:var(--text-light);">' + (b.startDate||'') + ' s/d ' + (b.endDate||'') + '</div>' +
+                  '<div style="font-size:12px;color:var(--primary);font-weight:600;">Rp ' + parseInt(b.amount||0).toLocaleString('id-ID') + '</div>' +
+                '</div>' +
+                '<div style="text-align:right;flex-shrink:0;margin-left:8px;">' +
+                  '<span style="background:' + statusColor + '22;color:' + statusColor + ';font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;">' + b.status + '</span>' +
+                  '<br><button onclick="mdToggleBanner('' + b.id + '','' + newStatus + '')" ' +
+                    'style="margin-top:6px;background:#F5F5F5;border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;">' +
+                    toggleLabel + '</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          }).join('');
+        })
+        .catch(function(err) { el.innerHTML = '<div style="color:var(--danger);padding:16px;">Gagal: ' + err.message + '</div>'; });
+    }
+
+    function mdToggleBanner(bannerId, newStatus) {
+      callGAS('adminSetBannerStatus', { bannerId: bannerId, status: newStatus })
+        .then(function() { showToast('Status iklan diperbarui', 'success'); loadMdBanners(); })
+        .catch(function(err) { showToast(err.message || 'Gagal update', 'error'); });
+    }
+
   </script>
 
 </body>
