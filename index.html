@@ -2504,6 +2504,7 @@
     let currentProduct = null;
     let currentChatUser = null;
     let cart = [];
+    let currentEditProductId = null;
 
     // ==================== INITIALIZATION ====================
     document.addEventListener('DOMContentLoaded', function() {
@@ -3689,29 +3690,39 @@
 
     // ==================== SELLER FUNCTIONS ====================
     function showAddProduct() {
-      if (!currentUser) {
-        showToast('Silakan login terlebih dahulu', 'error');
-        return;
-      }
-
-      if (currentUser.role !== 'seller') {
-        showToast('Hanya penjual yang dapat menambah produk', 'error');
-        return;
-      }
-
-      showPage('addProductPage');
-      // Reset form
-      document.getElementById('productName').value = '';
-      document.getElementById('productDesc').value = '';
-      document.getElementById('productPrice').value = '';
-      document.getElementById('productStock').value = '';
-      document.getElementById('productCategory').value = '';
-      const uploadDiv = document.getElementById('productImageUpload');
-      uploadDiv.innerHTML = `<i class="fas fa-camera"></i><span>Tambah Foto Produk</span><input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">`;
-      delete uploadDiv.dataset.image;
-      // Update lokasi
-      updateProductLocationUI();
-    }
+  if (!currentUser) {
+    showToast('Silakan login terlebih dahulu', 'error');
+    return;
+  }
+ 
+  if (currentUser.role !== 'seller') {
+    showToast('Hanya penjual yang dapat menambah produk', 'error');
+    return;
+  }
+ 
+  // Reset ke mode TAMBAH
+  currentEditProductId = null;
+  document.getElementById('addProductPageTitle').textContent = 'Tambah Produk';
+  document.getElementById('saveProductBtn').textContent = 'Tambah Produk';
+ 
+  showPage('addProductPage');
+ 
+  // Reset form
+  document.getElementById('productName').value = '';
+  document.getElementById('productDesc').value = '';
+  document.getElementById('productPrice').value = '';
+  document.getElementById('productStock').value = '';
+  document.getElementById('productCategory').value = '';
+  document.getElementById('productDiskon').value = '';
+ 
+  const uploadDiv = document.getElementById('productImageUpload');
+  uploadDiv.innerHTML = `<i class="fas fa-camera"></i><span>Tambah Foto Produk</span><input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">`;
+  uploadDiv.classList.remove('has-image');
+  delete uploadDiv.dataset.image;
+ 
+  // Update lokasi
+  updateProductLocationUI();
+}
 
     function previewProductImage(event) {
       const file = event.target.files[0];
@@ -3728,35 +3739,72 @@
     }
 
     function saveProduct() {
-      const nama = document.getElementById('productName').value;
-      const deskripsi = document.getElementById('productDesc').value;
-      const harga = document.getElementById('productPrice').value;
-      const stok = document.getElementById('productStock').value;
-      const kategori = document.getElementById('productCategory').value;
-      const foto = document.getElementById('productImageUpload').dataset.image || '';
-
-      if (!nama || !harga || !stok || !kategori) {
-        showToast('Mohon lengkapi semua field', 'error');
-        return;
-      }
-
-      callGAS('addProduct', {
-          sellerId: currentUser.id,
-          nama: nama, deskripsi: deskripsi, harga: harga, stok: stok, kategori: kategori, foto: foto,
-          diskonPersen: parseFloat(document.getElementById('productDiskon').value) || 0,
-          latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
-          longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : '',
-          alamat: currentUser.alamat || ''
-        })
-        .then(function(result) {
-          showToast('Produk berhasil ditambahkan!', 'success');
-          showPage('homePage');
-          loadNearbyProducts();
-        })
-        .catch(function(error) {
-          showToast(error.message || 'Gagal menambah produk', 'error');
-        });
-    }
+  const nama = document.getElementById('productName').value.trim();
+  const deskripsi = document.getElementById('productDesc').value.trim();
+  const harga = document.getElementById('productPrice').value;
+  const stok = document.getElementById('productStock').value;
+  const kategori = document.getElementById('productCategory').value;
+  const foto = document.getElementById('productImageUpload').dataset.image || '';
+  const diskonPersen = parseFloat(document.getElementById('productDiskon').value) || 0;
+ 
+  if (!nama || !harga || !stok || !kategori) {
+    showToast('Mohon lengkapi semua field yang wajib', 'error');
+    return;
+  }
+ 
+  const locationData = {
+    latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
+    longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : '',
+    alamat: currentUser.alamat || ''
+  };
+ 
+  if (currentEditProductId) {
+    // ===== MODE EDIT =====
+    callGAS('editProduct', {
+      productId: currentEditProductId,
+      sellerId: currentUser.id,
+      nama: nama,
+      deskripsi: deskripsi,
+      harga: harga,
+      stok: stok,
+      kategori: kategori,
+      foto: foto,
+      diskonPersen: diskonPersen
+    })
+    .then(function(result) {
+      showToast('Produk berhasil diperbarui!', 'success');
+      currentEditProductId = null;
+      showSellerProducts();
+    })
+    .catch(function(error) {
+      showToast(error.message || 'Gagal memperbarui produk', 'error');
+    });
+ 
+  } else {
+    // ===== MODE TAMBAH =====
+    callGAS('addProduct', {
+      sellerId: currentUser.id,
+      nama: nama,
+      deskripsi: deskripsi,
+      harga: harga,
+      stok: stok,
+      kategori: kategori,
+      foto: foto,
+      diskonPersen: diskonPersen,
+      latitude: locationData.latitude,
+      longitude: locationData.longitude,
+      alamat: locationData.alamat
+    })
+    .then(function(result) {
+      showToast('Produk berhasil ditambahkan!', 'success');
+      showPage('homePage');
+      loadNearbyProducts();
+    })
+    .catch(function(error) {
+      showToast(error.message || 'Gagal menambah produk', 'error');
+    });
+  }
+}
 
     function showSellerProducts() {
       showPage('sellerProductsPage');
@@ -4160,8 +4208,56 @@
 
 
     function editProduct(productId) {
-      showToast('Fitur edit produk segera hadir', 'error');
-    }
+  if (!currentUser || currentUser.role !== 'seller') {
+    showToast('Tidak dapat mengedit produk', 'error');
+    return;
+  }
+ 
+  showToast('Memuat data produk...', 'info');
+ 
+  callGAS('getProductDetail', { productId: productId })
+    .then(function(product) {
+      // Verifikasi produk milik seller yang login
+      if (product.sellerId !== currentUser.id) {
+        showToast('Anda bukan pemilik produk ini', 'error');
+        return;
+      }
+ 
+      // Set mode EDIT
+      currentEditProductId = productId;
+      document.getElementById('addProductPageTitle').textContent = 'Edit Produk';
+      document.getElementById('saveProductBtn').textContent = 'Simpan Perubahan';
+ 
+      // Isi form dengan data produk
+      document.getElementById('productName').value = product.nama || '';
+      document.getElementById('productDesc').value = product.deskripsi || '';
+      document.getElementById('productPrice').value = product.harga || '';
+      document.getElementById('productStock').value = product.stok || '';
+      document.getElementById('productDiskon').value = product.diskonPersen || 0;
+ 
+      // Isi kategori
+      const categorySelect = document.getElementById('productCategory');
+      categorySelect.value = product.kategori || '';
+ 
+      // Isi foto jika ada
+      const uploadDiv = document.getElementById('productImageUpload');
+      if (product.foto) {
+        uploadDiv.innerHTML = `<img src="${product.foto}" style="width:100%; height:100%; object-fit:cover; border-radius:16px;">`;
+        uploadDiv.classList.add('has-image');
+        uploadDiv.dataset.image = product.foto;
+      } else {
+        uploadDiv.innerHTML = `<i class="fas fa-camera"></i><span>Tambah Foto Produk</span><input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">`;
+        uploadDiv.classList.remove('has-image');
+        delete uploadDiv.dataset.image;
+      }
+ 
+      showPage('addProductPage');
+      updateProductLocationUI();
+    })
+    .catch(function(error) {
+      showToast(error.message || 'Gagal memuat produk', 'error');
+    });
+}
 
     // ==================== ADMIN ====================
     let currentAdmin = null;
