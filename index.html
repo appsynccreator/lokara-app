@@ -2549,20 +2549,21 @@
         + '&data='   + encodeURIComponent(dataStr)
         + '&t='      + Date.now(); // cache buster
 
+      console.log('[GAS] action:', action, '| url:', url.substring(0, 120) + '...');
       return fetch(url, { method: 'GET', redirect: 'follow' })
       .then(function(r) {
-        if (!r.ok && r.status !== 0) {
-          throw new Error('HTTP error: ' + r.status);
-        }
+        console.log('[GAS] HTTP status:', r.status, r.statusText);
+        if (!r.ok && r.status !== 0) throw new Error('HTTP error: ' + r.status);
         return r.text();
       })
       .then(function(text) {
+        console.log('[GAS] response preview:', text ? text.substring(0, 200) : '(kosong)');
         if (!text || text.trim() === '') throw new Error('Response kosong dari server');
         var t = text.trim();
-        if (t.startsWith('<')) throw new Error('GAS mengembalikan HTML. Pastikan "Who has access = Anyone" dan sudah deploy ulang.');
+        if (t.startsWith('<')) throw new Error('GAS mengembalikan HTML — cek: 1) Who has access = Anyone, 2) sudah deploy New Version');
         try { return JSON.parse(t); }
         catch(e) {
-          console.error('Response tidak valid:', t.substring(0, 300));
+          console.error('[GAS] JSON parse error. Raw:', t.substring(0, 300));
           throw new Error('Response tidak valid dari server');
         }
       })
@@ -3909,11 +3910,18 @@
       // MODE EDIT
       if (editingProductId) {
         if (!currentUser || !currentUser.id) { showToast('Sesi tidak valid, silakan login ulang', 'error'); return; }
+        // FIX CORS: jangan kirim foto base64 lewat GET - terlalu besar
+        // Kirim foto hanya jika URL pendek (bukan base64)
+        var fotoKirim = '';
+        if (foto && !foto.startsWith('data:')) {
+          fotoKirim = foto; // URL normal (http...), aman dikirim
+        }
+        // Jika base64, foto lama tetap dipakai di server (tidak dikirim)
         callGAS('editProduct', {
           productId: editingProductId,
           sellerId: currentUser.id,
           nama: nama, deskripsi: deskripsi, harga: parseFloat(harga), stok: parseInt(stok),
-          kategori: kategori, foto: foto, diskonPersen: diskon
+          kategori: kategori, foto: fotoKirim, diskonPersen: diskon
         })
         .then(function() {
           if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Update Produk'; }
