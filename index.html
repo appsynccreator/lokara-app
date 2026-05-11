@@ -2537,42 +2537,37 @@
     // Helper: panggil Google Apps Script via fetch
     function callGAS(action, data) {
       if (!GAS_URL) {
-        showToast('GAS_URL belum diisi di config.js', 'error');
+        showToast('GAS_URL belum diisi', 'error');
         return Promise.reject(new Error('GAS_URL kosong'));
       }
 
-      // PENTING: GAS Web App harus menerima POST dengan body JSON.
-      // Content-Type harus 'text/plain;charset=utf-8' — GAS tidak support
-      // application/json di CORS preflight, tapi tetap parse body-nya sebagai JSON.
-      // Struktur: { action: '...', data: { ... } }
-      const body = JSON.stringify({ action: action, data: data || {} });
+      // Gunakan GET + URL params untuk menghindari CORS preflight
+      // GAS Web App GET tidak memicu CORS block dari browser
+      var params = {
+        action: action,
+        data: JSON.stringify(data || {})
+      };
+      var qs = Object.keys(params).map(function(k) {
+        return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+      }).join('&');
+      var url = GAS_URL + '?' + qs;
 
-      return fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: body,
-        redirect: 'follow'   // GAS redirect ke URL eksekusi — ikuti redirect
-      })
-      .then(function(r) {
-        return r.text();
-      })
+      return fetch(url, { method: 'GET', redirect: 'follow' })
+      .then(function(r) { return r.text(); })
       .then(function(text) {
+        if (!text || text.trim() === '') throw new Error('Response kosong dari server');
         if (text.trim().startsWith('<')) {
-          console.error('GAS return HTML bukan JSON. Cek deploy setting.');
-          throw new Error('Server error: cek pengaturan deploy GAS (akses harus "Anyone")');
+          throw new Error('Server error: pastikan deploy GAS dengan akses "Anyone"');
         }
-        try {
-          return JSON.parse(text);
-        } catch(e) {
+        try { return JSON.parse(text); }
+        catch(e) {
           console.error('Response tidak valid:', text.substring(0, 300));
           throw new Error('Response tidak valid dari server');
         }
       })
       .then(function(res) {
         if (res && res.success === false) {
-          // FIX-16: backend pakai field 'error', bukan 'message'
           var errMsg = res.error || res.message || 'Terjadi kesalahan';
-          // Bersihkan prefix "Error: " dari GAS
           errMsg = errMsg.replace(/^Error:\s*/i, '');
           return Promise.reject(new Error(errMsg));
         }
