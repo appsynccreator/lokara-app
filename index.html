@@ -2055,6 +2055,15 @@
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
 
+        <div class="menu-item" onclick="showSellerInvoices()">
+          <div class="menu-icon" style="background:#FBE9E7; color:#BF360C;"><i class="fas fa-file-invoice-dollar"></i></div>
+          <div class="menu-text">
+            <h4>Tagihan Komisi</h4>
+            <p>Lihat &amp; lunasi tagihan komisi COD</p>
+          </div>
+          <i class="fas fa-chevron-right menu-arrow"></i>
+        </div>
+
         <div class="menu-item" onclick="showWishlist()">
           <div class="menu-icon"><i class="fas fa-heart"></i></div>
           <div class="menu-text">
@@ -2413,6 +2422,10 @@
           style="flex:1; padding:12px 6px; border:none; border-bottom:3px solid transparent; background:white; font-size:12px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">👥 Users</button>
         <button onclick="showAdminTabPage('tabBannersPage')" id="btnTabBannersPage"
           style="flex:1; padding:12px 6px; border:none; border-bottom:3px solid transparent; background:white; font-size:12px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">📢 Iklan</button>
+        <button onclick="showAdminTabPage('tabGatewayPage')" id="btnTabGatewayPage"
+          style="flex:1; padding:12px 6px; border:none; border-bottom:3px solid transparent; background:white; font-size:12px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">💳 Gateway</button>
+        <button onclick="showAdminTabPage('tabInvoicesPage')" id="btnTabInvoicesPage"
+          style="flex:1; padding:12px 6px; border:none; border-bottom:3px solid transparent; background:white; font-size:12px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">🧾 Tagihan</button>
       </div>
 
       <!-- Tab Komisi -->
@@ -2462,8 +2475,115 @@
           <div id="adminBannersList"></div>
         </div>
       </div>
+
+      <!-- Tab Gateway Settings -->
+      <div id="tabGatewayPage" style="padding:20px; display:none;">
+        <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="font-size:15px; font-weight:700; margin-bottom:16px; color:var(--primary);">💳 Pengaturan Midtrans</div>
+          <div style="background:#FFF8E1; border-radius:12px; padding:12px; margin-bottom:16px; font-size:12px; color:#E65100; line-height:1.6;">
+            ⚠️ <strong>Server Key & Client Key</strong> bersifat rahasia. Jangan bagikan ke siapapun.<br>
+            Dapatkan key dari <a href="https://dashboard.midtrans.com" target="_blank" style="color:var(--primary);">dashboard.midtrans.com</a>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Server Key</label>
+            <input type="password" class="form-input" id="gatewayServerKey" placeholder="SB-Mid-server-xxxx (Sandbox) / Mid-server-xxxx (Production)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Client Key (untuk Snap.js di frontend)</label>
+            <input type="text" class="form-input" id="gatewayClientKey" placeholder="SB-Mid-client-xxxx">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mode</label>
+            <select class="form-input" id="gatewayMode">
+              <option value="sandbox">Sandbox (Testing)</option>
+              <option value="production">Production (Live)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Merchant ID</label>
+            <input type="text" class="form-input" id="gatewayMerchantId" placeholder="G12345678">
+          </div>
+          <button class="btn btn-primary" onclick="saveGatewaySettings()" style="margin-top:8px;">
+            <i class="fas fa-save"></i> Simpan Konfigurasi Gateway
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Verifikasi Tagihan Komisi -->
+      <div id="tabInvoicesPage" style="padding:20px; display:none;">
+        <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div style="font-size:15px; font-weight:700; color:var(--primary);">🧾 Verifikasi Tagihan COD</div>
+            <button onclick="loadAdminInvoices()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
+          </div>
+          <div id="adminInvoicesList"><div style="text-align:center;padding:40px;color:#757575;">Klik Refresh untuk memuat</div></div>
+        </div>
+      </div>
     </div>
     <!-- ============ END ADMIN MASTER DATA PAGE ============ -->
+
+    <!-- ============ PAYMENT WAITING PAGE ============ -->
+    <div class="page" id="paymentWaitingPage" style="display:none;">
+      <div class="app-header" style="position:sticky; top:0; z-index:120;">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
+          <div class="logo-text">💳 Pembayaran</div>
+          <div style="width:40px;"></div>
+        </div>
+      </div>
+      <div style="padding:40px 20px; text-align:center;">
+        <div style="font-size:64px; margin-bottom:16px;">⏳</div>
+        <div style="font-size:20px; font-weight:700; margin-bottom:8px;">Menunggu Pembayaran</div>
+        <div id="waitingOrderId" style="font-size:14px; color:#757575; margin-bottom:24px;"></div>
+        <div id="paymentWaitingStatus" style="font-size:15px; color:var(--primary); font-weight:600; margin-bottom:32px;">⏳ Menunggu pembayaran...</div>
+        <div style="background:#E8F5E9; border-radius:16px; padding:20px; margin-bottom:24px; text-align:left;">
+          <div style="font-weight:700; margin-bottom:8px;">📋 Cara Bayar:</div>
+          <div style="font-size:13px; line-height:1.8; color:#333;">
+            1. Buka aplikasi DANA atau OVO<br>
+            2. Scan QR atau masukkan nomor HP<br>
+            3. Konfirmasi pembayaran<br>
+            4. Halaman ini otomatis update
+          </div>
+        </div>
+        <button class="btn" style="background:#F5F5F5; color:#333; padding:12px 24px; border-radius:12px; font-size:14px; margin-bottom:12px; width:100%;"
+          onclick="if(_pollInterval)clearInterval(_pollInterval); showPage('ordersPage'); loadOrders();">
+          Lihat Pesanan Saya
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ SELLER INVOICES PAGE ============ -->
+    <div class="page" id="sellerInvoicesPage" style="display:none;">
+      <div class="app-header" style="position:sticky; top:0; z-index:120;">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
+          <div class="logo-text">🧾 Tagihan Komisi</div>
+          <div style="width:40px;"></div>
+        </div>
+      </div>
+      <div style="padding:20px;">
+        <div style="background:#E8F5E9; border-radius:16px; padding:16px; margin-bottom:20px; font-size:13px; line-height:1.7; color:#1B5E20;">
+          <strong>ℹ️ Tagihan Komisi COD</strong><br>
+          Komisi 3% dari total penjualan COD ditagih setiap bulan. Upload bukti transfer ke rekening platform untuk melunasi tagihan.
+        </div>
+        <div id="invoiceList">
+          <div style="text-align:center; padding:40px; color:#757575;"><i class="fas fa-spinner fa-spin"></i><p style="margin-top:12px;">Memuat tagihan...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PAYMENT IFRAME MODAL ============ -->
+    <div id="paymentIframeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+      <div style="background:white; border-radius:16px; width:95%; max-width:480px; overflow:hidden; max-height:90vh; display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #E0E0E0;">
+          <div style="font-weight:700;">💳 Pembayaran</div>
+          <button onclick="document.getElementById('paymentIframeModal').style.display='none'; showPaymentWaiting(window._currentPaymentOrderId, false);"
+            style="background:none; border:none; font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <iframe id="paymentIframe" style="flex:1; width:100%; min-height:400px; border:none;"></iframe>
+      </div>
+    </div>
+
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav" id="bottomNav">
@@ -3685,7 +3805,11 @@
               </div>
               <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top: 1px solid var(--border);">
                 <span style="font-weight:600;">Total</span>
-                <span style="font-weight:700; color: var(--primary); font-size:16px;">Rp ${parseInt(order.total).toLocaleString('id-ID')}</span>
+                <div style="text-align:right;">
+                  <span style="font-weight:700; color: var(--primary); font-size:16px;">Rp ${parseInt(order.total).toLocaleString('id-ID')}</span>
+                  ${order.metodePembayaran ? `<div style="font-size:11px;color:#757575;">${order.metodePembayaran}</div>` : ''}
+                  ${order.paymentStatus && order.paymentStatus !== 'cod' ? `<div style="font-size:11px;margin-top:2px;font-weight:700;color:${order.paymentStatus==='paid'||order.paymentStatus==='released'?'#2E7D32':order.paymentStatus==='failed'?'#C62828':'#E65100'};">${order.paymentStatus==='paid'?'✅ Dibayar':order.paymentStatus==='released'?'💸 Dana Dilepas':order.paymentStatus==='failed'?'❌ Gagal':'⏳ Belum Bayar'}</div>` : ''}
+                </div>
               </div>
               ${currentUser.role === 'seller' && order.status === 'pending' ? `
                 <div style="display:flex; gap:8px; margin-top:12px;">
@@ -3694,7 +3818,10 @@
                 </div>
               ` : ''}
               ${currentUser.role === 'buyer' && order.status === 'processing' ? `
-                <button class="btn btn-primary" style="margin-top:12px;" onclick="updateOrderStatus('${order.id}', 'completed')">Pesanan Diterima</button>
+                <button class="btn btn-primary" style="margin-top:12px;" onclick="confirmOrderReceived('${order.id}')">✅ Pesanan Diterima</button>
+              ` : ''}
+              ${currentUser.role === 'buyer' && order.paymentStatus === 'unpaid' && order.metodePembayaran !== 'COD' ? `
+                <button class="btn" style="margin-top:8px;background:#FF6B00;color:white;width:100%;" onclick="showPaymentWaiting('${order.id}', false)">💳 Lanjut Bayar</button>
               ` : ''}
             </div>
           `).join('');
@@ -3764,7 +3891,7 @@
               <div style="width:40px; height:40px; background:#E3F2FD; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; color:#1565C0; font-size:13px;">DANA</div>
               <div>
                 <div style="font-weight:600; font-size:14px;">DANA</div>
-                <div style="font-size:12px; color:var(--text-light);">Transfer ke dompet DANA</div>
+                <div style="font-size:11px; color:var(--text-light);">💰 Dana aman ditahan hingga pesanan selesai</div>
               </div>
             </label>
             <label style="display:flex; align-items:center; gap:12px; padding:14px; border:2px solid var(--border); border-radius:12px; cursor:pointer;" onclick="selectPayment(this,'OVO')">
@@ -3772,7 +3899,7 @@
               <div style="width:40px; height:40px; background:#F3E5F5; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; color:#6A1B9A; font-size:13px;">OVO</div>
               <div>
                 <div style="font-weight:600; font-size:14px;">OVO</div>
-                <div style="font-size:12px; color:var(--text-light);">Transfer ke dompet OVO</div>
+                <div style="font-size:11px; color:var(--text-light);">💰 Dana aman ditahan hingga pesanan selesai</div>
               </div>
             </label>
           </div>
@@ -3819,10 +3946,9 @@
     function confirmOrder() {
       if (!currentProduct || !currentUser) return;
 
-      // FIX-15: pakai quantity yang dipilih user
-      const qty = buyNowQty || 1;
-      const items = [{ productId: currentProduct.id, quantity: qty }];
-      const btn = document.querySelector('#modalBody .btn-primary');
+      var qty = buyNowQty || 1;
+      var items = [{ productId: currentProduct.id, quantity: qty }];
+      var btn = document.querySelector('#modalBody .btn-primary');
       if (btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }
 
       callGAS('createOrder', {
@@ -3832,17 +3958,119 @@
           alamatPengiriman: currentUser.alamat || '',
           latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
           longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : '',
-          metodePembayaran: selectedPayment
+          metodePembayaran: selectedPayment || 'COD'
         })
         .then(function(result) {
+          if (btn) { btn.disabled = false; btn.textContent = 'Konfirmasi Pesanan'; }
           closeModal();
-          showToast('Pesanan berhasil dibuat!', 'success');
-          showOrders();
+
+          if ((selectedPayment === 'DANA' || selectedPayment === 'OVO') && result.snapToken) {
+            openMidtransSnap(result.snapToken, result.orderId);
+          } else if ((selectedPayment === 'DANA' || selectedPayment === 'OVO') && result.paymentUrl) {
+            showPaymentModal(result.paymentUrl, result.orderId);
+          } else {
+            showToast('Pesanan COD berhasil dibuat! 🎉', 'success');
+            showOrders();
+          }
         })
         .catch(function(error) {
           if (btn) { btn.disabled = false; btn.textContent = 'Konfirmasi Pesanan'; }
           showToast(error.message || 'Gagal membuat pesanan', 'error');
         });
+    }
+
+    // ===== MIDTRANS SNAP =====
+    function openMidtransSnap(snapToken, orderId) {
+      var clientKey = window.MIDTRANS_CLIENT_KEY || 'SB-Mid-client-XXXXXX'; // ganti Client Key Anda
+      if (!window.snap) {
+        var s = document.createElement('script');
+        s.src = 'https://app.sandbox.midtrans.com/snap/snap.js'; // production: app.midtrans.com
+        s.setAttribute('data-client-key', clientKey);
+        s.onload = function() { triggerSnap(snapToken, orderId); };
+        document.head.appendChild(s);
+      } else {
+        triggerSnap(snapToken, orderId);
+      }
+    }
+
+    function triggerSnap(snapToken, orderId) {
+      window.snap.pay(snapToken, {
+        onSuccess: function() {
+          showToast('Pembayaran berhasil! 🎉', 'success');
+          showPaymentWaiting(orderId, true);
+        },
+        onPending: function() {
+          showToast('Menunggu konfirmasi pembayaran...', 'info');
+          showPaymentWaiting(orderId, false);
+        },
+        onError: function(r) {
+          showToast('Pembayaran gagal: ' + (r.status_message || ''), 'error');
+        },
+        onClose: function() {
+          showPaymentWaiting(orderId, false);
+        }
+      });
+    }
+
+    function showPaymentModal(paymentUrl, orderId) {
+      var modal = document.getElementById('paymentIframeModal');
+      if (modal) {
+        document.getElementById('paymentIframe').src = paymentUrl;
+        modal.style.display = 'flex';
+        window._currentPaymentOrderId = orderId;
+      } else {
+        window.open(paymentUrl, '_blank');
+        showPaymentWaiting(orderId, false);
+      }
+    }
+
+    function showPaymentWaiting(orderId, alreadyPaid) {
+      window._currentPaymentOrderId = orderId;
+      showPage('paymentWaitingPage');
+      var el = document.getElementById('waitingOrderId');
+      if (el) el.textContent = '#' + (orderId || '').substring(0, 8).toUpperCase();
+      var stEl = document.getElementById('paymentWaitingStatus');
+      if (stEl) stEl.textContent = alreadyPaid ? '✅ Menunggu konfirmasi server...' : '⏳ Menunggu pembayaran...';
+      if (!alreadyPaid) startPaymentPolling(orderId);
+      else startPaymentPolling(orderId);
+    }
+
+    var _pollInterval = null;
+    function startPaymentPolling(orderId) {
+      if (_pollInterval) clearInterval(_pollInterval);
+      var tries = 0;
+      _pollInterval = setInterval(function() {
+        tries++;
+        callGAS('getPaymentStatus', { orderId: orderId })
+          .then(function(res) {
+            if (res.paymentStatus === 'paid' || res.paymentStatus === 'released') {
+              clearInterval(_pollInterval);
+              var stEl = document.getElementById('paymentWaitingStatus');
+              if (stEl) stEl.textContent = '✅ Pembayaran dikonfirmasi!';
+              showToast('Pembayaran berhasil dikonfirmasi!', 'success');
+              setTimeout(function() { showPage('ordersPage'); loadOrders(); }, 1500);
+            } else if (res.paymentStatus === 'failed') {
+              clearInterval(_pollInterval);
+              var stEl = document.getElementById('paymentWaitingStatus');
+              if (stEl) stEl.textContent = '❌ Pembayaran gagal atau kadaluarsa';
+            }
+          }).catch(function() {});
+        if (tries >= 30) clearInterval(_pollInterval);
+      }, 5000);
+    }
+
+    function confirmOrderReceived(orderId) {
+      if (!confirm('Konfirmasi pesanan sudah diterima?')) return;
+      callGAS('updateOrderStatus', {
+        orderId: orderId,
+        status: 'completed',
+        buyerId: currentUser ? currentUser.id : ''
+      })
+      .then(function() {
+        showToast('Pesanan selesai! 🎉', 'success');
+        loadOrders();
+      })
+      .catch(function(e) { showToast(e.message || 'Gagal konfirmasi', 'error'); });
     }
 
     function updateOrderStatus(orderId, status) {
@@ -4469,8 +4697,8 @@
     }
 
     function showAdminTabPage(tabId) {
-      var tabs = ['tabKomisiPage', 'tabUsersPage', 'tabBannersPage'];
-      var btns = { tabKomisiPage: 'btnTabKomisiPage', tabUsersPage: 'btnTabUsersPage', tabBannersPage: 'btnTabBannersPage' };
+      var tabs = ['tabKomisiPage', 'tabUsersPage', 'tabBannersPage', 'tabGatewayPage', 'tabInvoicesPage'];
+      var btns = { tabKomisiPage: 'btnTabKomisiPage', tabUsersPage: 'btnTabUsersPage', tabBannersPage: 'btnTabBannersPage', tabGatewayPage: 'btnTabGatewayPage', tabInvoicesPage: 'btnTabInvoicesPage' };
       tabs.forEach(function(t) {
         var el = document.getElementById(t);
         if (el) el.style.display = t === tabId ? 'block' : 'none';
@@ -4794,6 +5022,88 @@
 
   <script>
     // Service Worker — hanya aktif di GitHub Pages (bukan GAS URL)
+  <script>
+    function showSellerInvoices() {
+      if (!currentUser) return;
+      showPage('sellerInvoicesPage');
+      loadSellerInvoices();
+    }
+    function loadSellerInvoices() {
+      var el = document.getElementById('invoiceList');
+      if (!el) return;
+      el.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin"></i></div>';
+      callGAS('getSellerInvoices', { sellerId: currentUser.id })
+        .then(function(invoices) {
+          if (!invoices || invoices.length === 0) {
+            el.innerHTML = '<div style="text-align:center;padding:40px;color:#757575;">Tidak ada tagihan</div>'; return;
+          }
+          el.innerHTML = invoices.map(function(inv) {
+            var isPaid = inv.status === 'paid', isPending = inv.status === 'pending_verify';
+            var bg = isPaid?'#E8F5E9':isPending?'#FFF8E1':'#FFEBEE', fc = isPaid?'#2E7D32':isPending?'#E65100':'#C62828';
+            var lbl = isPaid?'Lunas':isPending?'Menunggu Verifikasi':'Belum Bayar';
+            return '<div style="background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
+              +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+              +'<div style="font-weight:700;">Periode '+inv.period+'</div>'
+              +'<span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:'+bg+';color:'+fc+';">'+lbl+'</span>'
+              +'</div>'
+              +'<div style="font-size:14px;color:#333;">Komisi: <strong>Rp '+Number(inv.totalCommission).toLocaleString('id-ID')+'</strong></div>'
+              +(inv.proofUrl?'<div style="font-size:12px;margin-top:4px;"><a href="'+inv.proofUrl+'" target="_blank" style="color:var(--primary);">Lihat bukti</a></div>':'')
+              +(!isPaid&&!isPending?'<div style="margin-top:12px;background:#F5F5F5;border-radius:10px;padding:12px;">'
+                +'<div style="font-size:12px;margin-bottom:8px;">Rekening: <strong>BCA 1234567890 a/n LOKARA PLATFORM</strong></div>'
+                +'<input type="text" id="proof_'+inv.id+'" placeholder="URL bukti transfer" class="form-input" style="margin-bottom:8px;">'
+                +'<button class="btn btn-primary" style="padding:8px;font-size:13px;" onclick="uploadProof(''+inv.id+'')">Upload Bukti</button>'
+                +'</div>':'')
+              +'</div>';
+          }).join('');
+        }).catch(function(e){ el.innerHTML='<div style="padding:20px;color:red;">'+e.message+'</div>'; });
+    }
+    function uploadProof(id) {
+      var u = document.getElementById('proof_'+id);
+      if (!u||!u.value.trim()){showToast('Isi URL bukti','error');return;}
+      callGAS('uploadCommissionProof',{invoiceId:id,proofUrl:u.value.trim()})
+        .then(function(){showToast('Berhasil! Menunggu verifikasi.','success');loadSellerInvoices();})
+        .catch(function(e){showToast(e.message||'Gagal','error');});
+    }
+    function loadAdminInvoices() {
+      var el = document.getElementById('adminInvoicesList');
+      if (!el) return;
+      el.innerHTML = '<div style="text-align:center;padding:20px;">Memuat...</div>';
+      callGAS('getSellerInvoices', { sellerId: 'ALL', isAdmin: true })
+        .then(function(inv) {
+          if (!inv||inv.length===0){el.innerHTML='<div style="text-align:center;padding:40px;color:#757575;">Tidak ada tagihan</div>';return;}
+          el.innerHTML = inv.map(function(i) {
+            var ip = i.status==='pending_verify';
+            return '<div style="background:#FAFAFA;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #E0E0E0;">'
+              +'<div style="font-size:11px;color:#757575;">Periode: '+i.period+'</div>'
+              +'<div style="font-weight:700;font-size:15px;margin:4px 0;">Rp '+Number(i.totalCommission).toLocaleString('id-ID')+'</div>'
+              +'<div style="font-size:12px;">Status: <strong>'+i.status+'</strong></div>'
+              +(i.proofUrl?'<div style="margin:6px 0;font-size:12px;"><a href="'+i.proofUrl+'" target="_blank" style="color:var(--primary);">Lihat Bukti</a></div>':'<div style="font-size:12px;color:#757575;">Belum ada bukti</div>')
+              +(ip?'<div style="display:flex;gap:8px;margin-top:8px;">'
+                +'<button class="btn" style="flex:1;background:#4CAF50;color:white;padding:8px;font-size:12px;" onclick="verifyInvoice(''+i.id+'','approve')">Setujui</button>'
+                +'<button class="btn" style="flex:1;background:#F44336;color:white;padding:8px;font-size:12px;" onclick="verifyInvoice(''+i.id+'','reject')">Tolak</button>'
+                +'</div>':'')
+              +'</div>';
+          }).join('');
+        }).catch(function(e){el.innerHTML='<div style="padding:20px;color:red;">'+e.message+'</div>';});
+    }
+    function verifyInvoice(id, action) {
+      callGAS('verifyCommissionPayment',{invoiceId:id,action:action})
+        .then(function(r){showToast(r.message||'OK','success');loadAdminInvoices();})
+        .catch(function(e){showToast(e.message||'Gagal','error');});
+    }
+    function saveGatewaySettings() {
+      var sk=(document.getElementById('gatewayServerKey')||{}).value||'';
+      var ck=(document.getElementById('gatewayClientKey')||{}).value||'';
+      var mode=(document.getElementById('gatewayMode')||{}).value||'sandbox';
+      var mid=(document.getElementById('gatewayMerchantId')||{}).value||'';
+      if(!sk.trim()){showToast('Server Key wajib diisi','error');return;}
+      callGAS('saveGatewaySettings',{settings:{server_key:sk.trim(),client_key:ck.trim(),is_production:mode==='production',merchant_id:mid.trim()}})
+        .then(function(){if(ck)window.MIDTRANS_CLIENT_KEY=ck.trim();showToast('Konfigurasi Midtrans tersimpan!','success');})
+        .catch(function(e){showToast(e.message||'Gagal','error');});
+    }
+  </script>
+
+  <script>
     if ('serviceWorker' in navigator &&
         !location.hostname.includes('googleusercontent.com') &&
         !location.hostname.includes('google.com')) {
