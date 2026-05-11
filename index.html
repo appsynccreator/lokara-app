@@ -1705,6 +1705,20 @@
 </head>
 <body>
 
+  <!-- Fallback: pastikan loading hilang meski JS error -->
+  <script>
+    // Hilangkan loading screen setelah 4 detik sebagai fallback
+    window._loadingFallback = setTimeout(function() {
+      var ls = document.getElementById('loadingScreen');
+      if (ls) { ls.style.opacity = '0'; ls.style.pointerEvents = 'none'; }
+      // Jika authPage belum muncul, tampilkan langsung
+      var auth = document.getElementById('authPage');
+      if (auth && auth.style.display !== 'flex') {
+        auth.style.display = 'flex';
+      }
+    }, 4000);
+  </script>
+
   <!-- Loading Screen -->
   <div class="loading-screen" id="loadingScreen">
     <div class="loading-logo">
@@ -1751,9 +1765,6 @@
           <div class="auth-footer">
             Belum punya akun? <a onclick="showRegister()">Daftar sekarang</a>
           </div>
-          <div class="auth-footer" style="margin-top:4px;">
-            <a onclick="showAdminLogin()" style="color:rgba(255,255,255,0.5); font-size:11px;">🔐 Login Admin</a>
-          </div>
         </div>
 
         <!-- Register Form -->
@@ -1789,24 +1800,7 @@
           <div class="auth-footer">
             Sudah punya akun? <a onclick="showLogin()">Masuk sekarang</a>
           </div>
-        </div>
-
-        <!-- Admin Login Form -->
-        <div id="adminLoginForm" style="display:none;">
-          <div class="auth-title">Admin Panel 🔐</div>
-          <div class="form-group">
-            <label class="form-label">Email Admin</label>
-            <input type="email" class="form-input" id="adminEmail" placeholder="admin@lokara.id">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Password Admin</label>
-            <input type="password" class="form-input" id="adminPassword" placeholder="••••••••">
-          </div>
-          <button class="btn btn-primary" onclick="loginAdmin()">Masuk sebagai Admin</button>
-          <div class="auth-footer">
-            <a onclick="showLogin()">← Kembali ke Login</a>
-          </div>
-        </div>
+        </div></div>
 
       </div>
     </div>
@@ -1822,572 +1816,68 @@
       <button onclick="logoutAdmin()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:8px 16px; border-radius:20px; font-size:13px; cursor:pointer;">Keluar</button>
     </div>
 
-    <!-- Tab Navigation -->
-    <div style="display:flex; background:white; border-bottom:2px solid #E0E0E0; overflow-x:auto;">
-      <button class="admin-tab active" onclick="showAdminTab('tabKomisi')" id="btnTabKomisi" style="flex:1; padding:14px 10px; border:none; background:white; font-size:13px; font-weight:600; color:var(--primary); border-bottom:3px solid var(--primary); cursor:pointer; white-space:nowrap;">💰 Komisi & Biaya</button>
-      <button class="admin-tab" onclick="showAdminTab('tabUsers')" id="btnTabUsers" style="flex:1; padding:14px 10px; border:none; background:white; font-size:13px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">👥 Users</button>
-      <button class="admin-tab" onclick="showAdminTab('tabBanners')" id="btnTabBanners" style="flex:1; padding:14px 10px; border:none; background:white; font-size:13px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">📢 Iklan</button>
-    </div>
-
+    <!-- Tab navigation moved to adminMasterDataPage -->
     <!-- Tab: Komisi & Biaya -->
-    <div id="tabKomisi" style="padding:20px;">
-      <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:16px;">
-        <div style="font-size:16px; font-weight:700; margin-bottom:16px; color:#1B5E20;">⚙️ Pengaturan Komisi</div>
-        <div style="background:#E8F5E9; border-radius:12px; padding:14px; margin-bottom:16px; font-size:13px; color:#1B5E20; line-height:1.6;">
-          <strong>ℹ️ Cara kerja komisi:</strong><br>
-          Seller baru mendapatkan masa trial gratis. Setelah trial habis, komisi dipotong dari penerimaan seller (buyer tetap bayar harga normal).<br>
-          <strong>Contoh:</strong> Harga Rp 100.000, Komisi 3% = Rp 3.000 → Seller terima Rp 97.000
-        </div>
-        <div class="form-group">
-          <label class="form-label">Komisi (%)</label>
-          <input type="number" class="form-input" id="adminKomisiPersen" placeholder="3" min="0" max="30" step="0.5">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Masa Trial Seller (bulan)</label>
-          <input type="number" class="form-input" id="adminTrialBulan" placeholder="6" min="0" max="24">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Biaya Iklan per Minggu (Rp)</label>
-          <input type="number" class="form-input" id="adminBannerBiaya" placeholder="5000" min="0">
-        </div>
-        <button onclick="saveAdminSettings()" class="btn btn-primary" style="width:100%;">Simpan Pengaturan</button>
-      </div>
-    </div>
-
-    <!-- Tab: Users -->
-    <div id="tabUsers" style="padding:20px; display:none;">
-      <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <div style="font-size:16px; font-weight:700; color:#1B5E20;">👥 Manajemen User</div>
-          <button onclick="loadAdminUsers()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
-        </div>
-        <div id="adminUsersList">
-          <div style="text-align:center; padding:40px; color:#757575;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:12px;">Memuat data...</p></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab: Banners -->
-    <div id="tabBanners" style="padding:20px; display:none;">
-      <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <div style="font-size:16px; font-weight:700; color:#1B5E20;">📢 Manajemen Iklan</div>
-          <button onclick="loadAdminBanners()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
-        </div>
-        <div id="adminBannersList">
-          <div style="text-align:center; padding:40px; color:#757575;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:12px;">Memuat data...</p></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div id="mainApp" style="display:none;">
-    <!-- Header -->
-    <div class="app-header">
-      <div class="header-top">
-        <div class="logo-container">
-          <div class="logo-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="width:100%;height:100%;"><defs><linearGradient id="lgbg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4CAF50"/><stop offset="100%" stop-color="#1B5E20"/></linearGradient><radialGradient id="lgsh" cx="35%" cy="30%" r="60%"><stop offset="0%" stop-color="rgba(255,255,255,0.3)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><rect width="100" height="100" rx="22" fill="url(#lgbg)"/><rect width="100" height="100" rx="22" fill="url(#lgsh)"/><ellipse cx="50" cy="88" rx="42" ry="16" fill="#8BC34A" opacity="0.5"/><path d="M50 14C36 14 26 24 26 38C26 54 50 76 50 76C50 76 74 54 74 38C74 24 64 14 50 14Z" fill="white"/><circle cx="50" cy="37" r="12" fill="#1B5E20"/></svg>
+      <div id="tabKomisiPage" style="padding:20px;">
+        <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:16px;">
+          <div style="font-size:16px; font-weight:700; margin-bottom:12px; color:#1B5E20;">⚙️ Pengaturan Komisi & Biaya</div>
+          <div style="background:#E8F5E9; border-radius:12px; padding:14px; margin-bottom:16px; font-size:13px; color:#1B5E20; line-height:1.6;">
+            <strong>ℹ️ Cara kerja:</strong><br>
+            Seller baru mendapat masa trial gratis. Setelah trial, komisi dipotong dari penerimaan seller.
+            <br><strong>Contoh:</strong> Harga Rp 100.000, Komisi 3% → Seller terima Rp 97.000
           </div>
-          <div class="logo-text">LOKARA</div>
-        </div>
-        <div class="header-actions">
-          <i class="far fa-bell" onclick="showNotifications()">
-            <span class="badge" id="notifBadge" style="display:none;">0</span>
-          </i>
-          <i class="far fa-heart" onclick="showWishlist()"></i>
-        </div>
-      </div>
-      <div class="search-bar" style="position:relative;">
-        <i class="fas fa-search" style="color:var(--text-light); flex-shrink:0;"></i>
-        <input type="text" placeholder="Cari produk atau toko..." id="searchInput"
-          oninput="onSearchInput(this.value)"
-          onkeyup="if(event.key==='Enter') doSearch(this.value)"
-          autocomplete="off">
-        <i class="fas fa-times" id="searchClear" style="display:none; color:var(--text-light); cursor:pointer; flex-shrink:0;" onclick="clearSearch()"></i>
-      </div>
-      <!-- Search dropdown -->
-      <div id="searchDropdown" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border-radius:0 0 16px 16px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:200; max-height:320px; overflow-y:auto; margin:0 0 0 0;"></div>
-    </div>
-
-    <!-- Location Bar -->
-    <div class="location-bar">
-      <i class="fas fa-location-arrow"></i>
-      <span id="locationText">Mendeteksi lokasi...</span>
-    </div>
-
-    <!-- Home Page -->
-    <div class="page active" id="homePage">
-      <!-- Categories -->
-      <div class="categories-section">
-        <div class="section-title">
-          <i class="fas fa-th-large" style="color: var(--primary);"></i>
-          Kategori
-        </div>
-        <div class="categories-grid" id="categoriesGrid"></div>
-      </div>
-
-      <!-- Promo Banner -->
-      <div class="promo-wrap">
-        <div class="promo-card-default" id="promoCard">
-          <i class="fas fa-store promo-bg-icon" id="promoBgIcon"></i>
-
-          <!-- Slot thumbnail iklan (tampil saat ada iklan) -->
-          <div class="promo-ad-thumb" id="promoAdThumb">
-            <div class="promo-ad-label">IKLAN</div>
+          <div class="form-group">
+            <label class="form-label">Komisi Seller (%)</label>
+            <input type="number" class="form-input" id="adminKomisiPersen" placeholder="3" min="0" max="30" step="0.5">
           </div>
-
-          <!-- Teks (berubah fade saat ganti iklan) -->
-          <div class="promo-text-wrap" id="promoTextWrap">
-            <div class="promo-text-anim" id="promoTextInner">
-              <h3>🛍️ Dukung UMKM Lokal</h3>
-              <p>Temukan produk terbaik di sekitarmu dalam radius 1 km</p>
-            </div>
-            <button id="promoCTA" onclick="resetFilter()">Jelajahi Sekarang</button>
+          <div class="form-group">
+            <label class="form-label">Masa Trial Seller (bulan)</label>
+            <input type="number" class="form-input" id="adminTrialBulan" placeholder="6" min="0" max="24">
           </div>
+          <div class="form-group">
+            <label class="form-label">Biaya Iklan Banner (Rp/minggu)</label>
+            <input type="number" class="form-input" id="adminBannerBiaya" placeholder="5000" min="0" step="500">
+          </div>
+          <button class="btn btn-primary" onclick="saveAdminSettings()" style="margin-top:8px;">
+            <i class="fas fa-save"></i> Simpan Pengaturan
+          </button>
         </div>
-
-        <!-- Dots (hanya saat ada >1 iklan) -->
-        <div class="promo-dots" id="promoDots" style="display:none;"></div>
       </div>
 
-      <!-- Products with toggle + filter -->
-      <div class="products-section">
-        <div class="section-header" style="flex-wrap:wrap; gap:8px;">
-          <div class="section-title" id="productSectionTitle">
-            <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
-            <span id="productSectionLabel">Produk Terdekat</span>
+      <!-- Tab: User Management -->
+      <div id="tabUsersPage" style="padding:20px; display:none;">
+        <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div style="font-size:16px; font-weight:700; color:#1B5E20;">👥 Manajemen User</div>
+            <button onclick="loadAdminUsers()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;">
+              <i class="fas fa-sync"></i> Refresh
+            </button>
           </div>
-          <!-- Toggle radius -->
-          <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
-            <span style="font-size:12px; color:var(--text-light);" id="toggleLabel">< 1 KM</span>
-            <div id="radiusToggle" onclick="toggleRadius()"
-              style="width:44px; height:24px; background:var(--primary); border-radius:12px; position:relative; cursor:pointer; transition:background 0.2s; flex-shrink:0;">
-              <div id="radiusToggleThumb"
-                style="width:20px; height:20px; background:white; border-radius:50%; position:absolute; top:2px; left:22px; transition:left 0.2s; box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
+          <div id="adminUsersList">
+            <div style="text-align:center; padding:40px; color:#757575;">
+              <i class="fas fa-spinner fa-spin" style="font-size:24px;"></i>
+              <p style="margin-top:12px;">Memuat data...</p>
             </div>
           </div>
         </div>
-
-        <!-- Active category filter pill -->
-        <div id="activeCategoryFilter" style="display:none; margin-bottom:8px;">
-          <span style="display:inline-flex; align-items:center; gap:6px; background:var(--primary); color:white; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600;">
-            <span id="activeCategoryName"></span>
-            <i class="fas fa-times" style="cursor:pointer;" onclick="resetFilter()"></i>
-          </span>
-        </div>
-
-        <div class="products-grid" id="mainProductsGrid"></div>
-      </div>
-    </div>
-
-    <!-- Orders Page -->
-    <div class="page" id="ordersPage">
-      <div class="products-section">
-        <div class="section-header">
-          <div class="section-title">
-            <i class="fas fa-shopping-bag" style="color: var(--primary);"></i>
-            Pesanan Saya
-          </div>
-        </div>
-        <div id="ordersList"></div>
-      </div>
-    </div>
-
-    <!-- Profile Page -->
-    <div class="page" id="profilePage">
-      <div class="profile-header">
-        <div class="profile-avatar" id="profileAvatar" onclick="triggerPhotoUpload()" style="cursor:pointer; position:relative;">
-          <i class="fas fa-user" id="profileAvatarIcon"></i>
-          <img id="profileAvatarImg" src="" alt="Foto Profil" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
-          <div style="position:absolute; bottom:0; right:0; width:28px; height:28px; background:var(--primary-light); border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white;">
-            <i class="fas fa-camera" style="font-size:11px; color:white;"></i>
-          </div>
-        </div>
-        <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;" onchange="uploadProfilePhoto(event)">
-        <div class="profile-name" id="profileName">User Name</div>
-        <div class="profile-role" id="profileRole">Pembeli</div>
       </div>
 
-      <div class="stats-grid" id="statsGrid" style="display:none;">
-        <div class="stat-card">
-          <div class="stat-value" id="statProducts">0</div>
-          <div class="stat-label">Produk</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="statOrders">0</div>
-          <div class="stat-label">Pesanan</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="statSales">0</div>
-          <div class="stat-label">Penjualan</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="statRating">0</div>
-          <div class="stat-label">Rating</div>
-        </div>
-      </div>
-
-      <div class="profile-menu">
-        <div class="menu-item" onclick="showOrders()">
-          <div class="menu-icon"><i class="fas fa-shopping-bag"></i></div>
-          <div class="menu-text">
-            <h4>Pesanan Saya</h4>
-            <p>Lihat riwayat pembelian</p>
+      <!-- Tab: Banner/Iklan Management -->
+      <div id="tabBannersPage" style="padding:20px; display:none;">
+        <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div style="font-size:16px; font-weight:700; color:#1B5E20;">📢 Manajemen Iklan</div>
+            <button onclick="loadAdminBanners()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;">
+              <i class="fas fa-sync"></i> Refresh
+            </button>
           </div>
-          <i class="fas fa-chevron-right menu-arrow"></i>
-        </div>
-
-        <div class="menu-item" id="sellerProductsMenu" style="display:none;" onclick="showSellerProducts()">
-          <div class="menu-icon"><i class="fas fa-box"></i></div>
-          <div class="menu-text">
-            <h4>Produk Saya</h4>
-            <p>Kelola produk yang dijual</p>
-          </div>
-          <i class="fas fa-chevron-right menu-arrow"></i>
-        </div>
-
-        <div class="menu-item" id="sellerLocationMenu" style="display:none;" onclick="openMapPicker('profile','Lokasi Toko Saya')">
-          <div class="menu-icon" style="background:#E8F5E9; color:var(--primary);"><i class="fas fa-map-marker-alt"></i></div>
-          <div class="menu-text">
-            <h4>Lokasi Toko</h4>
-            <p id="profileLocationText">Belum diatur — klik untuk pilih di peta</p>
-          </div>
-          <i class="fas fa-chevron-right menu-arrow"></i>
-        </div>
-
-        <div class="menu-item" onclick="showBannerAd()">
-          <div class="menu-icon" style="background:#E3F2FD; color:#1565C0;"><i class="fas fa-ad"></i></div>
-          <div class="menu-text">
-            <h4>Pasang Iklan</h4>
-            <p>Promosikan produkmu di banner beranda · Rp 5.000/minggu</p>
-          </div>
-          <i class="fas fa-chevron-right menu-arrow"></i>
-        </div>
-
-        <div class="menu-item" onclick="showWishlist()">
-          <div class="menu-icon"><i class="fas fa-heart"></i></div>
-          <div class="menu-text">
-            <h4>Wishlist</h4>
-            <p>Produk yang disimpan</p>
-          </div>
-          <i class="fas fa-chevron-right menu-arrow"></i>
-        </div>
-
-        <div class="menu-item" onclick="showEditProfile()">
-          <div class="menu-icon"><i class="fas fa-user-edit"></i></div>
-          <div class="menu-text">
-            <h4>Edit Profil</h4>
-            <p>Ubah informasi akun</p>
-          </div>
-          <i class="fas fa-chevron-right menu-arrow"></i>
-        </div>
-
-        <div class="menu-item" onclick="logout()">
-          <div class="menu-icon" style="background: #FFEBEE; color: var(--danger);"><i class="fas fa-sign-out-alt"></i></div>
-          <div class="menu-text">
-            <h4>Keluar</h4>
-            <p>Logout dari aplikasi</p>
-          </div>
-          <i class="fas fa-chevron-right menu-arrow"></i>
-        </div>
-      </div>
-    </div>
-
-    <!-- Banner Ad Page -->
-    <div class="page" id="bannerAdPage" style="display:none;">
-      <div class="app-header" style="position:sticky; top:0; z-index:120;">
-        <div class="header-top">
-          <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
-          <div class="logo-text">Pasang Iklan</div>
-          <div style="width:40px;"></div>
-        </div>
-      </div>
-      <div style="padding:20px 20px 100px;">
-        <div style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB); border-radius:16px; padding:16px; margin-bottom:20px; display:flex; gap:12px; align-items:center;">
-          <i class="fas fa-ad" style="font-size:32px; color:#1565C0;"></i>
-          <div>
-            <div style="font-weight:700; font-size:14px;">Iklan Banner Beranda</div>
-            <div style="font-size:12px; color:var(--text-light); margin-top:2px;">Tampil di carousel atas beranda semua pengguna</div>
-            <div style="font-size:13px; font-weight:700; color:#1565C0; margin-top:4px;">Rp 5.000 / minggu</div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Judul Iklan</label>
-          <input type="text" class="form-input" id="bannerTitle" placeholder="Contoh: Promo Lebaran Bu Siti">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Deskripsi (opsional)</label>
-          <input type="text" class="form-input" id="bannerDesc" placeholder="Diskon 50% semua produk!">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">URL Gambar / Video</label>
-          <input type="text" class="form-input" id="bannerMedia" placeholder="https://...">
-          <div style="font-size:11px; color:var(--text-light); margin-top:4px;">Gunakan link gambar (JPG/PNG) atau video (MP4) dari Google Drive / hosting lain</div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Tipe Media</label>
-          <select class="form-input" id="bannerType">
-            <option value="image">Gambar</option>
-            <option value="video">Video</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Link Tujuan (opsional)</label>
-          <input type="text" class="form-input" id="bannerLink" placeholder="https://... (klik iklan menuju link ini)">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Durasi Tayang</label>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;" id="bannerWeeksOptions">
-            <button onclick="selectWeeks(1)" class="btn" id="weeks1" style="flex:1; min-width:80px; background:var(--bg); color:var(--text); padding:10px; font-size:13px;">1 minggu<br><span style="font-weight:700;">Rp 5.000</span></button>
-            <button onclick="selectWeeks(2)" class="btn" id="weeks2" style="flex:1; min-width:80px; background:var(--bg); color:var(--text); padding:10px; font-size:13px;">2 minggu<br><span style="font-weight:700;">Rp 10.000</span></button>
-            <button onclick="selectWeeks(4)" class="btn" id="weeks4" style="flex:1; min-width:80px; background:var(--bg); color:var(--text); padding:10px; font-size:13px;">4 minggu<br><span style="font-weight:700;">Rp 20.000</span></button>
-          </div>
-        </div>
-
-        <div id="bannerTotal" style="display:none; background:#E8F5E9; border-radius:12px; padding:14px; margin-bottom:16px; font-size:14px;">
-          Total: <strong id="bannerTotalAmount"></strong>
-        </div>
-
-        <button class="btn btn-primary" onclick="submitBanner()">Pasang Iklan</button>
-      </div>
-    </div>
-
-    <!-- Product Detail Page -->
-    <div class="page product-detail" id="productDetailPage" style="display:none;">
-      <div class="detail-image" id="detailImage">
-        <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
-        <i class="fas fa-image" style="font-size: 60px; color: var(--primary-light);"></i>
-      </div>
-
-      <div class="detail-content">
-        <div class="detail-header">
-          <div class="detail-title" id="detailName">Nama Produk</div>
-          <div class="detail-price" id="detailPrice">Rp 0</div>
-        </div>
-
-        <div class="detail-seller" id="detailSeller" onclick="showStorePage(currentProduct && currentProduct.sellerId, currentProduct && currentProduct.sellerNama)" style="cursor:pointer;">
-          <div class="seller-avatar"><i class="fas fa-store"></i></div>
-          <div class="seller-info">
-            <h4 id="sellerName">Nama Penjual</h4>
-            <p id="sellerDistance"><i class="fas fa-map-marker-alt"></i> 0.5 km</p>
-          </div>
-          <i class="fas fa-chevron-right" style="margin-left:auto; color:var(--text-light); font-size:14px;"></i>
-        </div>
-
-        <div class="detail-section">
-          <h3>Deskripsi</h3>
-          <p id="detailDescription">Deskripsi produk...</p>
-        </div>
-
-        <div class="detail-section">
-          <h3>Informasi Produk</h3>
-          <p id="detailInfo">Stok: 10 | Kategori: Makanan</p>
-        </div>
-
-        <div class="detail-section" id="reviewsSection">
-          <h3>Ulasan</h3>
-          <div id="reviewsList"></div>
-        </div>
-      </div>
-
-      <div style="height: 80px;"></div>
-
-      <div class="detail-actions">
-        <button class="btn-chat" onclick="chatWithSeller()"><i class="fas fa-comment"></i></button>
-        <button class="btn-buy" onclick="buyNow()">Beli Sekarang</button>
-      </div>
-    </div>
-
-    <!-- Add Product Page (Seller) -->
-    <div class="page" id="addProductPage" style="display:none;">
-      <div class="app-header" style="position:sticky; top:0; z-index:120;">
-        <div class="header-top">
-          <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
-          <div class="logo-text">Tambah Produk</div>
-          <div style="width:40px;"></div>
-        </div>
-      </div>
-
-      <div style="padding: 20px;">
-        <div class="image-upload" id="productImageUpload" onclick="document.getElementById('productImageInput').click()">
-          <i class="fas fa-camera"></i>
-          <span>Tambah Foto Produk</span>
-          <input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Nama Produk</label>
-          <input type="text" class="form-input" id="productName" placeholder="Nama produk">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Deskripsi</label>
-          <textarea class="form-input" id="productDesc" rows="3" placeholder="Deskripsi produk"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Harga (Rp)</label>
-          <input type="number" class="form-input" id="productPrice" placeholder="10000">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Stok</label>
-          <input type="number" class="form-input" id="productStock" placeholder="10">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Diskon (%) <span style="color:var(--text-light); font-weight:400; font-size:12px;">— Opsional, 0 = tidak ada diskon</span></label>
-          <input type="number" class="form-input" id="productDiskon" placeholder="0" min="0" max="99" step="1">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Kategori</label>
-          <select class="form-input" id="productCategory" style="width:100%;">
-            <option value="">Pilih Kategori</option>
-          </select>
-        </div>
-
-        <!-- Lokasi Toko -->
-        <div class="form-group">
-          <label class="form-label">Lokasi Toko</label>
-          <div id="productLocationBox" style="border:2px solid var(--border); border-radius:12px; padding:14px; background:#F9FBF9;">
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-              <div style="width:40px; height:40px; background:var(--primary); border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <i class="fas fa-map-marker-alt" style="color:white; font-size:18px;"></i>
-              </div>
-              <div style="flex:1; min-width:0;">
-                <div id="productLocationStatus" style="font-size:13px; font-weight:600; color:var(--text);">Mendeteksi lokasi...</div>
-                <div id="productLocationCoords" style="font-size:11px; color:var(--text-light); margin-top:2px;">GPS aktif otomatis</div>
-              </div>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <button onclick="refreshProductLocation()" style="flex:1; background:#E8F5E9; color:var(--primary); border:none; border-radius:8px; padding:9px 10px; font-size:12px; font-weight:600; cursor:pointer;">
-                <i class="fas fa-crosshairs"></i> Pakai GPS
-              </button>
-              <button onclick="openMapPicker('product','Lokasi Toko')" style="flex:1; background:var(--primary); color:white; border:none; border-radius:8px; padding:9px 10px; font-size:12px; font-weight:600; cursor:pointer;">
-                <i class="fas fa-map"></i> Pilih di Peta
-              </button>
+          <div id="adminBannersList">
+            <div style="text-align:center; padding:40px; color:#757575;">
+              <i class="fas fa-spinner fa-spin" style="font-size:24px;"></i>
+              <p style="margin-top:12px;">Memuat data...</p>
             </div>
           </div>
-          <div style="font-size:11px; color:var(--text-light); margin-top:6px; padding-left:4px;">
-            <i class="fas fa-info-circle" style="color:var(--primary);"></i> Lokasi menentukan produk muncul di radius pembeli
-          </div>
         </div>
-
-        <button class="btn btn-primary" onclick="saveProduct()" style="margin-top:8px;">Simpan Produk</button>
-      </div>
-    </div>
-
-    <!-- Chat Page -->
-    <div class="page" id="chatPage">
-      <div class="chat-page-wrapper">
-        <!-- Header -->
-        <div class="chat-header">
-          <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
-          <div class="chat-header-title" id="chatTitle">Chat</div>
-        </div>
-        <!-- Pesan (scroll di sini) -->
-        <div class="chat-messages" id="chatMessages"></div>
-      </div>
-      <!-- Input bar: fixed bottom, di luar wrapper -->
-      <div class="chat-input-bar">
-        <input type="text" id="chatInput" placeholder="Ketik pesan..." onkeyup="if(event.key==='Enter') sendChatMessage()">
-        <button class="chat-send" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
-      </div>
-    </div>
-
-    <!-- Store Page -->
-    <div class="page" id="storePage" style="display:none;">
-      <div class="app-header" style="position:sticky; top:0; z-index:120;">
-        <div class="header-top">
-          <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
-          <div class="logo-text" id="storePageTitle">Toko</div>
-          <div style="width:40px;"></div>
-        </div>
-      </div>
-      <div class="store-header">
-        <div class="store-avatar" id="storeAvatar"><i class="fas fa-store"></i></div>
-        <div class="store-name" id="storeNameDisplay">Nama Toko</div>
-        <div class="store-sub" id="storeSubDisplay">Penjual UMKM</div>
-      </div>
-      <div class="products-section">
-        <div class="section-title" style="margin-bottom:12px;">
-          <i class="fas fa-box" style="color:var(--primary);"></i>
-          Produk Toko
-        </div>
-        <div class="products-grid" id="storeProductsGrid"></div>
-      </div>
-    </div>
-
-    <!-- Wishlist Page -->
-    <div class="page" id="wishlistPage">
-      <div class="app-header" style="position:sticky; top:0; z-index:120;">
-        <div class="header-top">
-          <button class="back-btn" onclick="showPage('homePage')" style="position:static;"><i class="fas fa-arrow-left"></i></button>
-          <div class="logo-text">Wishlist</div>
-          <div style="width:40px;"></div>
-        </div>
-      </div>
-      <div class="products-section">
-        <div class="products-grid" id="wishlistGrid"></div>
-      </div>
-    </div>
-
-    <!-- Notifications Page -->
-    <div class="page" id="notificationsPage">
-      <div class="app-header" style="position:sticky; top:0; z-index:120;">
-        <div class="header-top">
-          <button class="back-btn" onclick="showPage('homePage')" style="position:static;"><i class="fas fa-arrow-left"></i></button>
-          <div class="logo-text">Notifikasi</div>
-          <div style="width:40px;"></div>
-        </div>
-      </div>
-      <div class="profile-menu" id="notificationsList" style="padding: 20px;"></div>
-    </div>
-
-    <!-- Seller Products Page -->
-    <div class="page" id="sellerProductsPage">
-      <div class="app-header" style="position:sticky; top:0; z-index:120;">
-        <div class="header-top">
-          <button class="back-btn" onclick="showPage('profilePage')" style="position:static;"><i class="fas fa-arrow-left"></i></button>
-          <div class="logo-text">Produk Saya</div>
-          <div style="width:40px;"></div>
-        </div>
-      </div>
-      <div class="products-section">
-        <div class="products-grid" id="sellerProductsGrid"></div>
-      </div>
-    </div>
-
-    <!-- Edit Profile Page -->
-    <div class="page" id="editProfilePage">
-      <div class="app-header" style="position:sticky; top:0; z-index:120;">
-        <div class="header-top">
-          <button class="back-btn" onclick="showPage('profilePage')" style="position:static;"><i class="fas fa-arrow-left"></i></button>
-          <div class="logo-text">Edit Profil</div>
-          <div style="width:40px;"></div>
-        </div>
-      </div>
-      <div style="padding: 20px;">
-        <div class="form-group">
-          <label class="form-label">Nama</label>
-          <input type="text" class="form-input" id="editName">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Telepon</label>
-          <input type="tel" class="form-input" id="editPhone">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Alamat</label>
-          <textarea class="form-input" id="editAddress" rows="2"></textarea>
-        </div>
-        <button class="btn btn-primary" onclick="saveProfile()">Simpan Perubahan</button>
       </div>
     </div>
 
@@ -2404,6 +1894,10 @@
       <div class="nav-item" onclick="showAddProduct()">
         <div class="sell-btn"><i class="fas fa-plus"></i></div>
         <span>Jual</span>
+      </div>
+      <div class="nav-item" id="adminNavItem" style="display:none;" onclick="showAdminMasterData()">
+        <i class="fas fa-cog"></i>
+        <span>Master Data</span>
       </div>
       <div class="nav-item" onclick="showPage('chatPage')">
         <i class="fas fa-comment"></i>
@@ -2447,13 +1941,17 @@
     </div>
   </div>
 
-  <!-- config.js berisi GAS_URL — edit file config.js di GitHub, bukan di sini -->
-  <script src="config.js"></script>
   <script>
     // ==================== KONFIGURASI BACKEND ====================
-    // GAS_URL dibaca dari config.js yang ada di GitHub
-    const GAS_URL = (typeof LOKARA_CONFIG !== 'undefined' && LOKARA_CONFIG.GAS_URL)
-      ? LOKARA_CONFIG.GAS_URL : '';
+    // Isi GAS_URL dengan URL deploy Google Apps Script Anda
+    // Contoh: 'https://script.google.com/macros/s/AKfy.../exec'
+    // Jika masih pakai GitHub Pages + config.js, ganti baris di bawah dengan URL langsung
+    const LOKARA_CONFIG = (function() {
+      // Coba baca dari window.LOKARA_CONFIG jika config.js dimuat terpisah
+      if (typeof window.LOKARA_CONFIG !== 'undefined') return window.LOKARA_CONFIG;
+      return { GAS_URL: '' }; // <-- Isi GAS_URL di sini jika tidak pakai config.js
+    })();
+    const GAS_URL = (LOKARA_CONFIG && LOKARA_CONFIG.GAS_URL) ? LOKARA_CONFIG.GAS_URL : '';
 
     // Helper: panggil Google Apps Script via fetch
     function callGAS(action, data) {
@@ -2519,9 +2017,11 @@
     // ==================== INITIALIZATION ====================
     document.addEventListener('DOMContentLoaded', function() {
       checkAuth();
+      clearTimeout(window._loadingFallback);
       setTimeout(() => {
-        document.getElementById('loadingScreen').classList.add('hidden');
-      }, 2000);
+        var ls = document.getElementById('loadingScreen');
+        if (ls) ls.classList.add('hidden');
+      }, 1500);
 
       // Tombol back smartphone - intercept popstate
       window.history.pushState({ page: 'home' }, '');
@@ -2537,7 +2037,7 @@
           const tp = document.getElementById(prev);
           if (tp) { tp.style.display = 'block'; tp.classList.add('active'); }
           const bottomNav = document.getElementById('bottomNav');
-          const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage'];
+          const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage', 'adminMasterDataPage'];
           if (bottomNav) bottomNav.style.display = hideNav.includes(prev) ? 'none' : 'flex';
           document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
           const navMap = { homePage: 0, ordersPage: 1, profilePage: 4 };
@@ -2553,6 +2053,18 @@
     });
 
     function checkAuth() {
+      // FIX: Cek sesi admin dulu
+      const adminData = sessionStorage.getItem('lokara_admin');
+      if (adminData) {
+        try {
+          currentAdmin = JSON.parse(adminData);
+          showAdminPanel();
+          return;
+        } catch(e) {
+          sessionStorage.removeItem('lokara_admin');
+        }
+      }
+
       const user = localStorage.getItem('lokara_user');
       if (user) {
         currentUser = JSON.parse(user);
@@ -2569,7 +2081,15 @@
 
     function showMainApp() {
       document.getElementById('authPage').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
+      // Hide admin-only elements for regular users
+      const adminMenuSection = document.getElementById('adminMenuSection');
+      if (adminMenuSection) adminMenuSection.style.display = 'none';
+      const adminNavItem = document.getElementById('adminNavItem');
+      if (adminNavItem) adminNavItem.style.display = 'none';
+      const userLogoutMenu = document.getElementById('userLogoutMenu');
+      if (userLogoutMenu) userLogoutMenu.style.display = 'flex';
       updateProfileUI();
     }
 
@@ -2632,7 +2152,7 @@
     }
 
     function login() {
-      const email = document.getElementById('loginEmail').value;
+      const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
 
       if (!email || !password) {
@@ -2640,8 +2160,20 @@
         return;
       }
 
+      const btn = document.querySelector('#loginForm .btn-primary');
+      if (btn) { btn.disabled = true; btn.textContent = 'Masuk...'; }
+
       callGAS('login', { email: email, password: password })
         .then(function(result) {
+          if (btn) { btn.disabled = false; btn.textContent = 'Masuk'; }
+          // FIX: Jika admin, masuk ke panel admin (bukan mainApp)
+          if (result.role === 'admin' || result.isAdmin) {
+            currentAdmin = result;
+            sessionStorage.setItem('lokara_admin', JSON.stringify(result));
+            showAdminPanel();
+            showToast('Selamat datang, Admin!', 'success');
+            return;
+          }
           currentUser = result;
           localStorage.setItem('lokara_user', JSON.stringify(result));
           showMainApp();
@@ -2649,9 +2181,11 @@
           loadCategories();
           loadNearbyProducts();
           loadNotifications();
+          loadBanners();
           showToast('Selamat datang kembali!', 'success');
         })
         .catch(function(error) {
+          if (btn) { btn.disabled = false; btn.textContent = 'Masuk'; }
           showToast(error.message || 'Login gagal', 'error');
         });
     }
@@ -2719,7 +2253,7 @@
 
       // Sembunyikan bottom nav di halaman tertentu
       const bottomNav = document.getElementById('bottomNav');
-      const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage'];
+      const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage', 'adminMasterDataPage'];
       bottomNav.style.display = hideNav.includes(pageId) ? 'none' : 'flex';
 
       // Simpan history untuk tombol back
@@ -3798,13 +3332,17 @@
 
       // MODE EDIT
       if (editingProductId) {
+        // FIX: pastikan sellerId benar — admin mungkin tidak punya currentUser
+        const sellerId = currentUser ? currentUser.id : null;
+        if (!sellerId) { showToast('Sesi tidak valid', 'error'); return; }
         callGAS('editProduct', {
           productId: editingProductId,
-          sellerId: currentUser.id,
-          nama, deskripsi, harga: parseFloat(harga), stok: parseInt(stok),
-          kategori, foto, diskonPersen: diskon
+          sellerId: sellerId,
+          nama: nama, deskripsi: deskripsi, harga: parseFloat(harga), stok: parseInt(stok),
+          kategori: kategori, foto: foto, diskonPersen: diskon
         })
         .then(function() {
+          if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Update Produk'; }
           showToast('Produk berhasil diperbarui!', 'success');
           resetProductForm();
           showSellerProducts();
@@ -4302,64 +3840,81 @@
     }
     let currentAdmin = null;
 
-    function showAdminLogin() {
-      document.getElementById('loginForm').style.display = 'none';
-      document.getElementById('registerForm').style.display = 'none';
-      document.getElementById('adminLoginForm').style.display = 'block';
-    }
 
-    function loginAdmin() {
-      const email = document.getElementById('adminEmail').value.trim();
-      const password = document.getElementById('adminPassword').value;
-      if (!email || !password) { showToast('Isi email dan password admin', 'error'); return; }
-
-      const btn = document.querySelector('#adminLoginForm .btn-primary');
-      if (btn) { btn.disabled = true; btn.textContent = 'Memverifikasi...'; }
-
-      callGAS('adminLogin', { email, password })
-        .then(function(result) {
-          if (btn) { btn.disabled = false; btn.textContent = 'Masuk sebagai Admin'; }
-          currentAdmin = result;
-          sessionStorage.setItem('lokara_admin', JSON.stringify(result));
-          showAdminPanel();
-        })
-        .catch(function(err) {
-          if (btn) { btn.disabled = false; btn.textContent = 'Masuk sebagai Admin'; }
-          showToast(err.message || 'Login admin gagal', 'error');
-        });
-    }
 
     function logoutAdmin() {
       currentAdmin = null;
       sessionStorage.removeItem('lokara_admin');
       document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'none';
       document.getElementById('authPage').style.display = 'flex';
-      document.getElementById('adminLoginForm').style.display = 'none';
       document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('registerForm').style.display = 'none';
     }
 
     function showAdminPanel() {
       document.getElementById('authPage').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'none';
-      document.getElementById('adminPanel').style.display = 'block';
+      document.getElementById('adminPanel').style.display = 'none';
+      // FIX: Admin masuk ke mainApp biasa tapi dengan akses penuh + menu tambahan
+      document.getElementById('mainApp').style.display = 'block';
       document.getElementById('adminGreeting').textContent = 'Selamat datang, ' + (currentAdmin.nama || 'Admin');
+      // Tampilkan menu admin di profil
+      const adminMenuSection = document.getElementById('adminMenuSection');
+      if (adminMenuSection) adminMenuSection.style.display = 'block';
+      // Tampilkan bottom nav admin (Master Data)
+      const adminNavItem = document.getElementById('adminNavItem');
+      if (adminNavItem) adminNavItem.style.display = 'flex';
+      // Tampilkan nama admin di profile header
+      document.getElementById('profileName').textContent = currentAdmin.nama || 'Admin LOKARA';
+      document.getElementById('profileRole').textContent = '⚙️ Administrator';
+      // Muat data untuk admin
+      loadCategories();
+      loadNearbyProducts();
+      loadBanners();
+    }
+
+    function showAdminMasterData() {
+      showPage('adminMasterDataPage');
       loadAdminSettings();
       loadAdminUsers();
       loadAdminBanners();
     }
 
     function showAdminTab(tabId) {
-      ['tabKomisi', 'tabUsers', 'tabBanners'].forEach(function(t) {
-        document.getElementById(t).style.display = t === tabId ? 'block' : 'none';
+      // Support both old IDs (adminPanel) and new IDs (adminMasterDataPage)
+      const tabMap = {
+        'tabKomisi': 'tabKomisiPage',
+        'tabUsers': 'tabUsersPage',
+        'tabBanners': 'tabBannersPage',
+        'tabKomisiPage': 'tabKomisiPage',
+        'tabUsersPage': 'tabUsersPage',
+        'tabBannersPage': 'tabBannersPage'
+      };
+      const resolvedId = tabMap[tabId] || tabId;
+
+      ['tabKomisiPage', 'tabUsersPage', 'tabBannersPage'].forEach(function(t) {
+        const el = document.getElementById(t);
+        if (el) el.style.display = t === resolvedId ? 'block' : 'none';
       });
-      const tabBtnMap = { tabKomisi: 'btnTabKomisi', tabUsers: 'btnTabUsers', tabBanners: 'btnTabBanners' };
-      Object.keys(tabBtnMap).forEach(function(t) {
-        const btn = document.getElementById(tabBtnMap[t]);
+
+      const btnMap = {
+        tabKomisiPage: 'btnTabKomisiPage',
+        tabUsersPage: 'btnTabUsersPage',
+        tabBannersPage: 'btnTabBannersPage'
+      };
+      Object.keys(btnMap).forEach(function(t) {
+        const btn = document.getElementById(btnMap[t]);
         if (btn) {
-          btn.style.color = t === tabId ? 'var(--primary)' : '#757575';
-          btn.style.borderBottom = t === tabId ? '3px solid var(--primary)' : '3px solid transparent';
+          btn.style.color = t === resolvedId ? 'var(--primary)' : '#757575';
+          btn.style.borderBottom = t === resolvedId ? '3px solid var(--primary)' : '3px solid transparent';
+          btn.style.fontWeight = t === resolvedId ? '700' : '600';
         }
       });
+
+      // Lazy-load data saat tab dibuka
+      if (resolvedId === 'tabUsersPage') loadAdminUsers();
+      if (resolvedId === 'tabBannersPage') loadAdminBanners();
+      if (resolvedId === 'tabKomisiPage') loadAdminSettings();
     }
 
     function loadAdminSettings() {
@@ -4459,21 +4014,7 @@
         .catch(function(err) { showToast(err.message || 'Gagal update', 'error'); });
     }
 
-    // Cek sesi admin saat halaman dibuka
-    (function checkAdminSession() {
-      const admin = sessionStorage.getItem('lokara_admin');
-      if (admin) {
-        try {
-          currentAdmin = JSON.parse(admin);
-          // Akan di-check setelah checkAuth, jadi di-delay
-          setTimeout(function() {
-            if (currentAdmin && document.getElementById('adminPanel').style.display !== 'block') {
-              showAdminPanel();
-            }
-          }, 100);
-        } catch(e) {}
-      }
-    })();
+    // Admin session sudah ditangani di checkAuth()
 
     // Toggle info lokasi saat pilih role seller di registrasi
     function toggleSellerLocationInfo(role) {
