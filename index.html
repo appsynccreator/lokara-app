@@ -2541,27 +2541,28 @@
         return Promise.reject(new Error('GAS_URL kosong'));
       }
 
-      // Gunakan GET + URL params untuk menghindari CORS preflight
-      // GAS Web App GET tidak memicu CORS block dari browser
-      var params = {
-        action: action,
-        data: JSON.stringify(data || {})
-      };
-      var qs = Object.keys(params).map(function(k) {
-        return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-      }).join('&');
-      var url = GAS_URL + '?' + qs;
+      // Selalu gunakan GET + URL params — tidak ada CORS preflight untuk simple GET
+      // Data dikirim sebagai JSON string di query param ?action=...&data={...}
+      var dataStr = JSON.stringify(data || {});
+      var url = GAS_URL
+        + '?action=' + encodeURIComponent(action)
+        + '&data='   + encodeURIComponent(dataStr)
+        + '&t='      + Date.now(); // cache buster
 
       return fetch(url, { method: 'GET', redirect: 'follow' })
-      .then(function(r) { return r.text(); })
+      .then(function(r) {
+        if (!r.ok && r.status !== 0) {
+          throw new Error('HTTP error: ' + r.status);
+        }
+        return r.text();
+      })
       .then(function(text) {
         if (!text || text.trim() === '') throw new Error('Response kosong dari server');
-        if (text.trim().startsWith('<')) {
-          throw new Error('Server error: pastikan deploy GAS dengan akses "Anyone"');
-        }
-        try { return JSON.parse(text); }
+        var t = text.trim();
+        if (t.startsWith('<')) throw new Error('GAS mengembalikan HTML. Pastikan "Who has access = Anyone" dan sudah deploy ulang.');
+        try { return JSON.parse(t); }
         catch(e) {
-          console.error('Response tidak valid:', text.substring(0, 300));
+          console.error('Response tidak valid:', t.substring(0, 300));
           throw new Error('Response tidak valid dari server');
         }
       })
