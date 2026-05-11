@@ -2055,11 +2055,20 @@
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
 
-        <div class="menu-item" onclick="showSellerInvoices()">
+        <div class="menu-item" id="sellerInvoiceMenu" style="display:none;" onclick="showSellerInvoices()">
           <div class="menu-icon" style="background:#FBE9E7; color:#BF360C;"><i class="fas fa-file-invoice-dollar"></i></div>
           <div class="menu-text">
             <h4>Tagihan Komisi</h4>
             <p>Lihat &amp; lunasi tagihan komisi COD</p>
+          </div>
+          <i class="fas fa-chevron-right menu-arrow"></i>
+        </div>
+
+        <div class="menu-item" id="sellerEwalletMenu" style="display:none;" onclick="showEwalletPage()">
+          <div class="menu-icon" style="background:#E8F5E9; color:#1B5E20;"><i class="fas fa-wallet"></i></div>
+          <div class="menu-text">
+            <h4>Akun E-Wallet</h4>
+            <p>Daftar e-wallet untuk terima dana</p>
           </div>
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
@@ -2584,6 +2593,70 @@
       </div>
     </div>
 
+
+    <!-- ============ SELLER E-WALLET PAGE ============ -->
+    <div class="page" id="ewalletPage" style="display:none;">
+      <div class="app-header" style="position:sticky; top:0; z-index:120;">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
+          <div class="logo-text">💳 Akun E-Wallet</div>
+          <div style="width:40px;"></div>
+        </div>
+      </div>
+
+      <div style="padding:20px;">
+        <div style="background:#E8F5E9; border-radius:16px; padding:16px; margin-bottom:20px; font-size:13px; line-height:1.7; color:#1B5E20;">
+          <strong>ℹ️ Untuk Apa Akun E-Wallet?</strong><br>
+          Dana dari pembayaran digital (DANA/OVO) buyer akan dikirim ke e-wallet yang terdaftar setelah buyer mengkonfirmasi pesanan diterima.
+        </div>
+
+        <!-- E-Wallet terdaftar -->
+        <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:16px;">
+          <div style="font-size:15px; font-weight:700; margin-bottom:16px; color:var(--primary);">E-Wallet Terdaftar</div>
+          <div id="ewalletList">
+            <div style="text-align:center;padding:24px;color:#757575;">
+              <i class="fas fa-spinner fa-spin" style="font-size:24px;"></i>
+              <p style="margin-top:8px;font-size:13px;">Memuat...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form tambah/ubah e-wallet -->
+        <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="font-size:15px; font-weight:700; margin-bottom:16px; color:var(--primary);">Daftarkan E-Wallet</div>
+
+          <div class="form-group">
+            <label class="form-label">Jenis E-Wallet</label>
+            <select class="form-input" id="ewalletType">
+              <option value="DANA">DANA</option>
+              <option value="OVO">OVO</option>
+              <option value="GoPay">GoPay</option>
+              <option value="ShopeePay">ShopeePay</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Nomor HP / Akun E-Wallet</label>
+            <input type="tel" class="form-input" id="ewalletNumber" placeholder="08xxxxxxxxxx"
+              pattern="[0-9]+" maxlength="15">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Nama Pemilik Akun</label>
+            <input type="text" class="form-input" id="ewalletName" placeholder="Sesuai nama di e-wallet">
+          </div>
+
+          <div style="background:#FFF8E1; border-radius:12px; padding:12px; margin-bottom:16px; font-size:12px; color:#E65100; line-height:1.6;">
+            ⚠️ Pastikan nomor dan nama sesuai dengan akun e-wallet Anda. Dana yang salah kirim tidak dapat dikembalikan.
+          </div>
+
+          <button class="btn btn-primary" onclick="saveEwallet()" style="width:100%;">
+            <i class="fas fa-save"></i> Simpan E-Wallet
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- ============ END SELLER E-WALLET PAGE ============ -->
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav" id="bottomNav">
@@ -4497,8 +4570,12 @@
       if (currentUser.role === 'seller') {
         document.getElementById('sellerProductsMenu').style.display = 'flex';
         document.getElementById('statsGrid').style.display = 'grid';
-        const locMenu = document.getElementById('sellerLocationMenu');
+        var locMenu = document.getElementById('sellerLocationMenu');
         if (locMenu) locMenu.style.display = 'flex';
+        var invMenu = document.getElementById('sellerInvoiceMenu');
+        if (invMenu) invMenu.style.display = 'flex';
+        var ewMenu = document.getElementById('sellerEwalletMenu');
+        if (ewMenu) ewMenu.style.display = 'flex';
         updateProfileLocationUI();
         loadDashboardStats();
       }
@@ -5021,8 +5098,6 @@
   </script>
 
   <script>
-    // Service Worker — hanya aktif di GitHub Pages (bukan GAS URL)
-  <script>
     function showSellerInvoices() {
       if (!currentUser) return;
       showPage('sellerInvoicesPage');
@@ -5145,6 +5220,80 @@
         });
       });
     }
+
+    // ===== SELLER E-WALLET =====
+    function showEwalletPage() {
+      showPage('ewalletPage');
+      loadEwalletList();
+    }
+
+    function loadEwalletList() {
+      var el = document.getElementById('ewalletList');
+      if (!el || !currentUser) return;
+      el.innerHTML = '<div style="text-align:center;padding:20px;"><i class="fas fa-spinner fa-spin"></i></div>';
+      callGAS('getSellerEwallet', { sellerId: currentUser.id })
+        .then(function(wallets) {
+          if (!wallets || wallets.length === 0) {
+            el.innerHTML = '<div style="text-align:center;padding:24px;color:#757575;">'
+              + '<i class="fas fa-wallet" style="font-size:40px;color:#E0E0E0;margin-bottom:12px;display:block;"></i>'
+              + '<strong>Belum ada e-wallet terdaftar</strong><br>'
+              + '<span style="font-size:13px;">Daftarkan e-wallet untuk menerima dana</span>'
+              + '</div>';
+            return;
+          }
+          el.innerHTML = wallets.map(function(w) {
+            var isActive = w.status === 'active';
+            var bgMap = {DANA:'#E3F2FD',OVO:'#F3E5F5',GoPay:'#E8F5E9',ShopeePay:'#FFF3E0'};
+            var fgMap = {DANA:'#1565C0',OVO:'#6A1B9A',GoPay:'#1B5E20',ShopeePay:'#E65100'};
+            var bg = bgMap[w.type]||'#F5F5F5', fg = fgMap[w.type]||'#333';
+            return '<div style="display:flex;align-items:center;gap:14px;padding:14px;background:#FAFAFA;border-radius:12px;margin-bottom:10px;border:2px solid '+(isActive?'var(--primary)':'#E0E0E0')+'; ">'
+              + '<div style="width:44px;height:44px;background:'+bg+';border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:'+fg+';flex-shrink:0;">'+w.type+'</div>'
+              + '<div style="flex:1;">'
+              + '<div style="font-weight:700;font-size:14px;">'+w.type+'</div>'
+              + '<div style="font-size:13px;color:#333;">'+w.number+'</div>'
+              + '<div style="font-size:12px;color:#757575;">'+w.name+'</div>'
+              + '</div>'
+              + (isActive
+                ? '<span style="font-size:11px;font-weight:700;color:#2E7D32;background:#E8F5E9;padding:4px 10px;border-radius:20px;">&#x2705; Aktif</span>'
+                : '<button onclick="setActiveEwallet(''+w.id+'')" style="font-size:11px;padding:6px 12px;background:var(--primary);color:white;border:none;border-radius:10px;cursor:pointer;">Jadikan Aktif</button>')
+              + '</div>';
+          }).join('');
+        })
+        .catch(function(e) {
+          el.innerHTML = '<div style="padding:20px;color:red;text-align:center;">'+(e.message||'Gagal memuat')+'</div>';
+        });
+    }
+
+    function saveEwallet() {
+      if (!currentUser) return;
+      var type = (document.getElementById('ewalletType')||{}).value||'DANA';
+      var number = ((document.getElementById('ewalletNumber')||{}).value||'').trim();
+      var name = ((document.getElementById('ewalletName')||{}).value||'').trim();
+      if (!number) { showToast('Nomor e-wallet wajib diisi', 'error'); return; }
+      if (!name) { showToast('Nama pemilik wajib diisi', 'error'); return; }
+      if (!/^[0-9]+$/.test(number)) { showToast('Nomor hanya boleh angka', 'error'); return; }
+      var btn = document.querySelector('#ewalletPage .btn-primary');
+      if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
+      callGAS('saveSellerEwallet', { sellerId: currentUser.id, type: type, number: number, name: name })
+        .then(function() {
+          if (btn) { btn.disabled = false; btn.textContent = 'Simpan E-Wallet'; }
+          showToast('E-Wallet berhasil disimpan! ✅', 'success');
+          document.getElementById('ewalletNumber').value = '';
+          document.getElementById('ewalletName').value = '';
+          loadEwalletList();
+        })
+        .catch(function(e) {
+          if (btn) { btn.disabled = false; btn.textContent = 'Simpan E-Wallet'; }
+          showToast(e.message || 'Gagal menyimpan', 'error');
+        });
+    }
+
+    function setActiveEwallet(walletId) {
+      callGAS('setActiveEwallet', { sellerId: currentUser.id, walletId: walletId })
+        .then(function() { showToast('E-Wallet aktif diperbarui ✅', 'success'); loadEwalletList(); })
+        .catch(function(e) { showToast(e.message||'Gagal', 'error'); });
+    }
+
   </script>
 
 </body>
