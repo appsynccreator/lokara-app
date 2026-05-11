@@ -1949,7 +1949,7 @@
     const LOKARA_CONFIG = (function() {
       // Coba baca dari window.LOKARA_CONFIG jika config.js dimuat terpisah
       if (typeof window.LOKARA_CONFIG !== 'undefined') return window.LOKARA_CONFIG;
-      return { GAS_URL: '' }; // <-- Isi GAS_URL di sini jika tidak pakai config.js
+      return { GAS_URL: 'https://script.google.com/macros/s/AKfycbzWfX928Mm1tqoMEYep9No1ucEY5CgbkJ7PTvZMJkqjklZv8QkuJjybCOXFiNL1pJm3Kg/exec' }; // <-- Isi GAS_URL di sini jika tidak pakai config.js
     })();
     const GAS_URL = (LOKARA_CONFIG && LOKARA_CONFIG.GAS_URL) ? LOKARA_CONFIG.GAS_URL : '';
 
