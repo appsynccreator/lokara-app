@@ -2680,7 +2680,7 @@
         <i class="fas fa-comment"></i>
         <span>Chat</span>
       </div>
-      <div class="nav-item" onclick="showPage('profilePage')">
+      <div class="nav-item" onclick="showPage('profilePage'); updateProfileUI();">
         <i class="fas fa-user"></i>
         <span>Akun</span>
       </div>
@@ -3011,6 +3011,10 @@
         // Chat page pakai flex wrapper
         if (pageId === 'chatPage') {
           targetPage.style.display = 'block';
+        }
+        // Refresh profile UI setiap kali profile page dibuka
+        if (pageId === 'profilePage' && typeof currentUser !== 'undefined' && currentUser) {
+          updateProfileUI();
         }
       }
 
