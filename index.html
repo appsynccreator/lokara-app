@@ -5109,40 +5109,51 @@
     }
     function loadSellerInvoices() {
       var el = document.getElementById('invoiceList');
-      if (!el) return;
+      if (!el || !currentUser) return;
       el.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin"></i></div>';
       callGAS('getSellerInvoices', { sellerId: currentUser.id })
         .then(function(invoices) {
           if (!invoices || invoices.length === 0) {
-            el.innerHTML = '<div style="text-align:center;padding:40px;color:#757575;">Tidak ada tagihan</div>'; return;
+            el.innerHTML = '<div style="text-align:center;padding:40px;color:#757575;"><i class="fas fa-receipt" style="font-size:40px;color:#E0E0E0;display:block;margin-bottom:12px;"></i><strong>Tidak ada tagihan</strong><br><span style="font-size:13px;">Tagihan komisi COD akan muncul di sini</span></div>';
+            return;
           }
           el.innerHTML = invoices.map(function(inv) {
             var isPaid = inv.status === 'paid', isPending = inv.status === 'pending_verify';
-            var bg = isPaid?'#E8F5E9':isPending?'#FFF8E1':'#FFEBEE', fc = isPaid?'#2E7D32':isPending?'#E65100':'#C62828';
-            var lbl = isPaid?'Lunas':isPending?'Menunggu Verifikasi':'Belum Bayar';
+            var bg = isPaid ? '#E8F5E9' : isPending ? '#FFF8E1' : '#FFEBEE';
+            var fc = isPaid ? '#2E7D32' : isPending ? '#E65100' : '#C62828';
+            var lbl = isPaid ? 'Lunas' : isPending ? 'Menunggu Verifikasi' : 'Belum Bayar';
+            var uploadSection = (!isPaid && !isPending) ? (
+              '<div style="margin-top:12px;background:#F5F5F5;border-radius:10px;padding:12px;">'
+              + '<div style="font-size:12px;margin-bottom:6px;color:#555;">Transfer ke: <strong>BCA 1234567890 a/n LOKARA PLATFORM</strong></div>'
+              + '<input type="text" class="form-input" id="proof_' + inv.id + '" placeholder="URL bukti transfer (foto/link)" style="margin-bottom:8px;">'
+              + '<button class="btn btn-primary" style="padding:8px;font-size:13px;width:100%;" data-inv-id="' + inv.id + '" onclick="uploadProof(this.getAttribute('data-inv-id'))">📎 Upload Bukti</button>'
+              + '</div>'
+            ) : (inv.proofUrl ? '<div style="font-size:12px;margin-top:6px;"><a href="' + inv.proofUrl + '" target="_blank" style="color:var(--primary);">📎 Lihat bukti transfer</a></div>' : '');
             return '<div style="background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
-              +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
-              +'<div style="font-weight:700;">Periode '+inv.period+'</div>'
-              +'<span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:'+bg+';color:'+fc+';">'+lbl+'</span>'
-              +'</div>'
-              +'<div style="font-size:14px;color:#333;">Komisi: <strong>Rp '+Number(inv.totalCommission).toLocaleString('id-ID')+'</strong></div>'
-              +(inv.proofUrl?'<div style="font-size:12px;margin-top:4px;"><a href="'+inv.proofUrl+'" target="_blank" style="color:var(--primary);">Lihat bukti</a></div>':'')
-              +(!isPaid&&!isPending?'<div style="margin-top:12px;background:#F5F5F5;border-radius:10px;padding:12px;">'
-                +'<div style="font-size:12px;margin-bottom:8px;">Rekening: <strong>BCA 1234567890 a/n LOKARA PLATFORM</strong></div>'
-                +'<input type="text" id="proof_'+inv.id+'" placeholder="URL bukti transfer" class="form-input" style="margin-bottom:8px;">'
-                +'<button class="btn btn-primary" style="padding:8px;font-size:13px;" onclick="uploadProof(''+inv.id+'')">Upload Bukti</button>'
-                +'</div>':'')
-              +'</div>';
+              + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+              + '<div style="font-weight:700;">Periode ' + inv.period + '</div>'
+              + '<span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:' + bg + ';color:' + fc + ';">' + lbl + '</span>'
+              + '</div>'
+              + '<div style="font-size:14px;color:#333;">Komisi: <strong>Rp ' + Number(inv.totalCommission).toLocaleString('id-ID') + '</strong></div>'
+              + uploadSection
+              + '</div>';
           }).join('');
-        }).catch(function(e){ el.innerHTML='<div style="padding:20px;color:red;">'+e.message+'</div>'; });
+        })
+        .catch(function(e) { el.innerHTML = '<div style="padding:20px;color:red;text-align:center;">' + (e.message || 'Gagal memuat') + '</div>'; });
     }
     function uploadProof(id) {
-      var u = document.getElementById('proof_'+id);
-      if (!u||!u.value.trim()){showToast('Isi URL bukti','error');return;}
-      callGAS('uploadCommissionProof',{invoiceId:id,proofUrl:u.value.trim()})
-        .then(function(){showToast('Berhasil! Menunggu verifikasi.','success');loadSellerInvoices();})
-        .catch(function(e){showToast(e.message||'Gagal','error');});
+      var u = document.getElementById('proof_' + id);
+      if (!u || !u.value.trim()) { showToast('Isi URL bukti transfer', 'error'); return; }
+      var btn = document.querySelector('[data-inv-id="' + id + '"]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Mengupload...'; }
+      callGAS('uploadCommissionProof', { invoiceId: id, proofUrl: u.value.trim() })
+        .then(function() { showToast('Berhasil! Menunggu verifikasi admin.', 'success'); loadSellerInvoices(); })
+        .catch(function(e) {
+          if (btn) { btn.disabled = false; btn.textContent = '📎 Upload Bukti'; }
+          showToast(e.message || 'Gagal', 'error');
+        });
     }
+
     function loadAdminInvoices() {
       var el = document.getElementById('adminInvoicesList');
       if (!el) return;
@@ -5245,26 +5256,38 @@
               + '</div>';
             return;
           }
-          el.innerHTML = wallets.map(function(w) {
+          var html = '';
+          wallets.forEach(function(w) {
             var isActive = w.status === 'active';
             var bgMap = {DANA:'#E3F2FD',OVO:'#F3E5F5',GoPay:'#E8F5E9',ShopeePay:'#FFF3E0'};
             var fgMap = {DANA:'#1565C0',OVO:'#6A1B9A',GoPay:'#1B5E20',ShopeePay:'#E65100'};
-            var bg = bgMap[w.type]||'#F5F5F5', fg = fgMap[w.type]||'#333';
-            return '<div style="display:flex;align-items:center;gap:14px;padding:14px;background:#FAFAFA;border-radius:12px;margin-bottom:10px;border:2px solid '+(isActive?'var(--primary)':'#E0E0E0')+'; ">'
-              + '<div style="width:44px;height:44px;background:'+bg+';border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:'+fg+';flex-shrink:0;">'+w.type+'</div>'
+            var bg = bgMap[w.type] || '#F5F5F5';
+            var fg = fgMap[w.type] || '#333';
+            var border = isActive ? 'var(--primary)' : '#E0E0E0';
+            var actionHtml = isActive
+              ? '<span style="font-size:11px;font-weight:700;color:#2E7D32;background:#E8F5E9;padding:4px 10px;border-radius:20px;">&#x2705; Aktif</span>'
+              : '<button class="btn-activate-wallet" data-wallet-id="' + w.id + '" style="font-size:11px;padding:6px 12px;background:var(--primary);color:white;border:none;border-radius:10px;cursor:pointer;">Jadikan Aktif</button>';
+            html += '<div style="display:flex;align-items:center;gap:14px;padding:14px;background:#FAFAFA;border-radius:12px;margin-bottom:10px;border:2px solid ' + border + ';">'
+              + '<div style="width:44px;height:44px;background:' + bg + ';border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:' + fg + ';flex-shrink:0;">' + w.type + '</div>'
               + '<div style="flex:1;">'
-              + '<div style="font-weight:700;font-size:14px;">'+w.type+'</div>'
-              + '<div style="font-size:13px;color:#333;">'+w.number+'</div>'
-              + '<div style="font-size:12px;color:#757575;">'+w.name+'</div>'
+              + '<div style="font-weight:700;font-size:14px;">' + w.type + '</div>'
+              + '<div style="font-size:13px;color:#333;">' + w.number + '</div>'
+              + '<div style="font-size:12px;color:#757575;">' + w.name + '</div>'
               + '</div>'
-              + (isActive
-                ? '<span style="font-size:11px;font-weight:700;color:#2E7D32;background:#E8F5E9;padding:4px 10px;border-radius:20px;">&#x2705; Aktif</span>'
-                : '<button onclick="setActiveEwallet(''+w.id+'')" style="font-size:11px;padding:6px 12px;background:var(--primary);color:white;border:none;border-radius:10px;cursor:pointer;">Jadikan Aktif</button>')
+              + actionHtml
               + '</div>';
-          }).join('');
+          });
+          el.innerHTML = html;
+          // Event delegation untuk tombol Jadikan Aktif
+          el.querySelectorAll('.btn-activate-wallet').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+              var wid = this.getAttribute('data-wallet-id');
+              setActiveEwallet(wid);
+            });
+          });
         })
         .catch(function(e) {
-          el.innerHTML = '<div style="padding:20px;color:red;text-align:center;">'+(e.message||'Gagal memuat')+'</div>';
+          el.innerHTML = '<div style="padding:20px;color:red;text-align:center;">' + (e.message || 'Gagal memuat') + '</div>';
         });
     }
 
