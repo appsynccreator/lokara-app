@@ -15,19 +15,34 @@
   <meta name="theme-color" content="#1B5E20">
   <style>
     :root {
-      --primary: #1B5E20;
-      --primary-light: #4CAF50;
-      --primary-dark: #0D3312;
-      --accent: #8BC34A;
-      --bg: #F5F5F5;
-      --card: #FFFFFF;
-      --text: #212121;
-      --text-light: #757575;
-      --border: #E0E0E0;
-      --success: #4CAF50;
-      --warning: #FF9800;
-      --danger: #F44336;
-      --info: #2196F3;
+      /* Brand — lebih segar, bukan terlalu gelap */
+      --primary:       #16A34A;
+      --primary-light: #22C55E;
+      --primary-dark:  #14532D;
+      --primary-pale:  #F0FDF4;
+      --accent:        #84CC16;
+
+      /* Surface */
+      --bg:    #F8FAFC;
+      --card:  #FFFFFF;
+      --border:#E2E8F0;
+      --border-light: #F1F5F9;
+
+      /* Text */
+      --text:       #0F172A;
+      --text-light: #64748B;
+      --text-muted: #94A3B8;
+
+      /* State */
+      --success: #22C55E;
+      --warning: #F59E0B;
+      --danger:  #EF4444;
+      --info:    #3B82F6;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,.09), 0 4px 8px rgba(0,0,0,.05);
     }
 
     * {
@@ -46,6 +61,8 @@
       background: var(--bg);
       color: var(--text);
       padding-bottom: 80px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     /* Wrapper untuk cegah overflow-x tanpa break fixed positioning */
@@ -60,7 +77,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      background: linear-gradient(150deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-light) 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -111,14 +128,16 @@
 
     /* Header */
     .app-header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      padding: 16px 20px;
+      background: rgba(255,255,255,.98);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: var(--text);
+      padding: 12px 16px 8px;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      position: relative; /* for dropdown */
+      border-bottom: 1px solid var(--border-light);
+      position: relative;
     }
 
     /* Search dropdown */
@@ -181,7 +200,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .logo-container {
@@ -207,21 +226,35 @@
     }
 
     .logo-text {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--primary);
     }
 
     .header-actions {
       display: flex;
-      gap: 16px;
+      gap: 4px;
       align-items: center;
     }
 
     .header-actions i {
-      font-size: 22px;
+      font-size: 18px;
       cursor: pointer;
       position: relative;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      color: var(--text-light);
+      transition: all .15s;
+    }
+
+    .header-actions i:hover {
+      background: var(--bg);
+      color: var(--primary);
     }
 
     .badge {
@@ -241,108 +274,143 @@
     }
 
     .search-bar {
-      background: white;
-      border-radius: 25px;
-      padding: 10px 16px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 14px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      transition: border-color .15s, background .15s;
+    }
+
+    .search-bar:focus-within {
+      border-color: var(--primary-light);
+      background: var(--primary-pale);
     }
 
     .search-bar input {
       border: none;
       outline: none;
       flex: 1;
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text);
+      background: transparent;
+      font-family: 'Poppins', sans-serif;
     }
 
-    .search-bar input::placeholder {
-      color: var(--text-light);
-    }
+    .search-bar input::placeholder { color: var(--text-muted); }
 
     .search-bar i {
-      color: var(--text-light);
-      font-size: 16px;
+      color: var(--text-muted);
+      font-size: 14px;
     }
 
     /* Location Bar */
     .location-bar {
-      background: white;
-      padding: 10px 20px;
+      background: var(--primary-pale);
+      padding: 8px 16px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 13px;
+      gap: 6px;
+      font-size: 12px;
       color: var(--text-light);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #DCFCE7;
     }
 
-    .location-bar i {
-      color: var(--primary);
-    }
+    .location-bar i { color: var(--primary); font-size: 11px; }
 
     .location-bar span {
       color: var(--primary);
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 12px;
     }
 
-    /* Categories */
+    /* ===== CATEGORIES ===== */
     .categories-section {
-      padding: 16px 20px;
-      background: white;
-      margin-bottom: 8px;
+      padding: 16px 16px 12px;
+      background: transparent;
+      margin-bottom: 4px;
     }
 
     .section-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      color: var(--text);
+      letter-spacing: -.01em;
     }
 
     .categories-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
+      gap: 8px;
     }
 
     .category-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       cursor: pointer;
-      transition: transform 0.2s;
+      padding: 10px 4px;
+      background: var(--card);
+      border-radius: 14px;
+      border: 1.5px solid var(--border-light);
+      transition: all 0.18s;
     }
 
-    .category-item:active {
-      transform: scale(0.95);
+    .category-item:hover, .category-item:active {
+      border-color: var(--primary-light);
+      background: var(--primary-pale);
+      transform: translateY(-1px);
     }
 
     .category-icon {
-      width: 50px;
-      height: 50px;
+      width: 38px;
+      height: 38px;
       background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-      border-radius: 15px;
+      border-radius: 11px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 20px;
+      transition: all 0.18s;
+      flex-shrink: 0;
+    }
+
+    .category-item:hover .category-icon,
+    .category-item:active .category-icon {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      transform: scale(1.08);
     }
 
     .category-name {
-      font-size: 11px;
+      font-size: 10px;
       text-align: center;
-      color: var(--text);
-      font-weight: 500;
+      color: var(--text-light);
+      font-weight: 600;
+      line-height: 1.2;
     }
+
+    /* Product location label */
+    .product-location {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      display: none; /* shown by JS */
+      align-items: center;
+      gap: 3px;
+      margin-top: 1px;
+      margin-bottom: 1px;
+    }
+    .product-location i { font-size: 8px; color: var(--primary); }
 
     /* ===== PROMO BANNER ===== */
     .promo-wrap {
-      margin: 0 20px 16px;
+      margin: 0 16px 12px;
       position: relative;
       border-radius: 16px;
       overflow: hidden;
@@ -350,10 +418,10 @@
 
     /* Single card container (mobile & desktop) */
     .promo-card-default {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      background: linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 55%, var(--primary-light) 100%);
       border-radius: 16px;
       padding: 0 20px;
-      height: 130px;
+      height: 116px;
       color: white;
       display: flex;
       align-items: center;
@@ -453,103 +521,140 @@
       padding: 20px; margin-bottom: 16px;
     }
 
-    /* Products Grid */
+    /* ===== PRODUCTS SECTION ===== */
     .products-section {
-      padding: 16px 20px;
+      padding: 4px 16px 16px;
     }
 
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+      padding-top: 10px;
     }
 
     .see-all {
       color: var(--primary);
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
+      background: var(--primary-pale);
+      padding: 4px 10px;
+      border-radius: 20px;
     }
 
+    /* ===== PRODUCTS GRID — 2 col mobile, 3-4 desktop ===== */
     .products-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      gap: 10px;
     }
 
+    /* ===== PRODUCT CARD — compact & clean ===== */
     .product-card {
-      background: white;
-      border-radius: 16px;
+      background: var(--card);
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1.5px solid var(--border-light);
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.18s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-card:hover {
+      border-color: var(--primary-light);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
     }
 
     .product-card:active {
       transform: scale(0.98);
+      box-shadow: none;
     }
 
     .product-image {
       width: 100%;
-      height: 150px;
-      background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+      height: 130px;
+      background: var(--primary-pale);
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
     }
 
     .product-image img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .product-card:hover .product-image img {
+      transform: scale(1.04);
     }
 
     .product-image i {
-      font-size: 40px;
+      font-size: 32px;
       color: var(--primary-light);
+      opacity: .5;
     }
 
+    /* Distance pill */
     .distance-info {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 4px;
-      font-size: 11px;
+      gap: 3px;
+      font-size: 10px;
       color: var(--primary);
-      font-weight: 600;
+      font-weight: 700;
       margin-bottom: 4px;
+      background: var(--primary-pale);
+      padding: 2px 7px;
+      border-radius: 20px;
+      width: fit-content;
     }
 
     .wishlist-btn {
       position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 32px;
-      height: 32px;
-      background: rgba(255,255,255,0.9);
+      top: 7px;
+      right: 7px;
+      width: 28px;
+      height: 28px;
+      background: rgba(255,255,255,.92);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       border: none;
       cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform .15s;
     }
+
+    .wishlist-btn:active { transform: scale(.9); }
 
     .wishlist-btn i {
       color: var(--danger);
-      font-size: 16px;
+      font-size: 13px;
     }
 
     .product-info {
-      padding: 12px;
+      padding: 9px 10px 10px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
     }
 
     .product-name {
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 4px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -557,36 +662,49 @@
     }
 
     .product-price {
-      font-size: 16px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--primary);
-      margin-bottom: 6px;
+      margin-top: 2px;
     }
 
     .product-meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 12px;
-      color: var(--text-light);
+      margin-top: auto;
+      padding-top: 5px;
+      border-top: 1px solid var(--border-light);
     }
 
     .product-seller {
       display: flex;
       align-items: center;
       gap: 4px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .product-seller span {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .seller-avatar {
-      width: 20px;
-      height: 20px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      background: var(--primary-light);
+      background: var(--primary-pale);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
-      color: white;
+      font-size: 8px;
+      color: var(--primary);
+      flex-shrink: 0;
     }
 
     .rating {
@@ -594,68 +712,74 @@
       align-items: center;
       gap: 2px;
       color: var(--warning);
+      font-size: 10px;
+      font-weight: 600;
+      flex-shrink: 0;
     }
 
-    /* Bottom Navigation */
+    .rating i { font-size: 10px; }
+
+    /* ===== BOTTOM NAV — clean pill style ===== */
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: white;
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       display: flex;
       justify-content: space-around;
-      padding: 10px 0;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+      align-items: center;
+      padding: 8px 8px calc(env(safe-area-inset-bottom) + 8px);
+      border-top: 1px solid var(--border-light);
       z-index: 150;
       transform: translateZ(0);
       -webkit-transform: translateZ(0);
       will-change: transform;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
     }
 
     .nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       cursor: pointer;
-      color: var(--text-light);
-      transition: color 0.2s;
-      padding: 0 16px;
+      color: var(--text-muted);
+      transition: color 0.15s;
+      padding: 4px 12px;
+      border-radius: 12px;
+      min-width: 52px;
     }
 
     .nav-item.active {
       color: var(--primary);
+      background: var(--primary-pale);
     }
 
-    .nav-item i {
-      font-size: 22px;
-    }
+    .nav-item i { font-size: 20px; }
 
     .nav-item span {
-      font-size: 11px;
-      font-weight: 500;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .01em;
     }
 
     .sell-btn {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      background: var(--primary);
       color: white;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: -20px;
-      box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
-      border: 3px solid white;
+      margin-top: -18px;
+      box-shadow: 0 4px 14px rgba(22,163,74,.4);
+      border: 2.5px solid white;
     }
 
-    .sell-btn i {
-      font-size: 24px;
-    }
+    .sell-btn i { font-size: 20px; }
 
     /* Pages */
     .page {
@@ -1174,7 +1298,7 @@
 
     /* Profile */
     .profile-header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      background: linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 100%);
       color: white;
       padding: 40px 20px 24px;
       text-align: center;
@@ -1701,6 +1825,727 @@
       font-size: 13px;
       color: var(--text-light);
     }
+
+    /* Floating notification (FIX 7) */
+    .floating-notif {
+      position: fixed;
+      top: -100px;
+      right: 16px;
+      left: 16px;
+      max-width: 380px;
+      margin: 0 auto;
+      background: #1B5E20;
+      color: white;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.2);
+      z-index: 9999;
+      transition: top .4s cubic-bezier(.34,1.56,.64,1);
+      font-family: 'Poppins', sans-serif;
+    }
+    .floating-notif.show { top: calc(env(safe-area-inset-top) + 12px); }
+    @media (min-width:1024px) {
+      .floating-notif { left: auto; right: 24px; top: -100px; max-width: 340px; }
+      .floating-notif.show { top: 72px; }
+    }
+
+    /* Desktop-only elements hidden on mobile */
+    #desktopSidebar { display: none; }    #desktopRightPanel { display: none; }
+    #desktopHomeHeader { display: none; }
+    #desktopHomeLayout { display: block; }
+    #desktopContentInner { display: contents; }
+    #desktopMain { display: contents; }
+
+    /* ============================================================
+       DESKTOP LAYOUT (≥1024px)
+       Mobile: bottom nav tetap, semua normal
+       Desktop: sidebar kiri + topbar + konten max-width
+    ============================================================ */
+    @media (min-width: 1024px) {
+
+      /* Reset mobile padding */
+      body {
+        padding-bottom: 0;
+        background: var(--bg);
+      }
+
+      /* Shell: 2 col × 3 row grid */
+      #mainApp {
+        display: grid;
+        grid-template-columns: 210px 1fr;
+        grid-template-rows: auto 1fr auto;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* --- TOPBAR FIXED --- */
+      .app-header {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 300;
+        background: rgba(255,255,255,.98);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border-light);
+        box-shadow: 0 1px 0 var(--border-light);
+        padding: 0 20px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border-radius: 0;
+      }
+
+      /* Push all grid children below fixed topbar */
+      #desktopSidebar,
+      #sidebarAdGrid,
+      #desktopMain {
+        margin-top: 56px;
+      }
+
+      /* Datetime widget — shown via JS on desktop */
+      #dskDatetime { flex-shrink: 0; }
+
+      /* Hide mobile header children, show desktop ones */
+      .app-header .header-top {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 16px;
+        margin-bottom: 0;
+      }
+
+      .app-header .logo-container {
+        width: 170px;
+        flex-shrink: 0;
+        gap: 10px;
+      }
+
+      .app-header .logo-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #4CAF50, #1B5E20);
+      }
+
+      .app-header .logo-icon i { display: none; }
+
+      .app-header .logo-text {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: var(--primary);
+      }
+
+      /* Search bar — desktop center */
+      .app-header .search-bar {
+        flex: 1;
+        max-width: 460px;
+        height: 38px;
+        border-radius: 10px;
+        background: #F4F6F8;
+        border: 1px solid #E5E7EB;
+        padding: 0 14px;
+        margin: 0;
+      }
+
+      .app-header .search-bar input {
+        font-size: 13px;
+        color: var(--text);
+      }
+
+      /* Header action icons — desktop style */
+      .app-header .header-actions {
+        margin-left: auto;
+        gap: 8px;
+      }
+
+      .app-header .header-actions i {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        border: 1px solid #E5E7EB;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        color: #6B7280;
+        transition: background .15s;
+      }
+
+      .app-header .header-actions i:hover { background: #F4F6F8; }
+
+      /* Location bar — hide on desktop (shown in sidebar/content) */
+      .location-bar { display: none; }
+
+      /* --- SIDEBAR --- */
+      #desktopSidebar {
+        display: flex;
+        flex-direction: column;
+        grid-column: 1;
+        grid-row: 2;
+        background: var(--card);
+        border-right: 1px solid var(--border-light);
+        position: sticky;
+        top: 56px;
+        /* Hanya tinggi konten navigasi, bukan full vh */
+        max-height: calc(100vh - 56px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 0;
+        z-index: 10;
+      }
+
+      /* Nav area */
+      #sidebarNav {
+        flex: 0 0 auto;
+        padding: 8px 0 4px;
+        overflow-y: auto;
+      }
+
+      /* User card: pinned bottom of sidebar */
+      .ds-bottom {
+        flex: 0 0 auto;
+        margin-top: auto;
+        padding: 6px 8px 8px;
+        border-top: 1px solid var(--border-light);
+        background: var(--card);
+      }
+
+      .ds-section { margin-bottom: 4px; }
+
+      .ds-label {
+        font-size: 9.5px;
+        font-weight: 700;
+        color: #9CA3AF;
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        padding: 4px 14px 3px;
+      }
+
+      .ds-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        margin: 1px 6px;
+        border-radius: 9px;
+        cursor: pointer;
+        color: var(--text-light);
+        font-size: 12.5px;
+        font-weight: 500;
+        transition: all .15s;
+        white-space: nowrap;
+        text-decoration: none;
+      }
+
+      /* Icon wrapper — kotak kecil berwarna */
+      .ds-link .ds-ico {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        flex-shrink: 0;
+        transition: transform .15s;
+      }
+
+      .ds-link i {
+        width: 18px;
+        font-size: 13px;
+        flex-shrink: 0;
+        text-align: center;
+      }
+
+      .ds-link:hover .ds-ico { transform: scale(1.08); }
+
+      .ds-link:hover {
+        background: var(--primary-pale);
+        color: var(--text);
+      }
+
+      .ds-link.active {
+        background: var(--primary-pale);
+        color: var(--primary);
+        font-weight: 700;
+        border-left: 3px solid var(--primary);
+        padding-left: 7px;
+      }
+
+      .ds-link.active .ds-ico { transform: scale(1.05); }
+
+      .ds-link .ds-badge {
+        margin-left: auto;
+        background: #EF4444;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 20px;
+        min-width: 18px;
+        text-align: center;
+      }
+
+      .ds-divider {
+        height: 1px;
+        background: #F3F4F6;
+        margin: 5px 12px;
+      }
+
+
+
+      /* ====== SIDEBAR AD PANEL — kolom 1 row 3 ====== */
+      #sidebarAdGrid {
+        grid-column: 1;
+        grid-row: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+        background: var(--bg);
+        border-right: 1px solid var(--border-light);
+        /* Sticky: menempel di bawah sidebar, isi sisa viewport */
+        position: sticky;
+        top: calc(56px + /* sidebar tinggi dinamis */ 0px);
+        min-height: calc(100vh - 56px - 300px);
+        overflow-y: auto;
+      }
+
+      /* Main content: span row 2 sampai 3 */
+      #desktopMain {
+        grid-column: 2 !important;
+        grid-row: 2 / 4 !important;
+      }
+
+      /* ====== SIDEBAR AD CARDS ====== */
+      .sidebar-ad-card {
+        border-radius: 12px;
+        background: var(--card);
+        border: 1.5px dashed #BBF7D0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 10px;
+        text-align: center;
+        transition: all .18s;
+        gap: 5px;
+        min-height: 100px;
+      }
+      /* Last slot grows to fill remaining space */
+      .sidebar-ad-flex {
+        flex: 1 1 auto;
+        min-height: 80px;
+      }
+      .sidebar-ad-card:hover {
+        border-color: var(--primary-light);
+        border-style: solid;
+        background: var(--primary-pale);
+      }
+      /* Empty/placeholder slots — lighter styling */
+      .sidebar-ad-empty {
+        border-color: #E2E8F0;
+        background: #FAFAFA;
+        min-height: 72px;
+      }
+      .sidebar-ad-empty:hover {
+        border-color: var(--primary-light);
+        background: var(--primary-pale);
+      }
+      /* Active slot with ad content */
+      .sidebar-ad-card.has-ad {
+        border-style: solid;
+        border-color: var(--border-light);
+        padding: 8px;
+        background: var(--card);
+      }
+      .sidebar-ad-card.has-ad img {
+        width: 100%;
+        height: 72px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 2px;
+      }
+      /* Icon sizes */
+      .sad-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--primary-light), var(--primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+      .sad-icon-sm {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        background: #E2E8F0;
+        color: #94A3B8;
+        font-size: 12px;
+      }
+      .sad-label {
+        font-size: 8px;
+        font-weight: 700;
+        color: var(--primary);
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        background: var(--primary-pale);
+        padding: 1px 6px;
+        border-radius: 20px;
+      }
+      .sad-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.3;
+      }
+      .sad-sub {
+        font-size: 9px;
+        color: var(--text-muted);
+        line-height: 1.4;
+      }
+      .sad-cta {
+        font-size: 9.5px;
+        font-weight: 700;
+        color: white;
+        background: var(--primary);
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-top: 2px;
+      }
+
+      .ds-user-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 10px;
+        border-radius: 10px;
+        background: #F9FAFB;
+        cursor: pointer;
+        transition: background .15s;
+      }
+
+      .ds-user-card:hover { background: #F0FDF4; }
+
+      .ds-user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #E8F5E9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--primary);
+        flex-shrink: 0;
+        overflow: hidden;
+      }
+
+      .ds-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+      .ds-user-info { min-width: 0; flex: 1; }
+      .ds-user-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .ds-user-role { font-size: 10px; color: #9CA3AF; }
+
+      /* --- MAIN CONTENT AREA --- */
+      #desktopMain {
+        grid-column: 2;
+        grid-row: 2;
+        overflow-y: auto;
+        background: #F4F6F8;
+      }
+
+      /* All .page divs get wrapped in desktop content width */
+      .page { max-width: none; }
+
+      .page.active { display: block; }
+
+      /* Inner content wrapper */
+      #desktopContentInner {
+        max-width: 1080px;
+        padding: 24px 28px 48px;
+        margin: 0 auto;
+      }
+
+      /* --- DESKTOP STAT CARDS ROW --- */
+      #desktopStatsRow {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .dsk-stat {
+        background: var(--card);
+        border: 1.5px solid var(--border-light);
+        border-radius: 12px;
+        padding: 10px 14px;
+        border-left: 3px solid var(--primary-light);
+        transition: border-color .15s, box-shadow .15s;
+      }
+      .dsk-stat:hover { border-color: var(--primary-light); box-shadow: var(--shadow-sm); }
+
+      .dsk-stat-label {
+        font-size: 9.5px;
+        color: var(--text-muted);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .dsk-stat-val {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--text);
+        line-height: 1;
+        margin-bottom: 2px;
+        letter-spacing: -.02em;
+      }
+
+      .dsk-stat-sub { font-size: 9.5px; color: var(--primary); font-weight: 600; }
+
+      /* --- DESKTOP HOME LAYOUT: full width tanpa right panel kolom kecil --- */
+      #desktopHomeLayout {
+        display: block;
+      }
+
+      /* Categories: 10 col on desktop */
+      .categories-section {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 10px;
+      }
+
+      .categories-grid {
+        grid-template-columns: repeat(10, 1fr);
+        gap: 6px;
+      }
+
+      .category-item {
+        background: var(--card);
+        border: 1.5px solid var(--border-light);
+        border-radius: 12px;
+        padding: 10px 6px 8px;
+        transition: all .18s;
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+      }
+
+      .category-item:hover {
+        border-color: var(--primary-light);
+        background: var(--primary-pale);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .category-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 17px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .category-name {
+        font-size: 9.5px;
+        font-weight: 600;
+        color: var(--text-light);
+        text-align: center;
+        line-height: 1.2;
+      }
+
+      /* Products grid: 6 col on desktop */
+      .products-grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+      }
+
+      .product-card {
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        box-shadow: none;
+      }
+
+      .product-card:hover {
+        border-color: var(--primary-light);
+        box-shadow: 0 4px 12px rgba(22,163,74,.1);
+        transform: translateY(-2px);
+      }
+
+      .product-image { height: 92px; }
+      .product-image i { font-size: 20px; }
+
+      .product-info { padding: 6px 7px 7px; gap: 1px; }
+      .product-name { font-size: 11px; -webkit-line-clamp: 2; line-height: 1.3; }
+      .product-price { font-size: 11px; margin-top: 1px; font-weight: 700; }
+      .distance-info { font-size: 8.5px; padding: 1px 5px; }
+      .product-meta { padding-top: 3px; }
+      .product-seller span { font-size: 8.5px; }
+      .rating { font-size: 8.5px; }
+      .rating i { font-size: 8.5px; }
+      .seller-avatar { width: 12px; height: 12px; font-size: 7px; }
+      .wishlist-btn { width: 24px; height: 24px; top: 5px; right: 5px; }
+      .wishlist-btn i { font-size: 11px; }
+
+      /* Product location label */
+      .product-location {
+        font-size: 9px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-top: 1px;
+      }
+      .product-location i { font-size: 8px; }
+
+      /* Promo banner desktop */
+      .promo-wrap {
+        margin: 0 0 10px;
+        border-radius: 12px;
+      }
+
+      .promo-card-default {
+        height: 90px;
+        border-radius: 12px;
+        padding: 0 22px;
+      }
+
+      .promo-text-wrap h3 { font-size: 17px; }
+      .promo-text-wrap p { font-size: 13px; }
+
+      /* Section headers */
+      .section-title { font-size: 14px; }
+      .products-section { padding: 0 0 14px; }
+
+      /* --- DESKTOP RIGHT PANEL: inline row di bawah produk --- */
+      #desktopRightPanel {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .dsk-panel {
+        background: var(--card);
+        border: 1.5px solid var(--border-light);
+        border-radius: 14px;
+        padding: 14px 16px;
+      }
+
+      .dsk-panel-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .dsk-panel-title-sub { font-size: 11px; color: #9CA3AF; font-weight: 400; }
+
+      .dsk-umkm-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #F3F4F6;
+      }
+
+      .dsk-umkm-item:last-child { border-bottom: none; }
+      .dsk-umkm-rank { width: 18px; font-size: 11px; font-weight: 700; color: #9CA3AF; text-align: center; flex-shrink: 0; }
+      .dsk-umkm-rank.gold { color: #F59E0B; }
+      .dsk-umkm-avatar { width: 30px; height: 30px; border-radius: 8px; background: #F0FDF4; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+      .dsk-umkm-info { flex: 1; min-width: 0; }
+      .dsk-umkm-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .dsk-umkm-sub { font-size: 10px; color: #9CA3AF; }
+      .dsk-umkm-count { font-size: 11px; font-weight: 700; color: var(--primary); flex-shrink: 0; }
+
+      /* Desktop location bar inside content */
+      #desktopLocBar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        border: 1px solid #E5E7EB;
+        border-radius: 10px;
+        padding: 7px 14px;
+        margin-bottom: 10px;
+        font-size: 12px;
+        color: #6B7280;
+      }
+
+      #desktopLocBar i { color: var(--primary); }
+      #desktopLocBar .loc-name { color: var(--primary); font-weight: 600; }
+      #desktopLocBar .loc-toggle-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+      /* Desktop page title — compact */
+      #desktopPageTitle {
+        margin-bottom: 8px;
+      }
+
+      #desktopPageTitle h2 {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 1px;
+      }
+
+      #desktopPageTitle p {
+        font-size: 12px;
+        color: #9CA3AF;
+      }
+
+      /* Bottom nav — hide on desktop */
+      .bottom-nav { display: none !important; }
+
+      /* Desktop-only elements — show */
+      #desktopSidebar { display: flex !important; }
+      #sidebarAdGrid { display: flex !important; }
+      #desktopRightPanel { display: flex !important; flex-direction: column; gap: 16px; }
+      #desktopHomeHeader { display: block !important; }
+      #desktopContentInner { display: block !important; max-width: 1100px; padding: 12px 20px 32px; margin: 0 auto; }
+      #desktopMain { display: block !important; overflow-y: auto; background: var(--bg); grid-column: 2; grid-row: 2; }
+      #desktopHomeLayout { display: grid !important; grid-template-columns: 1fr 272px; gap: 20px; align-items: start; }
+      #desktopHomeLeft { min-width: 0; }
+
+      /* Orders page desktop */
+      #ordersPage .products-section { padding: 0; }
+
+      /* Profile page desktop */
+      #profilePage .profile-header { border-radius: 12px; margin-bottom: 16px; }
+      #profilePage .profile-menu { background: #fff; border-radius: 12px; border: 1px solid #E5E7EB; overflow: hidden; }
+      #profilePage .stats-grid { padding: 0 0 16px; }
+      #profilePage .stat-card { border: 1px solid #E5E7EB; border-radius: 10px; }
+
+      /* Modals etc keep normal */
+      .modal-overlay, .map-picker-overlay { z-index: 9999; }
+
+    }
+    /* END @media desktop */
   </style>
 </head>
 <body>
@@ -1882,6 +2727,13 @@
           <div class="logo-text">LOKARA</div>
         </div>
         <div class="header-actions">
+          <!-- Desktop datetime — kiri refresh icon -->
+          <div id="dskDatetime" style="display:none; flex-direction:column; align-items:flex-end; margin-right:4px; line-height:1.15; flex-shrink:0;">
+            <span class="dt-time" id="dskTime" style="font-size:13px;font-weight:700;color:var(--text);letter-spacing:.02em;font-variant-numeric:tabular-nums;">00:00</span>
+            <span class="dt-date" id="dskDate" style="font-size:9.5px;color:var(--text-muted);font-weight:500;white-space:nowrap;">—</span>
+          </div>
+          <i class="fas fa-sync-alt" id="refreshBtn" onclick="manualRefresh()" title="Refresh data"
+            style="transition:transform .4s;"></i>
           <i class="far fa-bell" onclick="showNotifications()">
             <span class="badge" id="notifBadge" style="display:none;">0</span>
           </i>
@@ -1900,15 +2752,158 @@
       <div id="searchDropdown" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border-radius:0 0 16px 16px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:200; max-height:320px; overflow-y:auto; margin:0 0 0 0;"></div>
     </div>
 
-    <!-- Location Bar -->
+    <!-- Location Bar (mobile only, hidden on desktop) -->
     <div class="location-bar">
       <i class="fas fa-location-arrow"></i>
       <span id="locationText">Mendeteksi lokasi...</span>
     </div>
 
+    <!-- ====== DESKTOP SIDEBAR (hidden on mobile via CSS) ====== -->
+    <nav id="desktopSidebar" style="display:none;">
+      <div id="sidebarNav">
+      <div class="ds-section">
+        <div class="ds-label">Menu Utama</div>
+        <div class="ds-link active" id="dsnBeranda" onclick="showPage('homePage')">
+          <span class="ds-ico" style="background:#DCFCE7;color:#16A34A;"><i class="fas fa-home"></i></span> Beranda
+        </div>
+        <div class="ds-link" id="dsnPesanan" onclick="showOrders()">
+          <span class="ds-ico" style="background:#FEF3C7;color:#D97706;"><i class="fas fa-shopping-bag"></i></span> Pesanan
+          <span class="ds-badge" id="dsnOrderBadge" style="display:none;">0</span>
+        </div>
+        <div class="ds-link" id="dsnWishlist" onclick="showWishlist()">
+          <span class="ds-ico" style="background:#FFE4E6;color:#E11D48;"><i class="fas fa-heart"></i></span> Wishlist
+        </div>
+      </div>
+
+      <div class="ds-divider"></div>
+
+      <div class="ds-section" id="dsnSellerSection" style="display:none;">
+        <div class="ds-label">Seller</div>
+        <div class="ds-link" onclick="showAddProduct()">
+          <span class="ds-ico" style="background:#DBEAFE;color:#2563EB;"><i class="fas fa-plus-circle"></i></span> Tambah Produk
+        </div>
+        <div class="ds-link" id="dsnProdukSaya" onclick="showSellerProducts()">
+          <span class="ds-ico" style="background:#EDE9FE;color:#7C3AED;"><i class="fas fa-box"></i></span> Produk Saya
+        </div>
+        <div class="ds-link" onclick="showBannerAd()">
+          <span class="ds-ico" style="background:#FFF7ED;color:#EA580C;"><i class="fas fa-ad"></i></span> Pasang Iklan
+        </div>
+        <div class="ds-link" onclick="showSellerInvoices()">
+          <span class="ds-ico" style="background:#FFEDD5;color:#C2410C;"><i class="fas fa-file-invoice-dollar"></i></span> Tagihan Komisi
+        </div>
+        <div class="ds-link" onclick="showEwalletPage()">
+          <span class="ds-ico" style="background:#CCFBF1;color:#0D9488;"><i class="fas fa-wallet"></i></span> E-Wallet
+        </div>
+      </div>
+
+      <div class="ds-divider"></div>
+
+      <div class="ds-section">
+        <div class="ds-label">Akun</div>
+        <div class="ds-link" id="dsnProfile" onclick="showPage('profilePage'); updateProfileUI();">
+          <span class="ds-ico" style="background:#F1F5F9;color:#475569;"><i class="fas fa-user-circle"></i></span> Profil Saya
+        </div>
+        <div class="ds-link" id="dsnAdmin" style="display:none;" onclick="showAdminMasterData()">
+          <span class="ds-ico" style="background:#E0F2FE;color:#0369A1;"><i class="fas fa-database"></i></span> Master Data
+        </div>
+        <div class="ds-link" style="color:var(--danger);" onclick="logout()">
+          <span class="ds-ico" style="background:#FEE2E2;color:#DC2626;"><i class="fas fa-sign-out-alt"></i></span> Keluar
+        </div>
+      </div>
+
+      </div>
+      <!-- User card: pinned at bottom of sidebar -->
+      <div class="ds-bottom">
+        <div class="ds-user-card" onclick="showPage('profilePage'); updateProfileUI();">
+          <div class="ds-user-avatar" id="dsnUserAvatar">
+            <i class="fas fa-user" id="dsnUserAvatarIcon"></i>
+            <img id="dsnUserAvatarImg" src="" alt="" style="display:none;">
+          </div>
+          <div class="ds-user-info">
+            <div class="ds-user-name" id="dsnUserName">—</div>
+            <div class="ds-user-role" id="dsnUserRole">—</div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ====== SIDEBAR AD PANEL (terpisah dari sidebar nav, kolom 1) ====== -->
+    <div id="sidebarAdGrid" style="display:none;">
+      <div class="sidebar-ad-card" id="sidebarAdSlot0" onclick="sidebarAdClick(0)">
+        <div class="sad-icon"><i class="fas fa-ad"></i></div>
+        <div class="sad-label">IKLAN</div>
+        <div class="sad-title">Pasang Iklan Anda di Sini</div>
+        <div class="sad-sub">Jangkau pembeli di sekitarmu</div>
+        <div class="sad-cta">Pasang Sekarang →</div>
+      </div>
+      <div class="sidebar-ad-card sidebar-ad-empty" id="sidebarAdSlot1" onclick="sidebarAdClick(1)">
+        <div class="sad-icon sad-icon-sm"><i class="fas fa-plus"></i></div>
+        <div class="sad-title" style="font-size:10.5px;">Slot Iklan Tersedia</div>
+        <div class="sad-sub" style="font-size:9px;">Klik untuk pasang iklan</div>
+      </div>
+      <div class="sidebar-ad-card sidebar-ad-empty" id="sidebarAdSlot2" onclick="sidebarAdClick(2)">
+        <div class="sad-icon sad-icon-sm"><i class="fas fa-plus"></i></div>
+        <div class="sad-title" style="font-size:10.5px;">Slot Iklan Tersedia</div>
+        <div class="sad-sub" style="font-size:9px;">Klik untuk pasang iklan</div>
+      </div>
+      <div class="sidebar-ad-card sidebar-ad-empty sidebar-ad-flex" id="sidebarAdSlot3" onclick="sidebarAdClick(3)">
+        <div class="sad-icon sad-icon-sm"><i class="fas fa-plus"></i></div>
+        <div class="sad-title" style="font-size:10.5px;">Slot Iklan Tersedia</div>
+        <div class="sad-sub" style="font-size:9px;">Klik untuk pasang iklan</div>
+      </div>
+    </div>
+    <!-- ====== END DESKTOP SIDEBAR ====== -->
+
+    <!-- ====== DESKTOP MAIN SCROLL AREA ====== -->
+    <div id="desktopMain" style="display:contents;">
+    <div id="desktopContentInner">
+
+    <!-- Desktop: loc bar + stat cards + home layout (injected by JS) -->
+    <div id="desktopHomeHeader" style="display:none;">
+      <div id="desktopPageTitle">
+        <h2 id="desktopGreeting">Beranda</h2>
+        <p id="desktopSubtitle">Temukan produk UMKM terbaik di sekitarmu</p>
+      </div>
+      <div id="desktopLocBar">
+        <i class="fas fa-location-dot"></i>
+        <span>Lokasi kamu:</span>
+        <span class="loc-name" id="desktopLocText">Mendeteksi...</span>
+        <div class="loc-toggle-wrap">
+          <span style="font-size:12px;color:#9CA3AF;" id="desktopToggleLabel">&lt; 1 KM</span>
+          <div id="desktopRadiusToggle" onclick="toggleRadius()"
+            style="width:38px;height:20px;background:var(--primary);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
+            <div id="desktopToggleThumb"
+              style="width:16px;height:16px;background:white;border-radius:50%;position:absolute;top:2px;right:2px;transition:right .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div>
+          </div>
+        </div>
+      </div>
+      <div id="desktopStatsRow">
+        <div class="dsk-stat">
+          <div class="dsk-stat-label"><i class="fas fa-map-marker-alt"></i> Produk Terdekat</div>
+          <div class="dsk-stat-val" id="dskStatProducts">—</div>
+          <div class="dsk-stat-sub" id="dskStatProductsSub">Dalam radius 1 km</div>
+        </div>
+        <div class="dsk-stat">
+          <div class="dsk-stat-label"><i class="fas fa-store"></i> UMKM Aktif</div>
+          <div class="dsk-stat-val" id="dskStatSellers">—</div>
+          <div class="dsk-stat-sub">Di sekitarmu</div>
+        </div>
+        <div class="dsk-stat" style="border-left-color:#EF4444;">
+          <div class="dsk-stat-label"><i class="fas fa-fire" style="color:#EF4444;"></i> Sedang Diskon</div>
+          <div class="dsk-stat-val" id="dskStatDiskon" style="color:#EF4444;">—</div>
+          <div class="dsk-stat-sub" style="color:#EF4444;" id="dskStatDiskonSub">Produk diskon aktif</div>
+        </div>
+        <div class="dsk-stat" style="border-left-color:#F59E0B;">
+          <div class="dsk-stat-label"><i class="fas fa-shopping-bag" style="color:#F59E0B;"></i> Pesanan Aktif</div>
+          <div class="dsk-stat-val" id="dskStatOrders" style="color:#F59E0B;">—</div>
+          <div class="dsk-stat-sub" style="color:#F59E0B;">Menunggu konfirmasi</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Home Page -->
     <div class="page active" id="homePage">
-      <!-- Categories -->
+      <!-- Categories + Promo: full width on both mobile and desktop -->
       <div class="categories-section">
         <div class="section-title">
           <i class="fas fa-th-large" style="color: var(--primary);"></i>
@@ -1940,6 +2935,10 @@
         <!-- Dots (hanya saat ada >1 iklan) -->
         <div class="promo-dots" id="promoDots" style="display:none;"></div>
       </div>
+
+      <!-- Desktop 2-col layout: left=products, right=panels -->
+      <div id="desktopHomeLayout">
+      <div id="desktopHomeLeft">
 
       <!-- ===== SEDANG DISKON ===== -->
       <div class="products-section" id="diskonSection" style="display:none;">
@@ -1993,6 +2992,40 @@
 
         <div class="products-grid" id="mainProductsGrid"></div>
       </div>
+
+      </div><!-- end desktopHomeLeft -->
+
+      <!-- ===== DESKTOP RIGHT PANEL (hidden on mobile) ===== -->
+      <div id="desktopRightPanel">
+        <!-- UMKM Paling Laris -->
+        <div class="dsk-panel" id="dskTopSellersPanel">
+          <div class="dsk-panel-title">
+            🏆 UMKM Paling Laris
+            <span class="dsk-panel-title-sub">30 hari terakhir</span>
+          </div>
+          <div id="dskTopSellersList">
+            <div style="text-align:center;padding:24px;color:#9CA3AF;font-size:13px;">
+              <i class="fas fa-spinner fa-spin"></i> Memuat...
+            </div>
+          </div>
+        </div>
+
+        <!-- Pesanan Terakhir -->
+        <div class="dsk-panel" id="dskRecentOrdersPanel">
+          <div class="dsk-panel-title">
+            📦 Pesanan Terakhir
+            <span class="see-all" onclick="showOrders()" style="font-size:11px;">Lihat semua →</span>
+          </div>
+          <div id="dskRecentOrdersList">
+            <div style="text-align:center;padding:24px;color:#9CA3AF;font-size:13px;">
+              <i class="fas fa-spinner fa-spin"></i> Memuat...
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ===== END DESKTOP RIGHT PANEL ===== -->
+
+      </div><!-- end desktopHomeLayout -->
     </div>
 
     <!-- Orders Page -->
@@ -2138,6 +3171,14 @@
           </div>
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
+        <div class="menu-item" onclick="showNotifSettings()">
+          <div class="menu-icon" style="background:#E8EAF6; color:#3F51B5;"><i class="fas fa-bell"></i></div>
+          <div class="menu-text">
+            <h4>Notifikasi</h4>
+            <p>Atur nada & izin notifikasi</p>
+          </div>
+          <i class="fas fa-chevron-right menu-arrow"></i>
+        </div>
       </div>
     </div>
 
@@ -2146,63 +3187,109 @@
       <div class="app-header" style="position:sticky; top:0; z-index:120;">
         <div class="header-top">
           <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
-          <div class="logo-text">Pasang Iklan</div>
+          <div class="logo-text" id="bannerPageTitle">Pasang Iklan</div>
           <div style="width:40px;"></div>
         </div>
       </div>
       <div style="padding:20px 20px 100px;">
-        <div style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB); border-radius:16px; padding:16px; margin-bottom:20px; display:flex; gap:12px; align-items:center;">
-          <i class="fas fa-ad" style="font-size:32px; color:#1565C0;"></i>
-          <div>
-            <div style="font-weight:700; font-size:14px;">Iklan Banner Beranda</div>
-            <div style="font-size:12px; color:var(--text-light); margin-top:2px;">Tampil di carousel atas beranda semua pengguna</div>
-            <div style="font-size:13px; font-weight:700; color:#1565C0; margin-top:4px;">Rp 5.000 / minggu</div>
+
+        <!-- Tab: Baru vs Iklan Saya -->
+        <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;">
+          <button id="tabBannerBaru" onclick="switchBannerTab('baru')"
+            style="flex:1;padding:10px;font-size:13px;font-weight:600;background:var(--primary);color:white;border:none;cursor:pointer;">
+            ➕ Pasang Baru
+          </button>
+          <button id="tabBannerSaya" onclick="switchBannerTab('saya')"
+            style="flex:1;padding:10px;font-size:13px;font-weight:600;background:white;color:var(--text);border:none;cursor:pointer;">
+            📋 Iklan Saya
+          </button>
+        </div>
+
+        <!-- Panel: Pasang Baru -->
+        <div id="panelBannerBaru">
+          <div style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB); border-radius:16px; padding:16px; margin-bottom:20px; display:flex; gap:12px; align-items:center;">
+            <i class="fas fa-ad" style="font-size:32px; color:#1565C0;"></i>
+            <div>
+              <div style="font-weight:700; font-size:14px;">Iklan Banner Beranda</div>
+              <div style="font-size:12px; color:var(--text-light); margin-top:2px;">Tampil di carousel atas beranda semua pengguna</div>
+              <div style="font-size:13px; font-weight:700; color:#1565C0; margin-top:4px;">Rp 5.000 / minggu</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Judul Iklan</label>
+            <input type="text" class="form-input" id="bannerTitle" placeholder="Contoh: Promo Lebaran Bu Siti">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deskripsi (opsional)</label>
+            <input type="text" class="form-input" id="bannerDesc" placeholder="Diskon 50% semua produk!">
+          </div>
+
+          <!-- Media: URL atau Upload -->
+          <div class="form-group">
+            <label class="form-label">Gambar / Video</label>
+            <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px;">
+              <button id="tabMediaUrl" onclick="switchMediaTab('url')"
+                style="flex:1;padding:8px;font-size:12px;font-weight:600;background:var(--primary);color:white;border:none;cursor:pointer;">🔗 URL</button>
+              <button id="tabMediaUpload" onclick="switchMediaTab('upload')"
+                style="flex:1;padding:8px;font-size:12px;font-weight:600;background:white;color:var(--text);border:none;cursor:pointer;">📤 Upload</button>
+            </div>
+            <div id="mediaUrlPanel">
+              <input type="text" class="form-input" id="bannerMedia" placeholder="https://... link gambar/video"
+                oninput="previewBannerMedia()">
+              <div style="font-size:11px;color:var(--text-light);margin-top:4px;">JPG/PNG/MP4 dari Google Drive, Imgur, dll</div>
+            </div>
+            <div id="mediaUploadPanel" style="display:none;">
+              <div id="bannerUploadZone" onclick="document.getElementById('bannerFileInput').click()"
+                style="border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;background:#FAFAFA;transition:border-color .2s;"
+                ondragover="event.preventDefault();this.style.borderColor='var(--primary)'"
+                ondragleave="this.style.borderColor='var(--border)'"
+                ondrop="handleBannerDrop(event)">
+                <i class="fas fa-cloud-upload-alt" style="font-size:28px;color:var(--text-light);margin-bottom:8px;display:block;"></i>
+                <div style="font-size:13px;font-weight:600;">Klik atau seret file ke sini</div>
+                <div style="font-size:11px;color:var(--text-light);margin-top:4px;">JPG, PNG, MP4 — maks 10 MB</div>
+              </div>
+              <input type="file" id="bannerFileInput" accept="image/*,video/mp4" style="display:none;" onchange="handleBannerFileSelect(event)">
+              <div id="bannerUploadPreview" style="margin-top:10px;"></div>
+            </div>
+            <!-- Preview -->
+            <div id="bannerMediaPreview" style="margin-top:10px;border-radius:12px;overflow:hidden;display:none;max-height:160px;"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tipe Media</label>
+            <select class="form-input" id="bannerType">
+              <option value="image">Gambar</option>
+              <option value="video">Video</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Link Tujuan (opsional)</label>
+            <input type="text" class="form-input" id="bannerLink" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Durasi Tayang</label>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;" id="bannerWeeksOptions">
+              <button onclick="selectWeeks(1)" class="btn" id="weeks1" style="flex:1;min-width:80px;background:var(--bg);color:var(--text);padding:10px;font-size:13px;">1 minggu<br><span style="font-weight:700;">Rp 5.000</span></button>
+              <button onclick="selectWeeks(2)" class="btn" id="weeks2" style="flex:1;min-width:80px;background:var(--bg);color:var(--text);padding:10px;font-size:13px;">2 minggu<br><span style="font-weight:700;">Rp 10.000</span></button>
+              <button onclick="selectWeeks(4)" class="btn" id="weeks4" style="flex:1;min-width:80px;background:var(--bg);color:var(--text);padding:10px;font-size:13px;">4 minggu<br><span style="font-weight:700;">Rp 20.000</span></button>
+            </div>
+          </div>
+          <div id="bannerTotal" style="display:none;background:#E8F5E9;border-radius:12px;padding:14px;margin-bottom:16px;font-size:14px;">
+            Total: <strong id="bannerTotalAmount"></strong>
+          </div>
+          <button class="btn btn-primary" id="bannerSubmitBtn" onclick="submitBanner()">Pasang Iklan</button>
+        </div>
+
+        <!-- Panel: Iklan Saya -->
+        <div id="panelBannerSaya" style="display:none;">
+          <div id="myBannersList">
+            <div style="text-align:center;padding:40px;color:#9CA3AF;">
+              <i class="fas fa-spinner fa-spin"></i> Memuat iklan...
+            </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Judul Iklan</label>
-          <input type="text" class="form-input" id="bannerTitle" placeholder="Contoh: Promo Lebaran Bu Siti">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Deskripsi (opsional)</label>
-          <input type="text" class="form-input" id="bannerDesc" placeholder="Diskon 50% semua produk!">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">URL Gambar / Video</label>
-          <input type="text" class="form-input" id="bannerMedia" placeholder="https://...">
-          <div style="font-size:11px; color:var(--text-light); margin-top:4px;">Gunakan link gambar (JPG/PNG) atau video (MP4) dari Google Drive / hosting lain</div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Tipe Media</label>
-          <select class="form-input" id="bannerType">
-            <option value="image">Gambar</option>
-            <option value="video">Video</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Link Tujuan (opsional)</label>
-          <input type="text" class="form-input" id="bannerLink" placeholder="https://... (klik iklan menuju link ini)">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Durasi Tayang</label>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;" id="bannerWeeksOptions">
-            <button onclick="selectWeeks(1)" class="btn" id="weeks1" style="flex:1; min-width:80px; background:var(--bg); color:var(--text); padding:10px; font-size:13px;">1 minggu<br><span style="font-weight:700;">Rp 5.000</span></button>
-            <button onclick="selectWeeks(2)" class="btn" id="weeks2" style="flex:1; min-width:80px; background:var(--bg); color:var(--text); padding:10px; font-size:13px;">2 minggu<br><span style="font-weight:700;">Rp 10.000</span></button>
-            <button onclick="selectWeeks(4)" class="btn" id="weeks4" style="flex:1; min-width:80px; background:var(--bg); color:var(--text); padding:10px; font-size:13px;">4 minggu<br><span style="font-weight:700;">Rp 20.000</span></button>
-          </div>
-        </div>
-
-        <div id="bannerTotal" style="display:none; background:#E8F5E9; border-radius:12px; padding:14px; margin-bottom:16px; font-size:14px;">
-          Total: <strong id="bannerTotalAmount"></strong>
-        </div>
-
-        <button class="btn btn-primary" onclick="submitBanner()">Pasang Iklan</button>
       </div>
     </div>
 
@@ -2248,7 +3335,10 @@
 
       <div class="detail-actions">
         <button class="btn-chat" onclick="chatWithSeller()"><i class="fas fa-comment"></i></button>
-        <button class="btn-buy" onclick="buyNow()">Beli Sekarang</button>
+        <button class="btn-buy" id="btnBuyNow" onclick="buyNow()">Beli Sekarang</button>
+        <div id="sellerBuyWarning" style="display:none;flex:1;background:#FEF3C7;border:1.5px solid #F59E0B;border-radius:12px;padding:10px 14px;font-size:12px;color:#92400E;font-weight:600;text-align:center;">
+          ⚠️ Akun Penjual tidak bisa membeli produk
+        </div>
       </div>
     </div>
 
@@ -2682,6 +3772,9 @@
     </div>
     <!-- ============ END SELLER E-WALLET PAGE ============ -->
 
+    </div></div>
+    <!-- ====== END DESKTOP CONTENT INNER + DESKTOP MAIN ====== -->
+
     <!-- Bottom Navigation — Buyer: 4 item | Seller: 5 item dengan FAB tengah -->
     <div class="bottom-nav" id="bottomNav">
       <!-- Beranda (semua role) -->
@@ -2880,7 +3973,12 @@
           getLocation();
           loadNotifications();
           loadBanners();
-          setTimeout(loadPromoSections, 1200); // delay agar lokasi sudah siap
+          setTimeout(loadPromoSections, 1200);
+          startAutoRefresh(); // FIX 6: auto refresh
+          requestNotifPermission(); // FIX 7: minta izin notifikasi
+          // Restore notif tone
+          var savedTone = localStorage.getItem('notifTone');
+          if (savedTone) _notifTone = savedTone;
           return;
         }
       } catch(e) { localStorage.removeItem('lokara_user'); }
@@ -2897,14 +3995,236 @@
       var adminEl = document.getElementById('adminPanel');
       if (authEl) authEl.style.display = 'none';
       if (adminEl) adminEl.style.display = 'none';
-      if (mainEl) mainEl.style.display = 'block';
-      // Sembunyikan elemen admin untuk user biasa
+      if (mainEl) mainEl.style.display = window.innerWidth >= 1024 ? 'grid' : 'block';
       var adminMenu = document.getElementById('adminMenuSection');
       if (adminMenu) adminMenu.style.display = 'none';
       var adminNav = document.getElementById('adminNavItem');
       if (adminNav) adminNav.style.display = 'none';
       updateProfileUI();
+      initDesktopLayout();
     }
+
+    // ==================== DESKTOP LAYOUT ====================
+
+    function isDesktop() { return window.innerWidth >= 1024; }
+
+    function initDesktopLayout() {
+      if (!isDesktop()) return;
+
+      // Show sidebar
+      var sb = document.getElementById('desktopSidebar');
+      if (sb) sb.style.display = 'flex';
+
+      // Show ad panel (separate from sidebar)
+      var adg = document.getElementById('sidebarAdGrid');
+      if (adg) adg.style.display = 'flex';
+
+      // desktopMain: use flex contents so grid works
+      var dm = document.getElementById('desktopMain');
+      if (dm) { dm.style.display = 'block'; dm.style.overflow = 'auto'; }
+
+      // Show desktop home header
+      var dhh = document.getElementById('desktopHomeHeader');
+      if (dhh) dhh.style.display = 'block';
+
+      // Sync desktop loc bar with mobile location text
+      syncDesktopLocBar();
+
+      // Update sidebar user card
+      updateDesktopSidebarUser();
+
+      // Load desktop right panel data
+      loadDesktopRightPanel();
+
+      // Populate desktop stat cards once products load
+      setTimeout(updateDesktopStats, 2000);
+
+      // Start datetime clock
+      showDesktopDatetime();
+
+      // Load sidebar ad
+      setTimeout(loadSidebarAd, 1500);
+    }
+
+    function syncDesktopLocBar() {
+      var mobileText = document.getElementById('locationText');
+      var desktopText = document.getElementById('desktopLocText');
+      if (mobileText && desktopText) {
+        desktopText.textContent = mobileText.textContent || 'Mendeteksi...';
+        // Observe mobile text changes
+        var obs = new MutationObserver(function() {
+          desktopText.textContent = mobileText.textContent;
+        });
+        obs.observe(mobileText, { childList: true, subtree: true, characterData: true });
+      }
+    }
+
+    function updateDesktopSidebarUser() {
+      if (!currentUser) return;
+      var nameEl = document.getElementById('dsnUserName');
+      var roleEl = document.getElementById('dsnUserRole');
+      var iconEl = document.getElementById('dsnUserAvatarIcon');
+      var imgEl  = document.getElementById('dsnUserAvatarImg');
+
+      if (nameEl) nameEl.textContent = currentUser.nama || '—';
+      if (roleEl) roleEl.textContent = currentUser.role === 'seller' ? 'Penjual UMKM' : 'Pembeli';
+
+      // Avatar photo
+      if (currentUser.foto && imgEl && iconEl) {
+        imgEl.src = currentUser.foto;
+        imgEl.style.display = 'block';
+        iconEl.style.display = 'none';
+      }
+
+      // Show seller section in sidebar
+      var sellerSec = document.getElementById('dsnSellerSection');
+      if (sellerSec) sellerSec.style.display = currentUser.role === 'seller' ? 'block' : 'none';
+
+      // Show admin link
+      var dsnAdmin = document.getElementById('dsnAdmin');
+      if (dsnAdmin) dsnAdmin.style.display = currentUser.role === 'admin' ? 'flex' : 'none';
+    }
+
+    function updateDesktopSidebarNav(pageId) {
+      if (!isDesktop()) return;
+      document.querySelectorAll('.ds-link').forEach(function(l) { l.classList.remove('active'); });
+      var map = {
+        homePage: 'dsnBeranda',
+        ordersPage: 'dsnPesanan',
+        wishlistPage: 'dsnWishlist',
+        profilePage: 'dsnProfile',
+        sellerProductsPage: 'dsnProdukSaya'
+      };
+      if (map[pageId]) {
+        var el = document.getElementById(map[pageId]);
+        if (el) el.classList.add('active');
+      }
+    }
+
+    function updateDesktopStats() {
+      if (!isDesktop()) return;
+      // Products count
+      var grid = document.getElementById('mainProductsGrid');
+      if (grid) {
+        var count = grid.querySelectorAll('.product-card').length;
+        var el = document.getElementById('dskStatProducts');
+        if (el) el.textContent = count || '—';
+      }
+      // Diskon count
+      var dGrid = document.getElementById('diskonGrid');
+      if (dGrid) {
+        var dc = dGrid.querySelectorAll('.product-card').length;
+        var del = document.getElementById('dskStatDiskon');
+        var dsub = document.getElementById('dskStatDiskonSub');
+        if (del) del.textContent = dc || '—';
+        if (dsub && dc > 0) dsub.textContent = 'Diskon s/d 40%';
+      }
+      // Sellers count — unique sellers in grid
+      if (grid) {
+        var sellerTexts = grid.querySelectorAll('.product-seller span');
+        var unique = new Set();
+        sellerTexts.forEach(function(s) { unique.add(s.textContent.trim()); });
+        var sel = document.getElementById('dskStatSellers');
+        if (sel) sel.textContent = unique.size || '—';
+      }
+      // Orders count
+      callGAS('getOrders', { userId: currentUser && currentUser.id, role: currentUser && currentUser.role })
+        .then(function(orders) {
+          var active = (orders || []).filter(function(o) {
+            return ['pending','confirmed','processing'].includes(o.status);
+          }).length;
+          var el = document.getElementById('dskStatOrders');
+          if (el) el.textContent = active;
+          // Also update sidebar badge
+          var badge = document.getElementById('dsnOrderBadge');
+          if (badge) { badge.textContent = active; badge.style.display = active > 0 ? 'inline-block' : 'none'; }
+        }).catch(function(){});
+    }
+
+    function loadDesktopRightPanel() {
+      if (!isDesktop()) return;
+      if (!currentLocation.lat || !currentLocation.lng) {
+        // Retry after location loads
+        setTimeout(loadDesktopRightPanel, 2000);
+        return;
+      }
+
+      // UMKM Paling Laris
+      callGAS('getTopSellers', { latitude: currentLocation.lat, longitude: currentLocation.lng })
+        .then(function(sellers) {
+          var el = document.getElementById('dskTopSellersList');
+          if (!el) return;
+          if (!sellers || sellers.length === 0) {
+            el.innerHTML = '<div style="text-align:center;padding:20px;color:#9CA3AF;font-size:12px;">Belum ada data</div>';
+            return;
+          }
+          var icons = ['🍱','👗','🥤','🌿','🔧','💄','🏡','📚'];
+          el.innerHTML = sellers.map(function(s, i) {
+            return '<div class="dsk-umkm-item">' +
+              '<div class="dsk-umkm-rank' + (i < 3 ? ' gold' : '') + '">' + (i+1) + '</div>' +
+              '<div class="dsk-umkm-avatar">' + (icons[i % icons.length]) + '</div>' +
+              '<div class="dsk-umkm-info">' +
+                '<div class="dsk-umkm-name">' + (s.nama || 'UMKM') + '</div>' +
+                '<div class="dsk-umkm-sub">' + (s.distance != null ? s.distance + ' km' : '') + '</div>' +
+              '</div>' +
+              '<div class="dsk-umkm-count">' + s.orderCount + ' order</div>' +
+            '</div>';
+          }).join('');
+        }).catch(function() {
+          var el = document.getElementById('dskTopSellersList');
+          if (el) el.innerHTML = '<div style="text-align:center;padding:20px;color:#9CA3AF;font-size:12px;">Belum ada data</div>';
+        });
+
+      // Pesanan Terakhir (3 terbaru)
+      if (!currentUser) return;
+      callGAS('getOrders', { userId: currentUser.id, role: currentUser.role })
+        .then(function(orders) {
+          var el = document.getElementById('dskRecentOrdersList');
+          if (!el) return;
+          if (!orders || orders.length === 0) {
+            el.innerHTML = '<div style="text-align:center;padding:20px;color:#9CA3AF;font-size:12px;">Belum ada pesanan</div>';
+            return;
+          }
+          var recent = orders.slice(0, 3);
+          var statusColor = { pending:'#F59E0B', confirmed:'#3B82F6', processing:'#8B5CF6', completed:'#10B981', cancelled:'#EF4444' };
+          var statusBg   = { pending:'#FEF3C7', confirmed:'#DBEAFE', processing:'#EDE9FE', completed:'#D1FAE5', cancelled:'#FEE2E2' };
+          var statusLabel = { pending:'Menunggu', confirmed:'Dikonfirmasi', processing:'Diproses', completed:'Selesai', cancelled:'Dibatal' };
+          el.innerHTML = recent.map(function(o) {
+            var sc = statusColor[o.status] || '#9CA3AF';
+            var sb = statusBg[o.status] || '#F3F4F6';
+            var sl = statusLabel[o.status] || o.status;
+            return '<div style="display:flex;align-items:center;gap:10px;padding:8px;background:#F9FAFB;border-radius:8px;margin-bottom:6px;cursor:pointer;" onclick="showOrders()">' +
+              '<div style="width:28px;height:28px;border-radius:7px;background:#E8F5E9;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🛍️</div>' +
+              '<div style="flex:1;min-width:0;">' +
+                '<div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Order #' + String(o.id).slice(-6) + '</div>' +
+                '<div style="font-size:10px;color:#9CA3AF;">' + (o.sellerNama || o.buyerNama || '—') + '</div>' +
+              '</div>' +
+              '<div style="font-size:10px;font-weight:700;color:' + sc + ';background:' + sb + ';padding:2px 8px;border-radius:6px;flex-shrink:0;">' + sl + '</div>' +
+            '</div>';
+          }).join('');
+        }).catch(function(){});
+    }
+
+    // Re-run desktop layout when window resizes across breakpoint
+    (function() {
+      var _wasDesktop = window.innerWidth >= 1024;
+      window.addEventListener('resize', function() {
+        var _isNowDesktop = window.innerWidth >= 1024;
+        if (_isNowDesktop && !_wasDesktop && currentUser) {
+          var mainEl = document.getElementById('mainApp');
+          if (mainEl) mainEl.style.display = 'grid';
+          initDesktopLayout();
+        } else if (!_isNowDesktop && _wasDesktop) {
+          var mainEl = document.getElementById('mainApp');
+          if (mainEl) mainEl.style.display = 'block';
+          var sb = document.getElementById('desktopSidebar');
+          if (sb) sb.style.display = 'none';
+          var adg2 = document.getElementById('sidebarAdGrid');
+          if (adg2) adg2.style.display = 'none';
+        }
+        _wasDesktop = _isNowDesktop;
+      });
+    })();
 
     // ==================== AUTHENTICATION ====================
     function showRegister() {
@@ -3012,19 +4332,41 @@
             currentLocation.lat = position.coords.latitude;
             currentLocation.lng = position.coords.longitude;
             document.getElementById('locationText').innerHTML =
-              `<i class="fas fa-check-circle" style="color: var(--success);"></i> Lokasi aktif`;
-            // Reload produk dengan koordinat agar jarak dihitung
+              '<i class="fas fa-spinner fa-spin"></i> Mendeteksi kota...';
+            // Reverse geocode pakai Nominatim
+            reverseGeocode(currentLocation.lat, currentLocation.lng, function(nama) {
+              var locEl = document.getElementById('locationText');
+              if (locEl) locEl.innerHTML =
+                '<i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> ' + nama;
+              var deskEl = document.getElementById('desktopLocText');
+              if (deskEl) deskEl.textContent = nama;
+              currentLocation.namaLokasi = nama;
+            });
             loadAllProducts();
+            loadPromoSections();
           },
           function(error) {
             document.getElementById('locationText').innerHTML =
-              `<i class="fas fa-exclamation-circle" style="color: var(--warning);"></i> Izinkan akses lokasi`;
-            // Tetap tampilkan semua produk meski tanpa jarak
+              '<i class="fas fa-exclamation-circle" style="color: var(--warning);"></i> Izinkan akses lokasi';
             if (allProductsCache.length === 0) loadAllProducts();
             else renderProducts();
-          }
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
         );
       }
+    }
+
+    function reverseGeocode(lat, lng, cb) {
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lng+'&accept-language=id')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          var a = d.address || {};
+          var city = a.city || a.town || a.village || a.county || a.state_district || '';
+          var prov = a.state || '';
+          var result = city && prov ? city + ', ' + prov : (city || prov || 'Lokasi aktif');
+          cb(result);
+        })
+        .catch(function(){ cb('Lokasi aktif'); });
     }
 
     // ==================== NAVIGATION ====================
@@ -3063,6 +4405,19 @@
       if (navIdMap[pageId]) {
         var navEl = document.getElementById(navIdMap[pageId]);
         if (navEl) navEl.classList.add('active');
+      }
+
+      // Desktop sidebar nav sync
+      updateDesktopSidebarNav(pageId);
+
+      // Desktop: tampilkan/sembunyikan home header
+      if (typeof isDesktop === 'function' && isDesktop()) {
+        var dhh = document.getElementById('desktopHomeHeader');
+        if (dhh) dhh.style.display = pageId === 'homePage' ? 'block' : 'none';
+        // Scroll desktopMain ke atas
+        var dm = document.getElementById('desktopMain');
+        if (dm) dm.scrollTop = 0;
+        else window.scrollTo(0,0);
       }
 
       // Sembunyikan bottom nav di halaman tertentu
@@ -3446,7 +4801,12 @@
 
     function loadAllProducts() {
       const grid = document.getElementById('mainProductsGrid');
-      grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-light);"><i class="fas fa-spinner fa-spin" style="font-size:32px;"></i><p style="margin-top:12px;">Memuat produk...</p></div>`;
+
+      // FIX 9: Tampilkan cache dulu agar terasa cepat
+      var showedCache = loadProductsFromLocalCache();
+      if (!showedCache) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-light);"><i class="fas fa-spinner fa-spin" style="font-size:32px;"></i><p style="margin-top:12px;">Memuat produk...</p></div>`;
+      }
 
       callGAS('getProducts', {
         latitude: (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
@@ -3454,11 +4814,14 @@
       })
       .then(function(products) {
         allProductsCache = products;
+        saveProductsToLocalCache(products); // FIX 9: simpan ke cache
         renderProducts();
       })
       .catch(function(error) {
         console.error('loadAllProducts error:', error);
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-exclamation-circle"></i><h3>Gagal memuat produk</h3><p>Cek koneksi internet</p></div>`;
+        if (!showedCache) {
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-exclamation-circle"></i><h3>Gagal memuat produk</h3><p>Cek koneksi internet</p></div>`;
+        }
       });
     }
 
@@ -3530,6 +4893,430 @@
             </div>
           </div>
         </div>`;
+    }
+
+    // ==================== FIX 6: REFRESH + AUTO REFRESH ====================
+
+    var _autoRefreshInterval = null;
+    var _lastDataHash = '';
+
+    function manualRefresh() {
+      var btn = document.getElementById('refreshBtn');
+      if (btn) { btn.style.transform = 'rotate(360deg)'; setTimeout(function(){ btn.style.transform = ''; }, 400); }
+      allProductsCache = [];
+      loadAllProducts();
+      loadNotifications();
+      if (typeof loadPromoSections === 'function') loadPromoSections();
+      if (typeof loadDesktopRightPanel === 'function') setTimeout(loadDesktopRightPanel, 500);
+      showToast('Data diperbarui', 'success');
+    }
+
+    function startAutoRefresh() {
+      if (_autoRefreshInterval) clearInterval(_autoRefreshInterval);
+      _autoRefreshInterval = setInterval(function() {
+        if (!currentUser) return;
+        // Silent check: hanya refresh jika ada perubahan
+        callGAS('getProductCount', { latitude: currentLocation.lat || 0, longitude: currentLocation.lng || 0 })
+          .then(function(result) {
+            var hash = JSON.stringify(result);
+            if (_lastDataHash && hash !== _lastDataHash) {
+              manualRefresh();
+            }
+            _lastDataHash = hash;
+          })
+          .catch(function() {
+            // Fallback: refresh langsung tiap menit
+            if (allProductsCache.length > 0) {
+              allProductsCache = [];
+              loadAllProducts();
+            }
+          });
+        loadNotifications();
+      }, 60000); // 1 menit
+    }
+
+    // ==================== FIX 7: PUSH NOTIFIKASI ====================
+
+    var _notifAudio = null;
+    var _notifTone = 'default';
+
+    function requestNotifPermission() {
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(function(perm) {
+          if (perm === 'granted') showToast('Notifikasi aktif! 🔔', 'success');
+        });
+      }
+    }
+
+    function sendPushNotif(title, body, icon) {
+      if (Notification.permission === 'granted') {
+        var n = new Notification(title, {
+          body: body,
+          icon: icon || 'icon-192.png',
+          badge: 'icon-192.png',
+          vibrate: [200, 100, 200]
+        });
+        n.onclick = function() { window.focus(); n.close(); showPage('ordersPage'); loadOrders(); };
+      }
+      // Play tone
+      playNotifTone();
+      // Also show in-app floating toast
+      showFloatingNotif(title, body);
+    }
+
+    function showFloatingNotif(title, body) {
+      var el = document.createElement('div');
+      el.className = 'floating-notif';
+      el.innerHTML = '<div style="display:flex;align-items:flex-start;gap:10px;">'
+        + '<div style="font-size:20px;flex-shrink:0;">🔔</div>'
+        + '<div><div style="font-size:13px;font-weight:700;margin-bottom:2px;">'+title+'</div>'
+        + '<div style="font-size:12px;opacity:.85;">'+body+'</div></div>'
+        + '<button onclick="this.parentElement.parentElement.remove()" '
+        + 'style="margin-left:auto;background:none;border:none;color:white;font-size:16px;cursor:pointer;flex-shrink:0;">×</button>'
+        + '</div>';
+      document.body.appendChild(el);
+      setTimeout(function(){ el.classList.add('show'); }, 10);
+      setTimeout(function(){ el.classList.remove('show'); setTimeout(function(){ el.remove(); }, 400); }, 5000);
+    }
+
+    function playNotifTone() {
+      try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        var tones = { default:[880,660], soft:[440,330], alert:[1047,784], pop:[1200,900] };
+        var t = tones[_notifTone] || tones.default;
+        osc.frequency.setValueAtTime(t[0], ctx.currentTime);
+        osc.frequency.setValueAtTime(t[1], ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      } catch(e) {}
+    }
+
+    function showNotifSettings() {
+      var tones = ['default','soft','alert','pop'];
+      var labels = { default:'Default 🎵', soft:'Lembut 🎶', alert:'Alert 🔔', pop:'Pop ✨' };
+      var html = '<div style="padding:4px 0;">'
+        + '<div style="font-size:13px;color:#9CA3AF;margin-bottom:16px;">Notifikasi melayang akan muncul saat ada pesanan baru, konfirmasi, atau promo.</div>'
+        + '<div style="margin-bottom:16px;">'
+        + '<div style="font-size:13px;font-weight:600;margin-bottom:10px;">Nada Notifikasi</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="toneOptions">'
+        + tones.map(function(t){
+            var active = t === _notifTone ? 'background:var(--primary);color:white;' : 'background:var(--bg);color:var(--text);';
+            return '<button onclick="selectNotifTone(\''+t+'\')" id="tone_'+t+'" class="btn" style="'+active+'padding:10px;font-size:13px;">'+labels[t]+'</button>';
+          }).join('')
+        + '</div></div>'
+        + (Notification.permission !== 'granted'
+            ? '<button class="btn btn-primary" onclick="requestNotifPermission();closeModal();">Izinkan Notifikasi</button>'
+            : '<div style="color:var(--success);font-size:13px;font-weight:600;text-align:center;"><i class="fas fa-check-circle"></i> Notifikasi sudah aktif</div>')
+        + '</div>';
+      showModal('Pengaturan Notifikasi 🔔', html);
+    }
+
+    function selectNotifTone(tone) {
+      _notifTone = tone;
+      document.querySelectorAll('#toneOptions button').forEach(function(b) {
+        var isSel = b.id === 'tone_'+tone;
+        b.style.background = isSel ? 'var(--primary)' : 'var(--bg)';
+        b.style.color = isSel ? 'white' : 'var(--text)';
+      });
+      playNotifTone();
+      localStorage.setItem('notifTone', tone);
+    }
+
+    // ==================== FIX 4: MAP TRACKING IN ORDERS ====================
+
+    var _trackingMap = null;
+
+    function showOrderMap(buyerLat, buyerLng, sellerLat, sellerLng, isBuyer) {
+      var html = '<div id="orderTrackMap" style="height:320px;border-radius:12px;overflow:hidden;"></div>'
+        + '<div style="padding:12px 0 0;font-size:12px;color:#9CA3AF;text-align:center;">'
+        + (isBuyer
+          ? '📍 Lokasi penjual — gunakan peta untuk panduan jalan'
+          : '📍 Lokasi pembeli — koordinat untuk pengiriman')
+        + '</div>';
+      showModal(isBuyer ? '🗺️ Lokasi Penjual' : '🗺️ Lokasi Pembeli', html);
+      setTimeout(function() {
+        if (typeof L === 'undefined') return;
+        if (_trackingMap) { _trackingMap.remove(); _trackingMap = null; }
+        var centerLat = isBuyer ? sellerLat : buyerLat;
+        var centerLng = isBuyer ? sellerLng : buyerLng;
+        _trackingMap = L.map('orderTrackMap').setView([centerLat, centerLng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OSM'
+        }).addTo(_trackingMap);
+        // Marker penjual
+        if (sellerLat && sellerLng) {
+          L.marker([sellerLat, sellerLng], {
+            icon: L.divIcon({ html:'<div style="background:var(--primary);color:white;padding:4px 8px;border-radius:8px;font-size:11px;font-weight:700;white-space:nowrap;">🏪 Penjual</div>', className:'', iconAnchor:[30,15] })
+          }).addTo(_trackingMap).bindPopup('Lokasi Penjual');
+        }
+        // Marker pembeli
+        if (buyerLat && buyerLng) {
+          L.marker([buyerLat, buyerLng], {
+            icon: L.divIcon({ html:'<div style="background:#2196F3;color:white;padding:4px 8px;border-radius:8px;font-size:11px;font-weight:700;white-space:nowrap;">🏠 Pembeli</div>', className:'', iconAnchor:[30,15] })
+          }).addTo(_trackingMap).bindPopup('Lokasi Pembeli');
+        }
+        // Fit bounds jika ada dua titik
+        if (sellerLat && buyerLat) {
+          _trackingMap.fitBounds([[sellerLat, sellerLng],[buyerLat, buyerLng]], { padding: [30,30] });
+        }
+        setTimeout(function(){ _trackingMap.invalidateSize(); }, 100);
+      }, 200);
+    }
+
+    // ==================== FIX 5b: BANNER EDIT JS ====================
+
+    var _editingBannerId = null;
+
+    function switchBannerTab(tab) {
+      var isBaru = tab === 'baru';
+      document.getElementById('panelBannerBaru').style.display = isBaru ? 'block' : 'none';
+      document.getElementById('panelBannerSaya').style.display = isBaru ? 'none' : 'block';
+      document.getElementById('tabBannerBaru').style.background = isBaru ? 'var(--primary)' : 'white';
+      document.getElementById('tabBannerBaru').style.color = isBaru ? 'white' : 'var(--text)';
+      document.getElementById('tabBannerSaya').style.background = isBaru ? 'white' : 'var(--primary)';
+      document.getElementById('tabBannerSaya').style.color = isBaru ? 'var(--text)' : 'white';
+      if (!isBaru) loadMyBanners();
+    }
+
+    function switchMediaTab(tab) {
+      var isUrl = tab === 'url';
+      document.getElementById('mediaUrlPanel').style.display = isUrl ? 'block' : 'none';
+      document.getElementById('mediaUploadPanel').style.display = isUrl ? 'none' : 'block';
+      document.getElementById('tabMediaUrl').style.background = isUrl ? 'var(--primary)' : 'white';
+      document.getElementById('tabMediaUrl').style.color = isUrl ? 'white' : 'var(--text)';
+      document.getElementById('tabMediaUpload').style.background = isUrl ? 'white' : 'var(--primary)';
+      document.getElementById('tabMediaUpload').style.color = isUrl ? 'var(--text)' : 'white';
+    }
+
+    function previewBannerMedia() {
+      var url = (document.getElementById('bannerMedia') || {}).value || '';
+      var prev = document.getElementById('bannerMediaPreview');
+      if (!prev) return;
+      if (!url) { prev.style.display = 'none'; return; }
+      var isVideo = /\.(mp4|webm|mov)/i.test(url) || (document.getElementById('bannerType') || {}).value === 'video';
+      prev.style.display = 'block';
+      prev.innerHTML = isVideo
+        ? '<video src="'+url+'" style="width:100%;max-height:160px;border-radius:12px;object-fit:cover;" controls></video>'
+        : '<img src="'+url+'" style="width:100%;max-height:160px;border-radius:12px;object-fit:cover;" onerror="this.parentElement.style.display=\'none\'">';
+    }
+
+    function handleBannerFileSelect(event) {
+      var file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) { showToast('File terlalu besar (maks 10MB)', 'error'); return; }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var prev = document.getElementById('bannerUploadPreview');
+        var isVideo = file.type.startsWith('video');
+        prev.innerHTML = isVideo
+          ? '<video src="'+e.target.result+'" style="width:100%;max-height:140px;border-radius:10px;object-fit:cover;" controls></video>'
+          : '<img src="'+e.target.result+'" style="width:100%;max-height:140px;border-radius:10px;object-fit:cover;">';
+        // Store base64 for upload
+        window._bannerBase64 = e.target.result;
+        window._bannerFileName = file.name;
+        if (document.getElementById('bannerType')) {
+          document.getElementById('bannerType').value = isVideo ? 'video' : 'image';
+        }
+        showToast('File siap diupload', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleBannerDrop(event) {
+      event.preventDefault();
+      document.getElementById('bannerUploadZone').style.borderColor = 'var(--border)';
+      var file = event.dataTransfer.files[0];
+      if (!file) return;
+      document.getElementById('bannerFileInput').files = event.dataTransfer.files;
+      handleBannerFileSelect({ target: { files: [file] } });
+    }
+
+    function loadMyBanners() {
+      if (!currentUser) return;
+      var el = document.getElementById('myBannersList');
+      if (!el) return;
+      el.innerHTML = '<div style="text-align:center;padding:30px;color:#9CA3AF;"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>';
+      callGAS('getSellerBanners', { sellerId: currentUser.id })
+        .then(function(banners) {
+          if (!banners || banners.length === 0) {
+            el.innerHTML = '<div style="text-align:center;padding:40px;color:#9CA3AF;"><i class="fas fa-ad" style="font-size:32px;display:block;margin-bottom:12px;opacity:.3;"></i>Belum ada iklan aktif</div>';
+            return;
+          }
+          var statusColor = { active:'#10B981', pending:'#F59E0B', expired:'#EF4444' };
+          var statusLabel = { active:'Aktif', pending:'Menunggu', expired:'Kedaluwarsa' };
+          el.innerHTML = banners.map(function(b) {
+            var sc = statusColor[b.status] || '#9CA3AF';
+            var sl = statusLabel[b.status] || b.status;
+            return '<div style="background:white;border:1px solid #E5E7EB;border-radius:12px;padding:14px;margin-bottom:12px;">'
+              + (b.mediaUrl ? '<img src="'+b.mediaUrl+'" style="width:100%;height:100px;object-fit:cover;border-radius:8px;margin-bottom:10px;" onerror="this.style.display=\'none\'">' : '')
+              + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
+              + '<div style="font-size:13px;font-weight:700;">'+b.title+'</div>'
+              + '<div style="font-size:11px;font-weight:700;color:'+sc+';background:'+sc+'22;padding:2px 8px;border-radius:20px;">'+sl+'</div>'
+              + '</div>'
+              + '<div style="font-size:11px;color:#9CA3AF;margin-bottom:10px;">Sampai: '+(b.endDate||'—')+'</div>'
+              + '<div style="display:flex;gap:8px;">'
+              + '<button class="btn" style="flex:1;font-size:12px;padding:8px;" onclick="editBanner(\''+b.id+'\',this.closest(\'div[style]\'))">✏️ Edit</button>'
+              + '<button class="btn" style="flex:1;font-size:12px;padding:8px;color:var(--danger);" onclick="deleteBanner(\''+b.id+'\')">🗑️ Hapus</button>'
+              + '</div></div>';
+          }).join('');
+        })
+        .catch(function() {
+          el.innerHTML = '<div style="text-align:center;padding:30px;color:#9CA3AF;">Gagal memuat iklan</div>';
+        });
+    }
+
+    function editBanner(bannerId, cardEl) {
+      _editingBannerId = bannerId;
+      switchBannerTab('baru');
+      document.getElementById('bannerSubmitBtn').textContent = '💾 Simpan Perubahan';
+      document.getElementById('bannerPageTitle').textContent = 'Edit Iklan';
+      // Fill form from card data (best-effort)
+      showToast('Edit mode aktif — ubah field lalu simpan', 'success');
+    }
+
+    function deleteBanner(bannerId) {
+      if (!confirm('Hapus iklan ini?')) return;
+      callGAS('deleteBanner', { bannerId: bannerId, sellerId: currentUser.id })
+        .then(function() { showToast('Iklan dihapus', 'success'); loadMyBanners(); })
+        .catch(function(e) { showToast(e.message || 'Gagal hapus', 'error'); });
+    }
+
+    // ==================== FIX 8b: PRODUCT LOCATION LABEL ====================
+
+    var _geocodeCache = {};
+
+    function getProductLocationLabel(lat, lng, cb) {
+      if (!lat || !lng) { cb(''); return; }
+      var key = parseFloat(lat).toFixed(3) + ',' + parseFloat(lng).toFixed(3);
+      if (_geocodeCache[key]) { cb(_geocodeCache[key]); return; }
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lng+'&accept-language=id&zoom=10')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          var a = d.address || {};
+          var city = a.city || a.town || a.village || a.county || a.state_district || a.state || '';
+          _geocodeCache[key] = city;
+          cb(city);
+        })
+        .catch(function(){ cb(''); });
+    }
+
+    // ==================== FIX 9: CACHING + FAST LOAD ====================
+
+    var _productsFromCache = false;
+
+    function loadProductsFromLocalCache() {
+      try {
+        var cached = sessionStorage.getItem('lokara_products_cache');
+        var ts = sessionStorage.getItem('lokara_products_ts');
+        if (cached && ts && (Date.now() - parseInt(ts)) < 3 * 60 * 1000) { // 3 menit
+          var products = JSON.parse(cached);
+          if (products && products.length > 0) {
+            allProductsCache = products;
+            renderProducts();
+            _productsFromCache = true;
+            return true;
+          }
+        }
+      } catch(e) {}
+      return false;
+    }
+
+    function saveProductsToLocalCache(products) {
+      try {
+        sessionStorage.setItem('lokara_products_cache', JSON.stringify(products));
+        sessionStorage.setItem('lokara_products_ts', String(Date.now()));
+      } catch(e) {}
+    }
+
+    // ==================== DATETIME WIDGET (desktop topbar) ====================
+
+    function startDatetimeClock() {
+      var DAYS = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+      var MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+
+      function tick() {
+        var now = new Date();
+        var h = String(now.getHours()).padStart(2,'0');
+        var m = String(now.getMinutes()).padStart(2,'0');
+        var s = String(now.getSeconds()).padStart(2,'0');
+        var timeEl = document.getElementById('dskTime');
+        var dateEl = document.getElementById('dskDate');
+        if (timeEl) timeEl.textContent = h + ':' + m + ':' + s;
+        if (dateEl) dateEl.textContent = DAYS[now.getDay()] + ', ' + now.getDate() + ' ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    function showDesktopDatetime() {
+      var el = document.getElementById('dskDatetime');
+      if (el) el.style.display = 'flex';
+      startDatetimeClock();
+    }
+
+    // ==================== SIDEBAR AD LOADER ====================
+
+    function loadSidebarAd() {
+      if (typeof isDesktop !== 'function' || !isDesktop()) return;
+      callGAS('getBanners', {})
+        .then(function(banners) {
+          var SLOTS = 4;
+          // Isi slot dengan banner aktif, sisanya tetap placeholder
+          for (var i = 0; i < SLOTS; i++) {
+            var slot = document.getElementById('sidebarAdSlot' + i);
+            if (!slot) continue;
+            var ad = banners && banners[i] ? banners[i] : null;
+            if (ad) {
+              var hasImg = ad.mediaUrl && (ad.mediaType === 'image' || /\.(jpg|jpeg|png|webp|gif)/i.test(ad.mediaUrl));
+              slot.classList.remove('sidebar-ad-empty');
+              slot.classList.add('has-ad');
+              slot.innerHTML = '<div class="sad-label">IKLAN</div>'
+                + (hasImg ? '<img src="' + ad.mediaUrl + '" alt="' + (ad.title||'Iklan') + '" onerror="this.style.display=\'none\'">' : '')
+                + '<div class="sad-title" style="font-size:10.5px;font-weight:700;">' + (ad.title || 'Promo') + '</div>'
+                + (ad.description ? '<div class="sad-sub">' + ad.description + '</div>' : '');
+              (function(url) {
+                if (url) slot.onclick = function() { window.open(url, '_blank'); };
+              })(ad.targetUrl);
+            }
+            // slot tetap placeholder jika tidak ada banner
+          }
+        })
+        .catch(function() {}); // placeholder cards tetap tampil jika gagal load
+    }
+
+    function sidebarAdClick(slotIndex) {
+      showBannerAd();
+    }
+
+    // ==================== PRODUCT LOCATION LABEL ====================
+
+    // Inject kota/provinsi ke kartu produk setelah render
+    function injectProductLocations(products) {
+      if (!products || products.length === 0) return;
+      // Batch: ambil lokasi unik, lalu update card
+      var seen = {};
+      products.forEach(function(p) {
+        var lat = p.latitude, lng = p.longitude;
+        if (!lat || !lng) return;
+        var key = parseFloat(lat).toFixed(2) + ',' + parseFloat(lng).toFixed(2);
+        if (seen[key]) return;
+        seen[key] = true;
+        getProductLocationLabel(lat, lng, function(city) {
+          if (!city) return;
+          // Update all cards with this product's lat/lng
+          document.querySelectorAll('[data-prod-lat="' + key + '"]').forEach(function(el) {
+            el.textContent = city;
+            el.parentElement && (el.parentElement.style.display = 'flex');
+          });
+        });
+      });
     }
 
     // Alias untuk kompatibilitas fungsi lama
@@ -3770,10 +5557,13 @@
         const ratingHtml = product.rating
           ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
           : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
+        const latKey = product.latitude ? (parseFloat(product.latitude).toFixed(2) + ',' + parseFloat(product.longitude).toFixed(2)) : '';
+        const locHtml = latKey
+          ? `<div class="product-location" style="display:none;"><i class="fas fa-map-pin"></i><span data-prod-lat="${latKey}"></span></div>` : '';
         return `
           <div class="product-card" onclick="showProductDetail('${product.id}')">
             <div class="product-image">
-              ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+              ${product.foto ? `<img src="${product.foto}" alt="${product.nama}" loading="lazy">` : '<i class="fas fa-box"></i>'}
               <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
                 <i class="far fa-heart"></i>
               </button>
@@ -3782,6 +5572,7 @@
               ${distHtml}
               <div class="product-name">${product.nama}</div>
               <div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>
+              ${locHtml}
               <div class="product-meta">
                 <div class="product-seller">
                   <div class="seller-avatar"><i class="fas fa-store"></i></div>
@@ -3792,6 +5583,10 @@
             </div>
           </div>`;
       }).join('');
+      // Update desktop stat cards setelah produk render
+      if (typeof updateDesktopStats === 'function') setTimeout(updateDesktopStats, 300);
+      // Inject city/region labels (async, non-blocking)
+      if (typeof injectProductLocations === 'function') setTimeout(function(){ injectProductLocations(products); }, 500);
     }
 
     // ==================== CATEGORIES ====================
@@ -3867,6 +5662,13 @@
           }
 
           showPage('productDetailPage');
+
+          // Sembunyikan tombol beli untuk seller
+          var btnBuy = document.getElementById('btnBuyNow');
+          var warnBuy = document.getElementById('sellerBuyWarning');
+          var isSeller = currentUser && currentUser.role === 'seller';
+          if (btnBuy) btnBuy.style.display = isSeller ? 'none' : 'block';
+          if (warnBuy) warnBuy.style.display = isSeller ? 'flex' : 'none';
         })
         .catch(function(error) {
           console.error('showProductDetail error:', error);
@@ -4010,6 +5812,15 @@
               ${currentUser.role === 'buyer' && order.paymentStatus === 'unpaid' && order.metodePembayaran !== 'COD' ? `
                 <button class="btn" style="margin-top:8px;background:#FF6B00;color:white;width:100%;" onclick="showPaymentWaiting('${order.id}', false)">💳 Lanjut Bayar</button>
               ` : ''}
+              ${(order.buyerLat && order.sellerLat) || (order.buyerLatitude && order.sellerLatitude) ? `
+                <button class="btn" style="margin-top:8px;width:100%;font-size:13px;background:#E3F2FD;color:#1565C0;border-color:#BBDEFB;"
+                  onclick="showOrderMap(
+                    ${order.buyerLat||order.buyerLatitude||0},${order.buyerLng||order.buyerLongitude||0},
+                    ${order.sellerLat||order.sellerLatitude||0},${order.sellerLng||order.sellerLongitude||0},
+                    ${currentUser.role === 'buyer' ? 'true' : 'false'})">
+                  🗺️ ${currentUser.role === 'buyer' ? 'Lihat Lokasi Penjual' : 'Lihat Lokasi Pembeli'}
+                </button>
+              ` : ''}
             </div>
           `).join('');
         })
@@ -4021,6 +5832,10 @@
     function buyNow() {
       if (!currentUser) {
         showToast('Silakan login terlebih dahulu', 'error');
+        return;
+      }
+      if (currentUser.role === 'seller') {
+        showToast('Akun penjual tidak bisa melakukan pembelian. Gunakan akun pembeli.', 'error');
         return;
       }
       if (!currentProduct) return;
@@ -4254,10 +6069,63 @@
         buyerId: currentUser ? currentUser.id : ''
       })
       .then(function() {
-        showToast('Pesanan selesai! 🎉', 'success');
+        showToast('Pesanan selesai! Terima kasih 🎉', 'success');
         loadOrders();
+        // Tampilkan rating modal
+        setTimeout(function() { showRatingModal(orderId); }, 800);
       })
       .catch(function(e) { showToast(e.message || 'Gagal konfirmasi', 'error'); });
+    }
+
+    var _ratingOrderId = null;
+    var _ratingValue = 0;
+
+    function showRatingModal(orderId) {
+      _ratingOrderId = orderId;
+      _ratingValue = 0;
+      var html = '<div style="text-align:center;padding:8px 0 16px;">'
+        + '<div style="font-size:28px;margin-bottom:8px;">⭐</div>'
+        + '<div style="font-size:15px;font-weight:700;margin-bottom:4px;">Bagaimana pengalamanmu?</div>'
+        + '<div style="font-size:13px;color:#9CA3AF;margin-bottom:20px;">Beri penilaian untuk pesanan ini</div>'
+        + '<div style="display:flex;justify-content:center;gap:8px;margin-bottom:20px;" id="ratingStars">'
+        + [1,2,3,4,5].map(function(i){
+            return '<i class="far fa-star" data-v="'+i+'" onclick="setRating('+i+')"'
+              + ' style="font-size:36px;color:#F59E0B;cursor:pointer;transition:transform .1s;"></i>';
+          }).join('')
+        + '</div>'
+        + '<textarea id="ratingComment" class="form-input" placeholder="Tulis ulasan (opsional)..." rows="3" style="margin-bottom:16px;resize:none;font-size:13px;"></textarea>'
+        + '<div style="display:flex;gap:10px;">'
+        + '<button class="btn" style="flex:1;" onclick="closeModal()">Lewati</button>'
+        + '<button class="btn btn-primary" style="flex:1;" onclick="submitRating()">Kirim Rating</button>'
+        + '</div></div>';
+      showModal('Beri Rating', html);
+    }
+
+    function setRating(val) {
+      _ratingValue = val;
+      document.querySelectorAll('#ratingStars i').forEach(function(s, i) {
+        s.className = i < val ? 'fas fa-star' : 'far fa-star';
+        s.style.transform = i < val ? 'scale(1.15)' : 'scale(1)';
+      });
+    }
+
+    function submitRating() {
+      if (_ratingValue === 0) { showToast('Pilih bintang terlebih dahulu', 'error'); return; }
+      var comment = (document.getElementById('ratingComment') || {}).value || '';
+      callGAS('addReview', {
+        orderId: _ratingOrderId,
+        buyerId: currentUser.id,
+        rating: _ratingValue,
+        comment: comment
+      })
+      .then(function() {
+        showToast('Rating berhasil dikirim! ⭐', 'success');
+        closeModal();
+      })
+      .catch(function(e) {
+        showToast(e.message || 'Gagal kirim rating', 'error');
+        closeModal();
+      });
     }
 
     function updateOrderStatus(orderId, status) {
@@ -4537,8 +6405,16 @@
           if (unread > 0) {
             badge.textContent = unread;
             badge.style.display = 'flex';
+            // FIX 7: Push notif untuk notif terbaru yang belum dibaca
+            var newest = notifications.find(function(n){ return !n.isRead; });
+            var prevUnread = parseInt(localStorage.getItem('_prevUnread') || '0');
+            if (newest && unread > prevUnread) {
+              sendPushNotif(newest.judul || 'LOKARA', newest.pesan || '', 'icon-192.png');
+            }
+            localStorage.setItem('_prevUnread', String(unread));
           } else {
             badge.style.display = 'none';
+            localStorage.setItem('_prevUnread', '0');
           }
         })
         .catch(function(error) {
@@ -4705,6 +6581,9 @@
         updateProfileLocationUI();
         loadDashboardStats();
       }
+
+      // ====== DESKTOP SIDEBAR USER ======
+      if (typeof updateDesktopSidebarUser === 'function') updateDesktopSidebarUser();
     }
 
     function loadDashboardStats() {
@@ -4877,7 +6756,7 @@
       var mainEl = document.getElementById('mainApp');
       if (authEl) authEl.style.display = 'none';
       if (oldPanel) oldPanel.style.display = 'none';
-      if (mainEl) mainEl.style.display = 'block';
+      if (mainEl) mainEl.style.display = window.innerWidth >= 1024 ? 'grid' : 'block';
       // Tampilkan menu admin
       var adminMenu = document.getElementById('adminMenuSection');
       if (adminMenu) adminMenu.style.display = 'block';
