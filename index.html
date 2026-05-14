@@ -1941,6 +1941,30 @@
         <div class="promo-dots" id="promoDots" style="display:none;"></div>
       </div>
 
+      <!-- ===== SEDANG DISKON ===== -->
+      <div class="products-section" id="diskonSection" style="display:none;">
+        <div class="section-header">
+          <div class="section-title">
+            <span style="font-size:18px;">🔥</span>
+            <span>Sedang Diskon</span>
+          </div>
+          <span class="see-all" onclick="resetFilter()">Lihat Semua</span>
+        </div>
+        <div class="products-grid" id="diskonGrid"></div>
+      </div>
+
+      <!-- ===== BEST SELLER DI SEKITARMU ===== -->
+      <div class="products-section" id="bestSellerSection" style="display:none;">
+        <div class="section-header">
+          <div class="section-title">
+            <span style="font-size:18px;">⭐</span>
+            <span>Best Seller di Sekitarmu</span>
+          </div>
+          <span class="see-all" onclick="resetFilter()">Lihat Semua</span>
+        </div>
+        <div class="products-grid" id="bestSellerGrid"></div>
+      </div>
+
       <!-- Products with toggle + filter -->
       <div class="products-section">
         <div class="section-header" style="flex-wrap:wrap; gap:8px;">
@@ -2658,29 +2682,40 @@
     </div>
     <!-- ============ END SELLER E-WALLET PAGE ============ -->
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation — Buyer: 4 item | Seller: 5 item dengan FAB tengah -->
     <div class="bottom-nav" id="bottomNav">
-      <div class="nav-item active" onclick="showPage('homePage')">
+      <!-- Beranda (semua role) -->
+      <div class="nav-item active" id="navBeranda" onclick="showPage('homePage')">
         <i class="fas fa-home"></i>
         <span>Beranda</span>
       </div>
-      <div class="nav-item" onclick="showPage('ordersPage')">
+      <!-- Pesanan (semua role) -->
+      <div class="nav-item" id="navPesanan" onclick="showOrders()">
         <i class="fas fa-shopping-bag"></i>
         <span>Pesanan</span>
       </div>
-      <div class="nav-item" onclick="showAddProduct()">
+      <!-- FAB Jual — hanya seller -->
+      <div class="nav-item" id="navJual" style="display:none;" onclick="showAddProduct()">
         <div class="sell-btn"><i class="fas fa-plus"></i></div>
         <span>Jual</span>
       </div>
+      <!-- Wishlist — hanya buyer -->
+      <div class="nav-item" id="navWishlist" onclick="showWishlist()">
+        <i class="fas fa-heart"></i>
+        <span>Wishlist</span>
+      </div>
+      <!-- Produk Saya — hanya seller -->
+      <div class="nav-item" id="navProdukSaya" style="display:none;" onclick="showSellerProducts()">
+        <i class="fas fa-box"></i>
+        <span>Produk</span>
+      </div>
+      <!-- Admin Master (hidden by default) -->
       <div class="nav-item" id="adminNavItem" style="display:none;" onclick="showAdminMasterData()">
         <i class="fas fa-database"></i>
         <span>Master</span>
       </div>
-      <div class="nav-item" onclick="showPage('chatPage')">
-        <i class="fas fa-comment"></i>
-        <span>Chat</span>
-      </div>
-      <div class="nav-item" onclick="showPage('profilePage'); updateProfileUI();">
+      <!-- Akun / Profil (semua role) -->
+      <div class="nav-item" id="navAkun" onclick="showPage('profilePage'); updateProfileUI();">
         <i class="fas fa-user"></i>
         <span>Akun</span>
       </div>
@@ -2811,8 +2846,9 @@
           const hideNav = ['productDetailPage', 'addProductPage', 'chatPage', 'bannerAdPage', 'storePage', 'adminMasterDataPage'];
           if (bottomNav) bottomNav.style.display = hideNav.includes(prev) ? 'none' : 'flex';
           document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-          const navMap = { homePage: 0, ordersPage: 1, profilePage: 4 };
-          if (navMap[prev] !== undefined) document.querySelectorAll('.nav-item')[navMap[prev]].classList.add('active');
+          const navIdMap2 = { homePage: 'navBeranda', ordersPage: 'navPesanan', profilePage: 'navAkun',
+                               wishlistPage: 'navWishlist', sellerProductsPage: 'navProdukSaya' };
+          if (navIdMap2[prev]) { var ne = document.getElementById(navIdMap2[prev]); if (ne) ne.classList.add('active'); }
           window.scrollTo(0, 0);
           // Push state baru supaya bisa back lagi
           window.history.pushState({ page: prev }, '');
@@ -2844,6 +2880,7 @@
           getLocation();
           loadNotifications();
           loadBanners();
+          setTimeout(loadPromoSections, 1200); // delay agar lokasi sudah siap
           return;
         }
       } catch(e) { localStorage.removeItem('lokara_user'); }
@@ -2950,6 +2987,7 @@
           getLocation();
           loadCategories();
           loadNearbyProducts();
+          loadPromoSections();
           loadNotifications();
           loadBanners();
           showToast('Selamat datang kembali!', 'success');
@@ -3018,11 +3056,13 @@
         }
       }
 
-      // Update nav active state
+      // Update nav active state (ID-based, robust terhadap jumlah nav item yang berubah)
       document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-      const navMap = { homePage: 0, ordersPage: 1, profilePage: 4 };
-      if (navMap[pageId] !== undefined) {
-        document.querySelectorAll('.nav-item')[navMap[pageId]].classList.add('active');
+      const navIdMap = { homePage: 'navBeranda', ordersPage: 'navPesanan', profilePage: 'navAkun',
+                         wishlistPage: 'navWishlist', sellerProductsPage: 'navProdukSaya' };
+      if (navIdMap[pageId]) {
+        var navEl = document.getElementById(navIdMap[pageId]);
+        if (navEl) navEl.classList.add('active');
       }
 
       // Sembunyikan bottom nav di halaman tertentu
@@ -3420,6 +3460,76 @@
         console.error('loadAllProducts error:', error);
         grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-exclamation-circle"></i><h3>Gagal memuat produk</h3><p>Cek koneksi internet</p></div>`;
       });
+    }
+
+    // ==================== PROMO SECTIONS (MVP) ====================
+
+    function loadPromoSections() {
+      if (!currentLocation.lat || !currentLocation.lng) return;
+
+      // #2: Sedang Diskon
+      callGAS('getDiscountedProducts', { latitude: currentLocation.lat, longitude: currentLocation.lng })
+        .then(function(products) {
+          if (!products || products.length === 0) {
+            document.getElementById('diskonSection').style.display = 'none';
+            return;
+          }
+          document.getElementById('diskonSection').style.display = 'block';
+          document.getElementById('diskonGrid').innerHTML = products.map(renderPromoProductCard).join('');
+        }).catch(function() {});
+
+      // #3: Best Seller di Sekitarmu
+      callGAS('getBestSellersNearby', { latitude: currentLocation.lat, longitude: currentLocation.lng })
+        .then(function(products) {
+          if (!products || products.length === 0) {
+            document.getElementById('bestSellerSection').style.display = 'none';
+            return;
+          }
+          document.getElementById('bestSellerSection').style.display = 'block';
+          document.getElementById('bestSellerGrid').innerHTML = products.map(renderPromoProductCard).join('');
+        }).catch(function() {});
+    }
+
+    function renderPromoProductCard(product) {
+      const dist = parseFloat(product.distance);
+      const distHtml = !isNaN(dist)
+        ? `<div class="distance-info"><i class="fas fa-map-marker-alt"></i> ${dist.toFixed(2)} km</div>` : '';
+      const ratingHtml = product.rating
+        ? `<div class="rating"><i class="fas fa-star"></i> ${product.rating}${product.ratingCount > 0 ? ` <span style="color:var(--text-light);font-size:10px;">(${product.ratingCount})</span>` : ''}</div>`
+        : `<div class="rating" style="color:var(--text-light);"><i class="far fa-star"></i> Baru</div>`;
+      const diskonBadge = product.diskonPersen > 0
+        ? `<div style="position:absolute;top:8px;left:8px;background:#F44336;color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;z-index:2;">-${product.diskonPersen}%</div>` : '';
+      const salesBadge = product.salesCount > 0
+        ? `<div style="position:absolute;top:8px;left:8px;background:#FF9800;color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;z-index:2;">🔥 ${product.salesCount} terjual</div>` : '';
+      const hargaHtml = product.diskonPersen > 0 && product.hargaDiskon
+        ? `<div style="display:flex;flex-direction:column;">
+             <span style="color:var(--text-light);font-size:11px;text-decoration:line-through;">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</span>
+             <span class="product-price" style="color:var(--danger);">Rp ${parseInt(product.hargaDiskon).toLocaleString('id-ID')}</span>
+           </div>`
+        : `<div class="product-price">Rp ${parseInt(product.harga).toLocaleString('id-ID')}</div>`;
+      const badge = product.diskonPersen > 0 ? diskonBadge : salesBadge;
+      return `
+        <div class="product-card" onclick="showProductDetail('${product.id}')">
+          <div class="product-image" style="position:relative;">
+            ${product.foto ? `<img src="${product.foto}" alt="${product.nama}">` : '<i class="fas fa-box"></i>'}
+            ${badge}
+            <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}')">
+              <i class="far fa-heart"></i>
+            </button>
+          </div>
+          <div class="product-info">
+            ${distHtml}
+            <div class="product-name">${product.nama}</div>
+            ${hargaHtml}
+            <div class="product-meta">
+              <div class="product-seller">
+                <div class="seller-avatar"><i class="fas fa-store"></i></div>
+                <span>${product.sellerNama || 'UMKM'}</span>
+              </div>
+              ${ratingHtml}
+            </div>
+          </div>
+        </div>`;
     }
 
     // Alias untuk kompatibilitas fungsi lama
@@ -4571,7 +4681,19 @@
         if (img) img.style.display = 'none';
       }
 
-      if (currentUser.role === 'seller') {
+      // ====== ROLE-BASED BOTTOM NAVIGATION ======
+      const isSeller = currentUser.role === 'seller';
+      // Wishlist: hanya buyer
+      var navWishlist = document.getElementById('navWishlist');
+      if (navWishlist) navWishlist.style.display = isSeller ? 'none' : 'flex';
+      // Jual (FAB) + Produk Saya: hanya seller
+      var navJual = document.getElementById('navJual');
+      if (navJual) navJual.style.display = isSeller ? 'flex' : 'none';
+      var navProdukSaya = document.getElementById('navProdukSaya');
+      if (navProdukSaya) navProdukSaya.style.display = isSeller ? 'flex' : 'none';
+
+      // ====== PROFILE MENU SELLER ITEMS ======
+      if (isSeller) {
         document.getElementById('sellerProductsMenu').style.display = 'flex';
         document.getElementById('statsGrid').style.display = 'grid';
         var locMenu = document.getElementById('sellerLocationMenu');
@@ -5104,7 +5226,26 @@
   <script>
     function showSellerInvoices() {
       if (!currentUser) return;
-      showPage('sellerInvoicesPage');
+      // Sembunyikan semua page di mainApp
+      document.querySelectorAll('#mainApp .page').forEach(function(p) {
+        p.style.display = 'none';
+        p.classList.remove('active');
+      });
+      // Tampilkan sellerInvoicesPage secara eksplisit
+      var pg = document.getElementById('sellerInvoicesPage');
+      if (pg) {
+        pg.style.display = 'block';
+        pg.classList.add('active');
+        pg.style.removeProperty('display'); // hapus inline display:none dari HTML
+        pg.style.display = 'block';
+      }
+      // Sembunyikan bottom nav (halaman full-screen)
+      var nav = document.getElementById('bottomNav');
+      if (nav) nav.style.display = 'none';
+      // Simpan history
+      if (currentPage && currentPage !== 'sellerInvoicesPage') pageHistory.push(currentPage);
+      currentPage = 'sellerInvoicesPage';
+      window.scrollTo(0, 0);
       loadSellerInvoices();
     }
     function loadSellerInvoices() {
@@ -5126,7 +5267,7 @@
               '<div style="margin-top:12px;background:#F5F5F5;border-radius:10px;padding:12px;">'
               + '<div style="font-size:12px;margin-bottom:6px;color:#555;">Transfer ke: <strong>BCA 1234567890 a/n LOKARA PLATFORM</strong></div>'
               + '<input type="text" class="form-input" id="proof_' + inv.id + '" placeholder="URL bukti transfer (foto/link)" style="margin-bottom:8px;">'
-              + '<button class="btn btn-primary" style="padding:8px;font-size:13px;width:100%;" data-inv-id="' + inv.id + '" onclick="uploadProof(this.getAttribute('data-inv-id'))">📎 Upload Bukti</button>'
+              + '<button class="btn btn-primary" style="padding:8px;font-size:13px;width:100%;" data-inv-id="' + inv.id + '" onclick="uploadProof(this.dataset.invId)">📎 Upload Bukti</button>'
               + '</div>'
             ) : (inv.proofUrl ? '<div style="font-size:12px;margin-top:6px;"><a href="' + inv.proofUrl + '" target="_blank" style="color:var(--primary);">📎 Lihat bukti transfer</a></div>' : '');
             return '<div style="background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
@@ -5169,8 +5310,8 @@
               +'<div style="font-size:12px;">Status: <strong>'+i.status+'</strong></div>'
               +(i.proofUrl?'<div style="margin:6px 0;font-size:12px;"><a href="'+i.proofUrl+'" target="_blank" style="color:var(--primary);">Lihat Bukti</a></div>':'<div style="font-size:12px;color:#757575;">Belum ada bukti</div>')
               +(ip?'<div style="display:flex;gap:8px;margin-top:8px;">'
-                +'<button class="btn" style="flex:1;background:#4CAF50;color:white;padding:8px;font-size:12px;" onclick="verifyInvoice(''+i.id+'','approve')">Setujui</button>'
-                +'<button class="btn" style="flex:1;background:#F44336;color:white;padding:8px;font-size:12px;" onclick="verifyInvoice(''+i.id+'','reject')">Tolak</button>'
+                +'<button class="btn" style="flex:1;background:#4CAF50;color:white;padding:8px;font-size:12px;" onclick="verifyInvoice(\"'+i.id+'\",\"approve\")">Setujui</button>'
+                +'<button class="btn" style="flex:1;background:#F44336;color:white;padding:8px;font-size:12px;" onclick="verifyInvoice(\"'+i.id+'\",\"reject\")">Tolak</button>'
                 +'</div>':'')
               +'</div>';
           }).join('');
