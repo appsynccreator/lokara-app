@@ -1869,11 +1869,9 @@
         background: var(--bg);
       }
 
-      /* Shell: 2 col × 2 row grid */
+      /* Shell: 1 col (konten kanan saja, sidebar fixed di luar flow) */
       #mainApp {
-        display: grid;
-        grid-template-columns: 210px 1fr;
-        grid-template-rows: auto 1fr;
+        display: block;
         min-height: 100vh;
         overflow-x: hidden;
       }
@@ -1900,7 +1898,7 @@
         border-radius: 0;
       }
 
-      /* Push all grid children below fixed topbar */
+      /* Push content below fixed topbar, and right of fixed sidebar */
       #desktopSidebar,
       #desktopMain {
         margin-top: 56px;
@@ -1982,21 +1980,27 @@
       /* Location bar — hide on desktop (shown in sidebar/content) */
       .location-bar { display: none; }
 
-      /* --- SIDEBAR --- */
+      /* --- SIDEBAR — fixed di kiri, selalu full height --- */
       #desktopSidebar {
         display: flex;
         flex-direction: column;
-        grid-column: 1;
-        grid-row: 2;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        width: 210px;
+        bottom: 0;
         background: var(--card);
         border-right: 1px solid var(--border-light);
-        position: sticky;
-        top: 56px;
-        height: calc(100vh - 56px);
         overflow-y: auto;
         overflow-x: hidden;
         padding: 0;
         z-index: 10;
+      }
+
+      /* Sidebar bukan lagi grid item, keluarkan dari flow */
+      /* desktopMain geser ke kanan sejauh lebar sidebar */
+      #desktopMain {
+        margin-left: 210px;
       }
 
       /* Nav area */
@@ -2520,7 +2524,7 @@
       #desktopRightPanel { display: flex !important; flex-direction: column; gap: 16px; }
       #desktopHomeHeader { display: block !important; }
       #desktopContentInner { display: block !important; max-width: 1100px; padding: 12px 20px 32px; margin: 0 auto; }
-      #desktopMain { display: block !important; overflow-y: auto; background: var(--bg); grid-column: 2; grid-row: 2; }
+      #desktopMain { display: block !important; overflow-y: auto; background: var(--bg); margin-left: 210px; margin-top: 56px; min-height: calc(100vh - 56px); }
       #desktopHomeLayout { display: grid !important; grid-template-columns: 1fr 272px; gap: 20px; align-items: start; }
       #desktopHomeLeft { min-width: 0; }
 
@@ -3986,7 +3990,7 @@
       var adminEl = document.getElementById('adminPanel');
       if (authEl) authEl.style.display = 'none';
       if (adminEl) adminEl.style.display = 'none';
-      if (mainEl) mainEl.style.display = window.innerWidth >= 1024 ? 'grid' : 'block';
+      if (mainEl) mainEl.style.display = 'block';
       var adminMenu = document.getElementById('adminMenuSection');
       if (adminMenu) adminMenu.style.display = 'none';
       var adminNav = document.getElementById('adminNavItem');
@@ -4203,7 +4207,7 @@
         var _isNowDesktop = window.innerWidth >= 1024;
         if (_isNowDesktop && !_wasDesktop && currentUser) {
           var mainEl = document.getElementById('mainApp');
-          if (mainEl) mainEl.style.display = 'grid';
+          if (mainEl) mainEl.style.display = 'block';
           initDesktopLayout();
         } else if (!_isNowDesktop && _wasDesktop) {
           var mainEl = document.getElementById('mainApp');
@@ -6747,7 +6751,7 @@
       var mainEl = document.getElementById('mainApp');
       if (authEl) authEl.style.display = 'none';
       if (oldPanel) oldPanel.style.display = 'none';
-      if (mainEl) mainEl.style.display = window.innerWidth >= 1024 ? 'grid' : 'block';
+      if (mainEl) mainEl.style.display = 'block';
       // Tampilkan menu admin
       var adminMenu = document.getElementById('adminMenuSection');
       if (adminMenu) adminMenu.style.display = 'block';
