@@ -1869,11 +1869,11 @@
         background: var(--bg);
       }
 
-      /* Shell: 2 col × 3 row grid */
+      /* Shell: 2 col × 2 row grid */
       #mainApp {
         display: grid;
         grid-template-columns: 210px 1fr;
-        grid-template-rows: auto 1fr auto;
+        grid-template-rows: auto 1fr;
         min-height: 100vh;
         overflow-x: hidden;
       }
@@ -1902,7 +1902,6 @@
 
       /* Push all grid children below fixed topbar */
       #desktopSidebar,
-      #sidebarAdGrid,
       #desktopMain {
         margin-top: 56px;
       }
@@ -1993,8 +1992,7 @@
         border-right: 1px solid var(--border-light);
         position: sticky;
         top: 56px;
-        /* Hanya tinggi konten navigasi, bukan full vh */
-        max-height: calc(100vh - 56px);
+        height: calc(100vh - 56px);
         overflow-y: auto;
         overflow-x: hidden;
         padding: 0;
@@ -2101,27 +2099,21 @@
 
 
 
-      /* ====== SIDEBAR AD PANEL — kolom 1 row 3 ====== */
+      /* ====== SIDEBAR AD PANEL — bagian dari sidebar kolom 1 ====== */
       #sidebarAdGrid {
-        grid-column: 1;
-        grid-row: 3;
         display: flex;
         flex-direction: column;
         gap: 8px;
         padding: 8px;
         background: var(--bg);
-        border-right: 1px solid var(--border-light);
-        /* Sticky: menempel di bawah sidebar, isi sisa viewport */
-        position: sticky;
-        top: calc(56px + /* sidebar tinggi dinamis */ 0px);
-        min-height: calc(100vh - 56px - 300px);
-        overflow-y: auto;
+        border-top: 1px solid var(--border-light);
+        flex-shrink: 0;
       }
 
-      /* Main content: span row 2 sampai 3 */
+      /* Main content: span row 2 saja */
       #desktopMain {
         grid-column: 2 !important;
-        grid-row: 2 / 4 !important;
+        grid-row: 2 !important;
       }
 
       /* ====== SIDEBAR AD CARDS ====== */
@@ -2825,34 +2817,33 @@
           </div>
         </div>
       </div>
-    </nav>
 
-    <!-- ====== SIDEBAR AD PANEL (terpisah dari sidebar nav, kolom 1) ====== -->
-    <div id="sidebarAdGrid" style="display:none;">
-      <div class="sidebar-ad-card" id="sidebarAdSlot0" onclick="sidebarAdClick(0)">
-        <div class="sad-icon"><i class="fas fa-ad"></i></div>
-        <div class="sad-label">IKLAN</div>
-        <div class="sad-title">Pasang Iklan Anda di Sini</div>
-        <div class="sad-sub">Jangkau pembeli di sekitarmu</div>
-        <div class="sad-cta">Pasang Sekarang →</div>
+      <!-- ====== SIDEBAR AD CARDS (selalu di bawah nav, dalam sidebar) ====== -->
+      <div id="sidebarAdGrid" style="display:none;">
+        <div class="sidebar-ad-card" id="sidebarAdSlot0" onclick="sidebarAdClick(0)">
+          <div class="sad-icon"><i class="fas fa-ad"></i></div>
+          <div class="sad-label">IKLAN</div>
+          <div class="sad-title">Pasang Iklan Anda di Sini</div>
+          <div class="sad-sub">Jangkau pembeli di sekitarmu</div>
+          <div class="sad-cta">Pasang Sekarang →</div>
+        </div>
+        <div class="sidebar-ad-card sidebar-ad-empty" id="sidebarAdSlot1" onclick="sidebarAdClick(1)">
+          <div class="sad-icon sad-icon-sm"><i class="fas fa-plus"></i></div>
+          <div class="sad-title" style="font-size:10.5px;">Slot Iklan Tersedia</div>
+          <div class="sad-sub" style="font-size:9px;">Klik untuk pasang iklan</div>
+        </div>
+        <div class="sidebar-ad-card sidebar-ad-empty" id="sidebarAdSlot2" onclick="sidebarAdClick(2)">
+          <div class="sad-icon sad-icon-sm"><i class="fas fa-plus"></i></div>
+          <div class="sad-title" style="font-size:10.5px;">Slot Iklan Tersedia</div>
+          <div class="sad-sub" style="font-size:9px;">Klik untuk pasang iklan</div>
+        </div>
+        <div class="sidebar-ad-card sidebar-ad-empty sidebar-ad-flex" id="sidebarAdSlot3" onclick="sidebarAdClick(3)">
+          <div class="sad-icon sad-icon-sm"><i class="fas fa-plus"></i></div>
+          <div class="sad-title" style="font-size:10.5px;">Slot Iklan Tersedia</div>
+          <div class="sad-sub" style="font-size:9px;">Klik untuk pasang iklan</div>
+        </div>
       </div>
-      <div class="sidebar-ad-card sidebar-ad-empty" id="sidebarAdSlot1" onclick="sidebarAdClick(1)">
-        <div class="sad-icon sad-icon-sm"><i class="fas fa-plus"></i></div>
-        <div class="sad-title" style="font-size:10.5px;">Slot Iklan Tersedia</div>
-        <div class="sad-sub" style="font-size:9px;">Klik untuk pasang iklan</div>
-      </div>
-      <div class="sidebar-ad-card sidebar-ad-empty" id="sidebarAdSlot2" onclick="sidebarAdClick(2)">
-        <div class="sad-icon sad-icon-sm"><i class="fas fa-plus"></i></div>
-        <div class="sad-title" style="font-size:10.5px;">Slot Iklan Tersedia</div>
-        <div class="sad-sub" style="font-size:9px;">Klik untuk pasang iklan</div>
-      </div>
-      <div class="sidebar-ad-card sidebar-ad-empty sidebar-ad-flex" id="sidebarAdSlot3" onclick="sidebarAdClick(3)">
-        <div class="sad-icon sad-icon-sm"><i class="fas fa-plus"></i></div>
-        <div class="sad-title" style="font-size:10.5px;">Slot Iklan Tersedia</div>
-        <div class="sad-sub" style="font-size:9px;">Klik untuk pasang iklan</div>
-      </div>
-    </div>
-    <!-- ====== END DESKTOP SIDEBAR ====== -->
+    </nav>
 
     <!-- ====== DESKTOP MAIN SCROLL AREA ====== -->
     <div id="desktopMain" style="display:contents;">
@@ -4011,11 +4002,11 @@
     function initDesktopLayout() {
       if (!isDesktop()) return;
 
-      // Show sidebar
+      // Show sidebar (contains nav + ad panel)
       var sb = document.getElementById('desktopSidebar');
       if (sb) sb.style.display = 'flex';
 
-      // Show ad panel (separate from sidebar)
+      // Show ad panel inside sidebar
       var adg = document.getElementById('sidebarAdGrid');
       if (adg) adg.style.display = 'flex';
 
