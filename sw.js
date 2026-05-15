@@ -1,4 +1,4 @@
-// Versi cache pakai timestamp — otomatis berubah setiap sw.js di-edit
+ Versi cache pakai timestamp — otomatis berubah setiap sw.js di-edit
 // Ganti angka ini setiap deploy baru agar browser langsung update
 const CACHE_VERSION = '20260510-1';
 const CACHE_NAME = 'lokara-' + CACHE_VERSION;
