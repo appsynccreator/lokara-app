@@ -4098,42 +4098,54 @@
 
     function updateDesktopStats() {
       if (!isDesktop()) return;
-      // Products count
-      var grid = document.getElementById('mainProductsGrid');
-      if (grid) {
-        var count = grid.querySelectorAll('.product-card').length;
-        var el = document.getElementById('dskStatProducts');
-        if (el) el.textContent = count || '—';
+
+      // Jika cache belum ada, tunggu lalu retry
+      if (!allProductsCache || allProductsCache.length === 0) {
+        setTimeout(updateDesktopStats, 1500);
+        return;
       }
-      // Diskon count
-      var dGrid = document.getElementById('diskonGrid');
-      if (dGrid) {
-        var dc = dGrid.querySelectorAll('.product-card').length;
-        var del = document.getElementById('dskStatDiskon');
-        var dsub = document.getElementById('dskStatDiskonSub');
-        if (del) del.textContent = dc || '—';
-        if (dsub && dc > 0) dsub.textContent = 'Diskon s/d 40%';
+
+      // --- Produk Terdekat dari cache ---
+      var nearbyProducts = allProductsCache.filter(function(p) {
+        var d = parseFloat(p.distance);
+        return !isNaN(d) && d <= 1;
+      });
+      var productCount = (currentLocation.lat && currentLocation.lng)
+        ? nearbyProducts.length
+        : allProductsCache.length;
+      var elP = document.getElementById('dskStatProducts');
+      var elPSub = document.getElementById('dskStatProductsSub');
+      if (elP) elP.textContent = productCount || '0';
+      if (elPSub) elPSub.textContent = currentLocation.lat ? 'Dalam radius 1 km' : 'Semua produk';
+
+      // --- UMKM Aktif (seller unik) ---
+      var uniqueSellers = new Set();
+      allProductsCache.forEach(function(p) { if (p.sellerId) uniqueSellers.add(p.sellerId); });
+      var elS = document.getElementById('dskStatSellers');
+      if (elS) elS.textContent = uniqueSellers.size || '0';
+
+      // --- Sedang Diskon ---
+      var diskonProducts = allProductsCache.filter(function(p) {
+        return p.diskonPersen && parseFloat(p.diskonPersen) > 0;
+      });
+      var elD = document.getElementById('dskStatDiskon');
+      var elDSub = document.getElementById('dskStatDiskonSub');
+      if (elD) elD.textContent = diskonProducts.length || '0';
+      if (elDSub) elDSub.textContent = diskonProducts.length > 0 ? 'Produk diskon aktif' : 'Belum ada diskon';
+
+      // --- Pesanan Aktif via GAS ---
+      if (currentUser) {
+        callGAS('getOrders', { userId: currentUser.id, role: currentUser.role })
+          .then(function(orders) {
+            var active = (orders || []).filter(function(o) {
+              return ['pending','confirmed','processing'].includes(o.status);
+            }).length;
+            var elO = document.getElementById('dskStatOrders');
+            if (elO) elO.textContent = active;
+            var badge = document.getElementById('dsnOrderBadge');
+            if (badge) { badge.textContent = active; badge.style.display = active > 0 ? 'inline-block' : 'none'; }
+          }).catch(function(){});
       }
-      // Sellers count — unique sellers in grid
-      if (grid) {
-        var sellerTexts = grid.querySelectorAll('.product-seller span');
-        var unique = new Set();
-        sellerTexts.forEach(function(s) { unique.add(s.textContent.trim()); });
-        var sel = document.getElementById('dskStatSellers');
-        if (sel) sel.textContent = unique.size || '—';
-      }
-      // Orders count
-      callGAS('getOrders', { userId: currentUser && currentUser.id, role: currentUser && currentUser.role })
-        .then(function(orders) {
-          var active = (orders || []).filter(function(o) {
-            return ['pending','confirmed','processing'].includes(o.status);
-          }).length;
-          var el = document.getElementById('dskStatOrders');
-          if (el) el.textContent = active;
-          // Also update sidebar badge
-          var badge = document.getElementById('dsnOrderBadge');
-          if (badge) { badge.textContent = active; badge.style.display = active > 0 ? 'inline-block' : 'none'; }
-        }).catch(function(){});
     }
 
     function loadDesktopRightPanel() {
@@ -4811,6 +4823,7 @@
         allProductsCache = products;
         saveProductsToLocalCache(products); // FIX 9: simpan ke cache
         renderProducts();
+        if (typeof updateDesktopStats === 'function') setTimeout(updateDesktopStats, 300);
       })
       .catch(function(error) {
         console.error('loadAllProducts error:', error);
