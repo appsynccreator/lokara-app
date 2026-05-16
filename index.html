@@ -2656,33 +2656,63 @@
 
     <!-- Tab Navigation -->
     <div style="display:flex; background:white; border-bottom:2px solid #E0E0E0; overflow-x:auto;">
-      <button class="admin-tab active" onclick="showAdminTab('tabKomisi')" id="btnTabKomisi" style="flex:1; padding:14px 10px; border:none; background:white; font-size:13px; font-weight:600; color:var(--primary); border-bottom:3px solid var(--primary); cursor:pointer; white-space:nowrap;">💰 Komisi & Biaya</button>
+      <button class="admin-tab active" onclick="showAdminTab('tabKomisi')" id="btnTabKomisi" style="flex:1; padding:14px 10px; border:none; background:white; font-size:13px; font-weight:600; color:var(--primary); border-bottom:3px solid var(--primary); cursor:pointer; white-space:nowrap;">👑 Langganan</button>
       <button class="admin-tab" onclick="showAdminTab('tabUsers')" id="btnTabUsers" style="flex:1; padding:14px 10px; border:none; background:white; font-size:13px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">👥 Users</button>
       <button class="admin-tab" onclick="showAdminTab('tabBanners')" id="btnTabBanners" style="flex:1; padding:14px 10px; border:none; background:white; font-size:13px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">📢 Iklan</button>
     </div>
 
-    <!-- Tab: Komisi & Biaya -->
+    <!-- Tab: Langganan -->
     <div id="tabKomisi" style="padding:20px;">
+      <!-- Pengaturan Harga Subscription -->
       <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:16px;">
-        <div style="font-size:16px; font-weight:700; margin-bottom:16px; color:#1B5E20;">⚙️ Pengaturan Komisi</div>
+        <div style="font-size:16px; font-weight:700; margin-bottom:16px; color:#1B5E20;">⚙️ Pengaturan Subscription</div>
         <div style="background:#E8F5E9; border-radius:12px; padding:14px; margin-bottom:16px; font-size:13px; color:#1B5E20; line-height:1.6;">
-          <strong>ℹ️ Cara kerja komisi:</strong><br>
-          Seller baru mendapatkan masa trial gratis. Setelah trial habis, komisi dipotong dari penerimaan seller (buyer tetap bayar harga normal).<br>
-          <strong>Contoh:</strong> Harga Rp 100.000, Komisi 3% = Rp 3.000 → Seller terima Rp 97.000
+          <strong>ℹ️ Model Subscription LOKARA:</strong><br>
+          Seller membayar langganan bulanan/tahunan. Tidak ada komisi per transaksi — semua hasil penjualan langsung ke seller.
         </div>
-        <div class="form-group">
-          <label class="form-label">Komisi (%)</label>
-          <input type="number" class="form-input" id="adminKomisiPersen" placeholder="3" min="0" max="30" step="0.5">
+        <!-- Harga paket dalam grid 3 kolom -->
+        <div style="font-size:13px; font-weight:600; color:#555; margin-bottom:10px;">💰 Harga Paket Langganan</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
+          <div>
+            <label class="form-label" style="font-size:11px;">Bulanan (Rp)</label>
+            <input type="number" class="form-input" id="adminSubMonthly" placeholder="50000" min="0" style="font-size:13px; padding:10px;">
+            <div style="font-size:10px; color:#9E9E9E; margin-top:3px;">1 bulan</div>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:11px;">3 Bulan (Rp)</label>
+            <input type="number" class="form-input" id="adminSubQuarterly" placeholder="135000" min="0" style="font-size:13px; padding:10px;">
+            <div style="font-size:10px; color:#9E9E9E; margin-top:3px;">hemat 10%</div>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:11px;">Tahunan (Rp)</label>
+            <input type="number" class="form-input" id="adminSubYearly" placeholder="500000" min="0" style="font-size:13px; padding:10px;">
+            <div style="font-size:10px; color:#9E9E9E; margin-top:3px;">hemat 17%</div>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Masa Trial Seller (bulan)</label>
-          <input type="number" class="form-input" id="adminTrialBulan" placeholder="6" min="0" max="24">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Masa Trial (bulan)</label>
+            <input type="number" class="form-input" id="adminTrialBulan" placeholder="3" min="0" max="12">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Biaya Iklan/Minggu (Rp)</label>
+            <input type="number" class="form-input" id="adminBannerBiaya" placeholder="5000" min="0">
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Biaya Iklan per Minggu (Rp)</label>
-          <input type="number" class="form-input" id="adminBannerBiaya" placeholder="5000" min="0">
+        <button onclick="saveAdminSettings()" class="btn btn-primary" style="width:100%;">
+          <i class="fas fa-save"></i> Simpan Pengaturan
+        </button>
+      </div>
+
+      <!-- Verifikasi Subscription -->
+      <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div style="font-size:16px; font-weight:700; color:#1B5E20;">📋 Verifikasi Pembayaran</div>
+          <button onclick="loadAdminSubscriptions()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
         </div>
-        <button onclick="saveAdminSettings()" class="btn btn-primary" style="width:100%;">Simpan Pengaturan</button>
+        <div id="adminSubList">
+          <div style="text-align:center;padding:30px;color:#757575;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>
+        </div>
       </div>
     </div>
 
@@ -2784,8 +2814,8 @@
         <div class="ds-link" onclick="showBannerAd()">
           <span class="ds-ico" style="background:#FFF7ED;color:#EA580C;"><i class="fas fa-ad"></i></span> Pasang Iklan
         </div>
-        <div class="ds-link" onclick="showSellerInvoices()">
-          <span class="ds-ico" style="background:#FFEDD5;color:#C2410C;"><i class="fas fa-file-invoice-dollar"></i></span> Tagihan Komisi
+        <div class="ds-link" id="dsnLangganan" onclick="showSubscriptionPage()">
+          <span class="ds-ico" style="background:#D1FAE5;color:#059669;"><i class="fas fa-crown"></i></span> Langganan
         </div>
         <div class="ds-link" onclick="showEwalletPage()">
           <span class="ds-ico" style="background:#CCFBF1;color:#0D9488;"><i class="fas fa-wallet"></i></span> E-Wallet
@@ -3107,11 +3137,11 @@
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
 
-        <div class="menu-item" id="sellerInvoiceMenu" style="display:none;" onclick="showSellerInvoices()">
-          <div class="menu-icon" style="background:#FBE9E7; color:#BF360C;"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div class="menu-item" id="sellerInvoiceMenu" style="display:none;" onclick="showSubscriptionPage()">
+          <div class="menu-icon" style="background:#D1FAE5; color:#059669;"><i class="fas fa-crown"></i></div>
           <div class="menu-text">
-            <h4>Tagihan Komisi</h4>
-            <p>Lihat &amp; lunasi tagihan komisi COD</p>
+            <h4>Langganan</h4>
+            <p>Kelola paket langganan seller</p>
           </div>
           <i class="fas fa-chevron-right menu-arrow"></i>
         </div>
@@ -3144,6 +3174,7 @@
         </div>
 
 
+        </div><!-- /sellerSection -->
         <!-- Menu Tambahan untuk Admin (hidden by default) -->
         <div id="adminMenuSection" style="display:none;">
           <div style="margin:12px 0 6px; padding:0 4px; font-size:11px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:1px;">⚙️ Admin</div>
@@ -3272,6 +3303,22 @@
           </div>
           <div id="bannerTotal" style="display:none;background:#E8F5E9;border-radius:12px;padding:14px;margin-bottom:16px;font-size:14px;">
             Total: <strong id="bannerTotalAmount"></strong>
+          </div>
+
+          <!-- Akun pembayaran admin (dinamis dari backend) -->
+          <div id="bannerPaymentInfo" style="display:none; background:#FFF8E1; border-radius:14px; padding:14px; margin-bottom:14px; font-size:13px; color:#5D4037;">
+            <strong>📋 Transfer ke salah satu rekening berikut:</strong>
+            <div id="bannerPaymentAccounts" style="margin-top:8px;">
+              <div style="font-size:12px;color:#9E9E9E;"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+            <div style="font-size:12px;margin-top:8px;">Setelah transfer, upload bukti di bawah. Iklan aktif setelah admin verifikasi.</div>
+          </div>
+          <div id="bannerProofSection" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Link Bukti Transfer</label>
+              <input type="url" class="form-input" id="bannerProofUrl" placeholder="https://drive.google.com/... atau link foto">
+              <div style="font-size:11px;color:#9E9E9E;margin-top:4px;">Upload foto ke Google Drive / ImgBB lalu paste linknya</div>
+            </div>
           </div>
           <button class="btn btn-primary" id="bannerSubmitBtn" onclick="submitBanner()">Pasang Iklan</button>
         </div>
@@ -3529,114 +3576,157 @@
       <div class="app-header" style="position:sticky; top:0; z-index:120;">
         <div class="header-top">
           <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
-          <div class="logo-text">⚙️ Master Data</div>
+          <div class="logo-text">⚙️ Admin LOKARA</div>
           <div style="width:40px;"></div>
         </div>
       </div>
-      <div style="display:flex; background:white; border-bottom:2px solid var(--border); overflow-x:auto; position:sticky; top:60px; z-index:110;">
-        <button onclick="showAdminTabPage('tabKomisiPage')" id="btnTabKomisiPage"
-          style="flex:1; padding:12px 6px; border:none; border-bottom:3px solid var(--primary); background:white; font-size:12px; font-weight:700; color:var(--primary); cursor:pointer; white-space:nowrap;">💰 Komisi</button>
-        <button onclick="showAdminTabPage('tabUsersPage')" id="btnTabUsersPage"
-          style="flex:1; padding:12px 6px; border:none; border-bottom:3px solid transparent; background:white; font-size:12px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">👥 Users</button>
-        <button onclick="showAdminTabPage('tabBannersPage')" id="btnTabBannersPage"
-          style="flex:1; padding:12px 6px; border:none; border-bottom:3px solid transparent; background:white; font-size:12px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">📢 Iklan</button>
-        <button onclick="showAdminTabPage('tabGatewayPage')" id="btnTabGatewayPage"
-          style="flex:1; padding:12px 6px; border:none; border-bottom:3px solid transparent; background:white; font-size:12px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">💳 Gateway</button>
-        <button onclick="showAdminTabPage('tabInvoicesPage')" id="btnTabInvoicesPage"
-          style="flex:1; padding:12px 6px; border:none; border-bottom:3px solid transparent; background:white; font-size:12px; font-weight:600; color:#757575; cursor:pointer; white-space:nowrap;">🧾 Tagihan</button>
-      </div>
 
-      <!-- Tab Komisi -->
-      <div id="tabKomisiPage" style="padding:20px;">
-        <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <div style="font-size:15px; font-weight:700; margin-bottom:12px; color:var(--primary);">⚙️ Pengaturan Komisi & Biaya</div>
-          <div style="background:#E8F5E9; border-radius:12px; padding:12px; margin-bottom:16px; font-size:12px; color:var(--primary); line-height:1.6;">
-            Seller baru dapat masa trial gratis. Setelah trial, komisi dipotong dari penerimaan seller.<br>
-            <strong>Contoh:</strong> Harga Rp 100.000, Komisi 3% → Seller terima Rp 97.000
+      <!-- Single scrollable page, no tabs needed -->
+      <div style="padding:16px; display:flex; flex-direction:column; gap:14px; padding-bottom:40px;">
+
+        <!-- ① Tarif Langganan Seller ──────────────────────────────────────── -->
+        <div style="background:white; border-radius:18px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+          <div style="font-size:15px; font-weight:700; color:var(--primary); margin-bottom:3px;">👑 Tarif Langganan Seller</div>
+          <div style="font-size:12px; color:#9E9E9E; margin-bottom:16px;">Ubah harga paket yang tampil di halaman langganan seller</div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px;">
+            <div style="text-align:center;">
+              <div style="font-size:11px; font-weight:600; color:#555; margin-bottom:6px;">Bulanan</div>
+              <div style="position:relative;">
+                <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#9E9E9E;">Rp</span>
+                <input type="number" class="form-input" id="adminSubMonthly" placeholder="50000" min="0" style="padding-left:26px;font-weight:700;font-size:13px;text-align:right;">
+              </div>
+              <div style="font-size:10px;color:#9E9E9E;margin-top:3px;">/ 1 bln</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:11px; font-weight:600; color:#555; margin-bottom:6px;">3 Bulan <span style="background:#DCFCE7;color:#16A34A;font-size:9px;padding:1px 4px;border-radius:6px;">-10%</span></div>
+              <div style="position:relative;">
+                <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#9E9E9E;">Rp</span>
+                <input type="number" class="form-input" id="adminSubQuarterly" placeholder="135000" min="0" style="padding-left:26px;font-weight:700;font-size:13px;text-align:right;">
+              </div>
+              <div style="font-size:10px;color:#9E9E9E;margin-top:3px;">/ 3 bln</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:11px; font-weight:600; color:#555; margin-bottom:6px;">Tahunan <span style="background:#FEF3C7;color:#D97706;font-size:9px;padding:1px 4px;border-radius:6px;">-17%</span></div>
+              <div style="position:relative;">
+                <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#9E9E9E;">Rp</span>
+                <input type="number" class="form-input" id="adminSubYearly" placeholder="500000" min="0" style="padding-left:26px;font-weight:700;font-size:13px;text-align:right;">
+              </div>
+              <div style="font-size:10px;color:#9E9E9E;margin-top:3px;">/ 12 bln</div>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Komisi Seller (%)</label>
-            <input type="number" class="form-input" id="adminKomisiPersen" placeholder="3" min="0" max="30" step="0.5">
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+            <div>
+              <label class="form-label" style="font-size:11px;">Masa Trial (bulan)</label>
+              <input type="number" class="form-input" id="adminTrialBulan" placeholder="3" min="0" max="12">
+            </div>
+            <div>
+              <label class="form-label" style="font-size:11px;">Biaya Iklan Banner/Minggu (Rp)</label>
+              <input type="number" class="form-input" id="adminBannerBiaya" placeholder="5000" min="0">
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Masa Trial Seller (bulan)</label>
-            <input type="number" class="form-input" id="adminTrialBulan" placeholder="6" min="0" max="24">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Biaya Iklan Banner (Rp/minggu)</label>
-            <input type="number" class="form-input" id="adminBannerBiaya" placeholder="5000" min="0" step="500">
-          </div>
-          <button class="btn btn-primary" onclick="saveAdminSettings()" style="margin-top:8px;">
-            <i class="fas fa-save"></i> Simpan Pengaturan
+
+          <button class="btn btn-primary" onclick="saveAdminSettings()" style="width:100%;">
+            <i class="fas fa-save"></i> Simpan Tarif
           </button>
         </div>
+
+        <!-- ② Akun Penerimaan Pembayaran ────────────────────────────────── -->
+        <div style="background:white; border-radius:18px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+            <div style="font-size:15px; font-weight:700; color:var(--primary);">💳 Akun Penerimaan</div>
+            <button onclick="showAddAdminEwallet()" style="background:#E8F5E9;color:var(--primary);border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">
+              <i class="fas fa-plus"></i> Tambah
+            </button>
+          </div>
+          <div style="font-size:12px; color:#9E9E9E; margin-bottom:14px;">Rekening/e-wallet yang ditampilkan ke seller saat bayar langganan &amp; iklan</div>
+
+          <div id="adminEwalletList">
+            <div style="text-align:center;padding:20px;color:#9E9E9E;font-size:13px;"><i class="fas fa-spinner fa-spin"></i></div>
+          </div>
+
+          <div id="adminEwalletForm" style="display:none;margin-top:12px;background:#F0FDF4;border-radius:14px;padding:14px;border:1.5px dashed var(--primary);">
+            <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:12px;">➕ Tambah Akun</div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:11px;">Jenis</label>
+              <select class="form-input" id="adminEwalletType">
+                <option value="BCA">BCA Transfer</option>
+                <option value="BNI">BNI Transfer</option>
+                <option value="BRI">BRI Transfer</option>
+                <option value="Mandiri">Mandiri Transfer</option>
+                <option value="DANA">DANA</option>
+                <option value="OVO">OVO</option>
+                <option value="GoPay">GoPay</option>
+                <option value="ShopeePay">ShopeePay</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:11px;">Nomor Rekening / HP</label>
+              <input type="text" class="form-input" id="adminEwalletNumber" placeholder="081234567890">
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label class="form-label" style="font-size:11px;">Nama Pemilik</label>
+              <input type="text" class="form-input" id="adminEwalletName" placeholder="PT Lokara Indonesia">
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="saveAdminEwallet()" class="btn btn-primary" style="flex:1;padding:10px;font-size:13px;">
+                <i class="fas fa-check"></i> Simpan
+              </button>
+              <button onclick="document.getElementById('adminEwalletForm').style.display='none'" style="background:#F5F5F5;border:none;border-radius:12px;padding:10px 16px;cursor:pointer;font-size:13px;">
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ③ Verifikasi Langganan Seller ──────────────────────────────── -->
+        <div style="background:white; border-radius:18px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+            <div style="font-size:15px; font-weight:700; color:var(--primary);">📋 Verifikasi Langganan</div>
+            <button onclick="loadAdminSubscriptions()" style="background:#E8F5E9;color:var(--primary);border:none;border-radius:10px;padding:7px 13px;font-size:12px;cursor:pointer;"><i class="fas fa-sync"></i></button>
+          </div>
+          <div style="font-size:12px; color:#9E9E9E; margin-bottom:14px;">Setujui atau tolak pembayaran langganan seller</div>
+          <div id="adminSubList">
+            <div style="text-align:center;padding:24px;color:#9E9E9E;font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
+          </div>
+        </div>
+
+        <!-- ④ Verifikasi Iklan Banner ───────────────────────────────────── -->
+        <div style="background:white; border-radius:18px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+            <div style="font-size:15px; font-weight:700; color:var(--primary);">📢 Verifikasi Iklan Banner</div>
+            <button onclick="loadAdminBanners()" style="background:#E8F5E9;color:var(--primary);border:none;border-radius:10px;padding:7px 13px;font-size:12px;cursor:pointer;"><i class="fas fa-sync"></i></button>
+          </div>
+          <div style="font-size:12px; color:#9E9E9E; margin-bottom:14px;">Aktifkan atau nonaktifkan iklan yang dipasang seller</div>
+          <div id="adminBannersList">
+            <div style="text-align:center;padding:24px;color:#9E9E9E;font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
+          </div>
+        </div>
+
+        <!-- ⑤ Manajemen Akun Seller/Buyer ──────────────────────────────── -->
+        <div style="background:white; border-radius:18px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+            <div style="font-size:15px; font-weight:700; color:var(--primary);">👥 Manajemen Akun</div>
+            <button onclick="loadAdminUsers()" style="background:#E8F5E9;color:var(--primary);border:none;border-radius:10px;padding:7px 13px;font-size:12px;cursor:pointer;"><i class="fas fa-sync"></i></button>
+          </div>
+          <div style="font-size:12px; color:#9E9E9E; margin-bottom:14px;">Aktifkan atau nonaktifkan akun seller &amp; buyer</div>
+          <div id="adminUsersList">
+            <div style="text-align:center;padding:24px;color:#9E9E9E;font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Tab Users -->
-      <div id="tabUsersPage" style="padding:20px; display:none;">
-        <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <div style="font-size:15px; font-weight:700; color:var(--primary);">👥 Manajemen User</div>
-            <button onclick="loadAdminUsers()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
-          </div>
-          <div id="adminUsersList"></div>
-        </div>
-      </div>
-
-      <!-- Tab Banners -->
-      <div id="tabBannersPage" style="padding:20px; display:none;">
-        <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <div style="font-size:15px; font-weight:700; color:var(--primary);">📢 Manajemen Iklan</div>
-            <button onclick="loadAdminBanners()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
-          </div>
-          <div id="adminBannersList"></div>
-        </div>
-      </div>
-
-      <!-- Tab Gateway Settings -->
-      <div id="tabGatewayPage" style="padding:20px; display:none;">
-        <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <div style="font-size:15px; font-weight:700; margin-bottom:16px; color:var(--primary);">💳 Pengaturan Midtrans</div>
-          <div style="background:#FFF8E1; border-radius:12px; padding:12px; margin-bottom:16px; font-size:12px; color:#E65100; line-height:1.6;">
-            ⚠️ <strong>Server Key & Client Key</strong> bersifat rahasia. Jangan bagikan ke siapapun.<br>
-            Dapatkan key dari <a href="https://dashboard.midtrans.com" target="_blank" style="color:var(--primary);">dashboard.midtrans.com</a>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Server Key</label>
-            <input type="password" class="form-input" id="gatewayServerKey" placeholder="SB-Mid-server-xxxx (Sandbox) / Mid-server-xxxx (Production)">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Client Key (untuk Snap.js di frontend)</label>
-            <input type="text" class="form-input" id="gatewayClientKey" placeholder="SB-Mid-client-xxxx">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mode</label>
-            <select class="form-input" id="gatewayMode">
-              <option value="sandbox">Sandbox (Testing)</option>
-              <option value="production">Production (Live)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Merchant ID</label>
-            <input type="text" class="form-input" id="gatewayMerchantId" placeholder="G12345678">
-          </div>
-          <button class="btn btn-primary" onclick="saveGatewaySettings()" style="margin-top:8px;">
-            <i class="fas fa-save"></i> Simpan Konfigurasi Gateway
-          </button>
-        </div>
-      </div>
-
-      <!-- Tab Verifikasi Tagihan Komisi -->
-      <div id="tabInvoicesPage" style="padding:20px; display:none;">
-        <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <div style="font-size:15px; font-weight:700; color:var(--primary);">🧾 Verifikasi Tagihan COD</div>
-            <button onclick="loadAdminInvoices()" style="background:#E8F5E9; color:var(--primary); border:none; border-radius:10px; padding:8px 14px; font-size:12px; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
-          </div>
-          <div id="adminInvoicesList"><div style="text-align:center;padding:40px;color:#757575;">Klik Refresh untuk memuat</div></div>
-        </div>
-      </div>
+      <!-- Dummy tab IDs agar JS lama tidak error -->
+      <div id="tabKomisiPage" style="display:none;"></div>
+      <div id="tabUsersPage" style="display:none;"></div>
+      <div id="tabBannersPage" style="display:none;"></div>
+      <div id="tabGatewayPage" style="display:none;"></div>
+      <div id="tabInvoicesPage" style="display:none;"></div>
+      <div id="btnTabKomisiPage" style="display:none;"></div>
+      <div id="btnTabUsersPage" style="display:none;"></div>
+      <div id="btnTabBannersPage" style="display:none;"></div>
     </div>
     <!-- ============ END ADMIN MASTER DATA PAGE ============ -->
 
@@ -3670,23 +3760,102 @@
       </div>
     </div>
 
-    <!-- ============ SELLER INVOICES PAGE ============ -->
-    <div class="page" id="sellerInvoicesPage" style="display:none;">
+    <!-- ============ SUBSCRIPTION PAGE ============ -->
+    <div class="page" id="subscriptionPage" style="display:none;">
       <div class="app-header" style="position:sticky; top:0; z-index:120;">
         <div class="header-top">
           <button class="back-btn" onclick="goBack()" style="position:static;"><i class="fas fa-arrow-left"></i></button>
-          <div class="logo-text">🧾 Tagihan Komisi</div>
+          <div class="logo-text">👑 Langganan Seller</div>
           <div style="width:40px;"></div>
         </div>
       </div>
-      <div style="padding:20px;">
-        <div style="background:#E8F5E9; border-radius:16px; padding:16px; margin-bottom:20px; font-size:13px; line-height:1.7; color:#1B5E20;">
-          <strong>ℹ️ Tagihan Komisi COD</strong><br>
-          Komisi 3% dari total penjualan COD ditagih setiap bulan. Upload bukti transfer ke rekening platform untuk melunasi tagihan.
+      <div style="padding:16px 16px 32px;">
+
+        <!-- Status Card -->
+        <div id="subStatusCard" style="border-radius:18px; padding:20px; margin-bottom:20px; background:linear-gradient(135deg,#1B5E20,#2E7D32); color:white; position:relative; overflow:hidden;">
+          <div style="position:absolute;right:-20px;top:-20px;opacity:0.08;font-size:100px;"><i class="fas fa-crown"></i></div>
+          <div style="font-size:11px; font-weight:600; letter-spacing:1.5px; opacity:0.8; margin-bottom:6px;">STATUS LANGGANAN</div>
+          <div id="subStatusBadge" style="font-size:22px; font-weight:800; margin-bottom:4px;">Memuat...</div>
+          <div id="subStatusDesc" style="font-size:13px; opacity:0.9;"></div>
+          <div id="subExpiry" style="font-size:12px; opacity:0.7; margin-top:6px;"></div>
         </div>
-        <div id="invoiceList">
-          <div style="text-align:center; padding:40px; color:#757575;"><i class="fas fa-spinner fa-spin"></i><p style="margin-top:12px;">Memuat tagihan...</p></div>
+
+        <!-- Pending notification -->
+        <div id="subPendingBox" style="display:none; background:#FFF3CD; border-radius:14px; padding:14px; margin-bottom:16px; font-size:13px; color:#856404; border-left:4px solid #FFC107;">
+          <i class="fas fa-clock"></i> <strong>Pembayaran menunggu verifikasi admin.</strong><br>
+          <span style="font-size:12px;">Biasanya selesai dalam 1x24 jam.</span>
         </div>
+
+        <!-- Info model -->
+        <div style="background:#E8F5E9; border-radius:14px; padding:14px; margin-bottom:20px; font-size:13px; line-height:1.7; color:#1B5E20;">
+          <strong>✅ Keuntungan Berlangganan</strong><br>
+          • Produk tampil di beranda pembeli<br>
+          • <strong>0% komisi</strong> — semua hasil penjualan langsung ke Anda<br>
+          • Semua metode bayar (COD, DANA, OVO) bebas potongan<br>
+          • Tambah produk tanpa batas selama masa aktif
+        </div>
+
+        <!-- Pilih Paket -->
+        <div id="subPlanSection">
+          <div style="font-size:15px; font-weight:700; margin-bottom:12px; color:#1B5E20;">📦 Pilih Paket</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
+            <div id="planMonthlyCard" onclick="selectPlan('monthly')"
+              style="border:2px solid #E0E0E0; border-radius:16px; padding:14px 10px; text-align:center; cursor:pointer; transition:all .2s; position:relative;">
+              <div style="font-size:12px; font-weight:700; color:#1B5E20; margin-bottom:4px;">Bulanan</div>
+              <div style="font-size:20px; font-weight:800; color:#1B5E20;">50K</div>
+              <div style="font-size:10px; color:#757575;">/ bulan</div>
+              <div style="font-size:9px; color:#9E9E9E; margin-top:4px;">Fleksibel</div>
+            </div>
+            <div id="planQuarterlyCard" onclick="selectPlan('quarterly')"
+              style="border:2px solid #E0E0E0; border-radius:16px; padding:14px 10px; text-align:center; cursor:pointer; transition:all .2s; position:relative;">
+              <div style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); background:#059669; color:white; font-size:9px; font-weight:700; padding:2px 8px; border-radius:20px; white-space:nowrap;">HEMAT 10%</div>
+              <div style="font-size:12px; font-weight:700; color:#1B5E20; margin-bottom:4px;">3 Bulan</div>
+              <div style="font-size:20px; font-weight:800; color:#1B5E20;">135K</div>
+              <div style="font-size:10px; color:#757575;">/ 3 bln</div>
+              <div style="font-size:9px; color:#9E9E9E; margin-top:4px;">≈ 45K/bln</div>
+            </div>
+            <div id="planYearlyCard" onclick="selectPlan('yearly')"
+              style="border:2px solid #E0E0E0; border-radius:16px; padding:14px 10px; text-align:center; cursor:pointer; transition:all .2s; position:relative;">
+              <div style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); background:#F59E0B; color:white; font-size:9px; font-weight:700; padding:2px 8px; border-radius:20px; white-space:nowrap;">HEMAT 17%</div>
+              <div style="font-size:12px; font-weight:700; color:#1B5E20; margin-bottom:4px;">Tahunan</div>
+              <div style="font-size:20px; font-weight:800; color:#1B5E20;">500K</div>
+              <div style="font-size:11px; color:#757575;">/ tahun</div>
+              <div style="font-size:9px; color:#9E9E9E; margin-top:4px;">≈ 42K/bln</div>
+            </div>
+          </div>
+
+          <!-- Upload Bukti Transfer -->
+          <div id="subUploadSection" style="display:none;">
+            <div style="background:#FFF8E1; border-radius:14px; padding:14px; margin-bottom:14px; font-size:13px; color:#5D4037;">
+              <strong>📋 Rekening Tujuan Transfer:</strong>
+              <div id="subPaymentAccounts" style="margin-top:8px;">
+                <div style="color:#9E9E9E;font-size:12px;"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
+              </div>
+              <div style="font-size:12px;margin-top:8px;color:#7B6050;">Transfer nominal sesuai paket, lalu upload bukti di bawah.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Link / URL Bukti Transfer</label>
+              <input type="url" class="form-input" id="subProofUrl" placeholder="https://drive.google.com/..." style="width:100%;">
+              <div style="font-size:11px; color:#9E9E9E; margin-top:4px;">Upload foto ke Google Drive / ImgBB lalu paste linknya di sini</div>
+            </div>
+            <button onclick="submitSubscription()" class="btn btn-primary" style="width:100%; margin-top:8px;">
+              <i class="fas fa-paper-plane"></i> Kirim & Tunggu Verifikasi
+            </button>
+          </div>
+
+          <button id="subChoosePlanBtn" onclick="toggleSubUpload()" class="btn btn-primary" style="width:100%; display:none;">
+            <i class="fas fa-crown"></i> Lanjut Berlangganan
+          </button>
+        </div>
+
+        <!-- Riwayat Subscription -->
+        <div style="margin-top:28px;">
+          <div style="font-size:15px; font-weight:700; margin-bottom:12px; color:#1B5E20;">📋 Riwayat Langganan</div>
+          <div id="subHistory">
+            <div style="text-align:center;padding:30px;color:#9E9E9E;font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -3901,12 +4070,75 @@
 
     // ==================== GLOBAL VARIABLES ====================
     let currentUser = null;
+    let currentAdmin = null;
     let currentLocation = { lat: null, lng: null };
     let currentPage = 'homePage';
     let pageHistory = [];
     let currentProduct = null;
     let currentChatUser = null;
     let cart = [];
+
+    // ── Ewallet helpers (global scope) ─────────────────────────────────────
+    function _parseEwalletList(settings) {
+      try {
+        var raw = settings && settings.ewallet_list ? settings.ewallet_list : null;
+        if (!raw || raw === '[]') {
+          // Fallback: baca dari localStorage jika GAS belum tersimpan
+          raw = localStorage.getItem('lokara_admin_ewallets') || '[]';
+        }
+        if (typeof raw !== 'string') raw = JSON.stringify(raw);
+        var list = JSON.parse(raw);
+        // Sync ke localStorage sebagai cache
+        if (list.length > 0) localStorage.setItem('lokara_admin_ewallets', JSON.stringify(list));
+        return list;
+      } catch(e) { return []; }
+    }
+
+    function _renderEwalletList(el, list) {
+      if (!list || list.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:#9E9E9E;font-size:13px;"><i class="fas fa-credit-card" style="font-size:28px;display:block;margin-bottom:8px;opacity:.3;"></i>Belum ada akun pembayaran</div>';
+        return;
+      }
+      var typeColors = { BCA:'#005BAC', BNI:'#F26522', BRI:'#00509E', Mandiri:'#003F88', DANA:'#118EEA', OVO:'#4C3494', GoPay:'#00AED6', ShopeePay:'#EE4D2D' };
+      el.innerHTML = list.map(function(w, idx) {
+        var c = typeColors[w.type] || '#1B5E20';
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F5F5F5;">'
+          + '<div style="display:flex;align-items:center;gap:12px;">'
+          + '<div style="background:' + c + ';color:white;font-size:10px;font-weight:800;padding:5px 9px;border-radius:10px;min-width:52px;text-align:center;">' + w.type + '</div>'
+          + '<div><div style="font-weight:700;font-size:14px;">' + w.number + '</div>'
+          + '<div style="font-size:12px;color:#757575;">a.n. ' + w.name + '</div></div>'
+          + '</div>'
+          + '<div style="display:flex;gap:6px;">'
+          + '<button onclick="editAdminEwallet(' + idx + ')" style="background:#E8F5E9;color:var(--primary);border:none;border-radius:10px;padding:7px 12px;font-size:12px;cursor:pointer;"><i class="fas fa-edit"></i></button>'
+          + '<button onclick="deleteAdminEwallet(' + idx + ')" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:10px;padding:7px 12px;font-size:12px;cursor:pointer;"><i class="fas fa-trash"></i></button>'
+          + '</div></div>';
+      }).join('');
+    }
+
+    function loadAdminEwallets() {
+      var el = document.getElementById('adminEwalletList');
+      if (!el) return;
+      // Tampilkan dari localStorage dulu (instant)
+      var cached = [];
+      try { cached = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+      if (cached.length > 0) {
+        _renderEwalletList(el, cached);
+      } else {
+        el.innerHTML = '<div style="text-align:center;padding:16px;color:#9E9E9E;font-size:13px;"><i class="fas fa-spinner fa-spin"></i></div>';
+      }
+      // Sync dari GAS di background
+      callGAS('adminGetSettings', { adminRole: 'admin' })
+        .then(function(s) {
+          var gasData = _parseEwalletList(s);
+          // Gunakan GAS data jika lebih banyak dari cache
+          if (gasData.length >= cached.length) {
+            localStorage.setItem('lokara_admin_ewallets', JSON.stringify(gasData));
+            _renderEwalletList(el, gasData);
+          }
+        })
+        .catch(function() { /* pakai cache saja */ });
+    }
+    // ── End ewallet helpers ─────────────────────────────────────────────────
 
     // ==================== INITIALIZATION ====================
     document.addEventListener('DOMContentLoaded', function() {
@@ -4327,8 +4559,25 @@
 
     function logout() {
       localStorage.removeItem('lokara_user');
+      localStorage.removeItem('lokara_products_cache');
       currentUser = null;
-      location.reload();
+      allProductsCache = [];
+      // Sembunyikan semua panel
+      var mainEl = document.getElementById('mainApp');
+      var adminEl = document.getElementById('adminPanel');
+      var authEl = document.getElementById('authPage');
+      var loginForm = document.getElementById('loginForm');
+      var regForm = document.getElementById('registerForm');
+      if (mainEl) mainEl.style.display = 'none';
+      if (adminEl) adminEl.style.display = 'none';
+      if (authEl) authEl.style.display = 'flex';
+      if (loginForm) loginForm.style.display = 'block';
+      if (regForm) regForm.style.display = 'none';
+      // Reset input login
+      var emailEl = document.getElementById('loginEmail');
+      var passEl = document.getElementById('loginPassword');
+      if (emailEl) emailEl.value = '';
+      if (passEl) passEl.value = '';
     }
 
     // ==================== LOCATION ====================
@@ -4626,18 +4875,31 @@
 
     function submitBanner() {
       if (!currentUser) return;
-      const title = document.getElementById('bannerTitle').value.trim();
-      const media = document.getElementById('bannerMedia').value.trim();
-      const desc = document.getElementById('bannerDesc').value.trim();
-      const link = document.getElementById('bannerLink').value.trim();
-      const type = document.getElementById('bannerType').value;
+      var title = document.getElementById('bannerTitle').value.trim();
+      var media = document.getElementById('bannerMedia').value.trim();
+      var desc  = document.getElementById('bannerDesc').value.trim();
+      var link  = document.getElementById('bannerLink').value.trim();
+      var type  = document.getElementById('bannerType').value;
+      var proofUrl = (document.getElementById('bannerProofUrl')||{value:''}).value.trim();
 
-      if (!title) { showToast('Judul iklan wajib diisi', 'error'); return; }
-      if (!media) { showToast('URL gambar/video wajib diisi', 'error'); return; }
+      if (!title)         { showToast('Judul iklan wajib diisi', 'error'); return; }
+      if (!media)         { showToast('URL gambar/video wajib diisi', 'error'); return; }
       if (!selectedWeeks) { showToast('Pilih durasi tayang', 'error'); return; }
 
-      const btn = document.querySelector('#bannerAdPage .btn-primary');
-      if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
+      // Jika bukti belum diisi, tampilkan seksi pembayaran dulu
+      if (!proofUrl) {
+        var pi = document.getElementById('bannerPaymentInfo');
+        var ps = document.getElementById('bannerProofSection');
+        if (pi) pi.style.display = 'block';
+        if (ps) ps.style.display = 'block';
+        loadBannerPaymentAccounts();
+        showToast('Transfer dulu, lalu upload bukti pembayaran', 'info');
+        setTimeout(function(){ var el=document.getElementById('bannerProofUrl'); if(el) el.focus(); }, 300);
+        return;
+      }
+
+      var btn = document.getElementById('bannerSubmitBtn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...'; }
 
       callGAS('createBanner', {
         userId: currentUser.id,
@@ -4646,29 +4908,41 @@
         mediaUrl: media,
         mediaType: type,
         linkUrl: link,
-        weeks: selectedWeeks
+        weeks: selectedWeeks,
+        proofUrl: proofUrl,
+        status: 'pending_verify'
       })
       .then(function(result) {
         if (btn) { btn.disabled = false; btn.textContent = 'Pasang Iklan'; }
-        const amount = result.amount || (selectedWeeks * 5000);
-        showModal('Iklan Berhasil Dipasang! 🎉', `
-          <div style="text-align:center; padding:8px 0;">
-            <i class="fas fa-check-circle" style="font-size:48px; color:var(--success); margin-bottom:16px; display:block;"></i>
-            <p style="font-size:14px; margin-bottom:12px;">Iklan "<strong>${title}</strong>" akan tayang hingga <strong>${result.endDate}</strong></p>
-            <div style="background:#FFF8E1; border-radius:12px; padding:14px; text-align:left; margin-bottom:16px;">
-              <div style="font-weight:700; font-size:13px; margin-bottom:8px; color:#F57F17;">💳 Instruksi Pembayaran</div>
-              <div style="font-size:13px; margin-bottom:4px;">Total: <strong>Rp ${amount.toLocaleString('id-ID')}</strong></div>
-              <div style="font-size:12px; color:var(--text-light);">Transfer ke ewallet admin LOKARA, lalu konfirmasi via chat/WhatsApp admin.</div>
-            </div>
-            <button class="btn btn-primary" onclick="closeModal(); goBack();">Selesai</button>
-          </div>
-        `);
-        loadBanners(); // refresh carousel
+        showToast('✅ Iklan terkirim! Menunggu verifikasi admin.', 'success');
+        switchBannerTab('saya');
       })
       .catch(function(error) {
         if (btn) { btn.disabled = false; btn.textContent = 'Pasang Iklan'; }
         showToast(error.message || 'Gagal memasang iklan', 'error');
       });
+    }
+
+    function loadBannerPaymentAccounts() {
+      var el = document.getElementById('bannerPaymentAccounts');
+      if (!el) return;
+      callGAS('adminGetSettings', { adminRole: 'admin' })
+        .then(function(s) {
+          var list = _parseEwalletList(s);
+          if (!list || list.length === 0) {
+            el.innerHTML = '<div style="font-size:12px;color:#9E9E9E;">Hubungi admin untuk info rekening.</div>';
+            return;
+          }
+          var typeColors = { BCA:'#005BAC', BNI:'#F26522', BRI:'#00509E', Mandiri:'#003F88', DANA:'#118EEA', OVO:'#4C3494', GoPay:'#00AED6', ShopeePay:'#EE4D2D' };
+          el.innerHTML = list.map(function(w) {
+            var c = typeColors[w.type] || '#1B5E20';
+            return '<div style="display:flex;align-items:center;gap:8px;margin-top:6px;background:white;border-radius:10px;padding:8px 10px;">'
+              + '<div style="background:' + c + ';color:white;font-size:9px;font-weight:800;padding:3px 7px;border-radius:6px;min-width:48px;text-align:center;">' + w.type + '</div>'
+              + '<div><div style="font-weight:700;font-size:12px;">' + w.number + '</div>'
+              + '<div style="font-size:11px;color:#757575;">a.n. ' + w.name + '</div></div>'
+              + '</div>';
+          }).join('');
+        });
     }
 
     // ==================== UNIFIED PRODUCT SYSTEM ====================
@@ -6738,12 +7012,11 @@
       const saveBtn = document.querySelector('#addProductPage .btn-primary');
       if (saveBtn) saveBtn.textContent = 'Simpan Produk';
     }
-    let currentAdmin = null;
-
-    // showAdminLogin & loginAdmin dihapus - admin login dari form biasa
+    // currentAdmin dideklarasikan di scope utama (line ~4000)
+    // Tidak dideklarasikan ulang di sini untuk menghindari shadowing
 
     function logoutAdmin() {
-      currentAdmin = null;
+      try { currentAdmin = null; } catch(e){}
       sessionStorage.removeItem('lokara_admin');
       var mainEl = document.getElementById('mainApp');
       var oldPanel = document.getElementById('adminPanel');
@@ -6758,52 +7031,83 @@
     }
 
     function showAdminPanel() {
-      // Admin masuk ke mainApp biasa + menu tambahan
       var authEl = document.getElementById('authPage');
       var oldPanel = document.getElementById('adminPanel');
       var mainEl = document.getElementById('mainApp');
       if (authEl) authEl.style.display = 'none';
       if (oldPanel) oldPanel.style.display = 'none';
       if (mainEl) mainEl.style.display = 'block';
-      // Tampilkan menu admin
+
+      // ── Sidebar: Sembunyikan semua section kecuali yang admin butuh ──
+      // Sembunyikan seksi buyer/seller
+      ['dsnSellerSection', 'sidebarAdGrid'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      // Sembunyikan menu pembeli di desktop sidebar
+      document.querySelectorAll('.ds-link[onclick*="showCart"], .ds-link[onclick*="showOrders"], .ds-link[onclick*="showWishlist"], .ds-link[onclick*="showEwallet"]').forEach(function(el) {
+        el.style.display = 'none';
+      });
+      // Sembunyikan bottom nav (admin tidak pakai)
+      var bottomNav = document.getElementById('bottomNav');
+      if (bottomNav) bottomNav.style.display = 'none';
+      // Tampilkan tombol Master Data di sidebar
+      var dsnAdmin = document.getElementById('dsnAdmin');
+      if (dsnAdmin) dsnAdmin.style.display = 'flex';
+      // Sembunyikan divider seller
+      document.querySelectorAll('.ds-divider').forEach(function(d, i) {
+        if (i === 0) d.style.display = 'none'; // divider sebelum seller section
+      });
+      // Profile page: tampilkan adminMenuSection, sembunyikan menu seller/buyer
       var adminMenu = document.getElementById('adminMenuSection');
       if (adminMenu) adminMenu.style.display = 'block';
-      var adminNav = document.getElementById('adminNavItem');
-      if (adminNav) adminNav.style.display = 'flex';
-      // Set nama di profile header
+      ['sellerInvoiceMenu','sellerEwalletMenu','sellerSection'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      // Update nama admin di user card sidebar & profile
+      var dsnName = document.getElementById('dsnUserName');
+      var dsnRole = document.getElementById('dsnUserRole');
+      if (dsnName) dsnName.textContent = (currentAdmin && currentAdmin.nama) ? currentAdmin.nama : 'Admin LOKARA';
+      if (dsnRole) dsnRole.textContent = '⚙️ Administrator';
       var pName = document.getElementById('profileName');
       if (pName) pName.textContent = (currentAdmin && currentAdmin.nama) ? currentAdmin.nama : 'Admin LOKARA';
       var pRole = document.getElementById('profileRole');
       if (pRole) pRole.textContent = '⚙️ Administrator';
+      // Navigasi ke beranda
+      showPage('homePage');
       loadCategories();
       loadNearbyProducts();
       loadBanners();
     }
 
-    function showAdminMasterData() {
-      showPage('adminMasterDataPage');
-      showAdminTabPage('tabKomisiPage');
-      loadAdminSettings();
+    // Helper: cek apakah sesi ini adalah admin
+    function isAdminSession() {
+      try {
+        if (currentAdmin) return true;
+        var stored = sessionStorage.getItem('lokara_admin');
+        if (stored) { currentAdmin = JSON.parse(stored); return true; }
+        return false;
+      } catch(e) { return false; }
     }
 
-    function showAdminTabPage(tabId) {
-      var tabs = ['tabKomisiPage', 'tabUsersPage', 'tabBannersPage', 'tabGatewayPage', 'tabInvoicesPage'];
-      var btns = { tabKomisiPage: 'btnTabKomisiPage', tabUsersPage: 'btnTabUsersPage', tabBannersPage: 'btnTabBannersPage', tabGatewayPage: 'btnTabGatewayPage', tabInvoicesPage: 'btnTabInvoicesPage' };
-      tabs.forEach(function(t) {
-        var el = document.getElementById(t);
-        if (el) el.style.display = t === tabId ? 'block' : 'none';
-      });
-      Object.keys(btns).forEach(function(t) {
-        var btn = document.getElementById(btns[t]);
-        if (!btn) return;
-        btn.style.color = t === tabId ? 'var(--primary)' : '#757575';
-        btn.style.borderBottom = t === tabId ? '3px solid var(--primary)' : '3px solid transparent';
-        btn.style.fontWeight = t === tabId ? '700' : '600';
-      });
-      if (tabId === 'tabUsersPage') loadAdminUsers();
-      if (tabId === 'tabBannersPage') loadAdminBanners();
-      if (tabId === 'tabKomisiPage') loadAdminSettings();
+    function showAdminMasterData() {
+      // Pastikan currentAdmin ter-restore dari session
+      if (!currentAdmin) {
+        try {
+          var s = sessionStorage.getItem('lokara_admin');
+          if (s) currentAdmin = JSON.parse(s);
+        } catch(e) {}
+      }
+      showPage('adminMasterDataPage');
+      loadAdminSettings();
+      loadAdminEwallets();
+      loadAdminSubscriptions();
+      loadAdminBanners();
+      loadAdminUsers();
     }
+
+    function showAdminTabPage(tabId) { /* no-op, page is now single scroll */ }
 
     function showAdminTab(tabId) {
       ['tabKomisi', 'tabUsers', 'tabBanners'].forEach(function(t) {
@@ -6820,10 +7124,10 @@
     }
 
     function loadAdminSettings() {
-      if (!currentAdmin) return;
       callGAS('adminGetSettings', { adminRole: 'admin' })
         .then(function(s) {
-          document.getElementById('adminKomisiPersen').value = s.komisiPersen;
+          if(document.getElementById('adminSubMonthly')) document.getElementById('adminSubMonthly').value = s.subMonthly || 50000;
+          if(document.getElementById('adminSubYearly')) document.getElementById('adminSubYearly').value = s.subYearly || 500000;
           document.getElementById('adminTrialBulan').value = s.trialBulan;
           document.getElementById('adminBannerBiaya').value = s.bannerPerMinggu;
         })
@@ -6832,24 +7136,40 @@
 
     function saveAdminSettings() {
       if (!currentAdmin) return;
-      const komisiPersen = parseFloat(document.getElementById('adminKomisiPersen').value);
-      const trialBulan = parseInt(document.getElementById('adminTrialBulan').value);
-      const bannerPerMinggu = parseInt(document.getElementById('adminBannerBiaya').value);
-      if (isNaN(komisiPersen) || isNaN(trialBulan) || isNaN(bannerPerMinggu)) {
-        showToast('Isi semua pengaturan dengan benar', 'error'); return;
+      var g = function(id) { return parseInt((document.getElementById(id)||{}).value||0); };
+      const subMonthly   = g('adminSubMonthly');
+      const subQuarterly = g('adminSubQuarterly');
+      const subYearly    = g('adminSubYearly');
+      const trialBulan   = g('adminTrialBulan');
+      const bannerPerMinggu = g('adminBannerBiaya');
+      if (!subMonthly || !subQuarterly || !subYearly || isNaN(trialBulan) || isNaN(bannerPerMinggu)) {
+        showToast('Isi semua harga paket dengan benar', 'error'); return;
       }
-      callGAS('adminUpdateSettings', { adminRole: 'admin', komisiPersen, trialBulan, bannerPerMinggu })
-        .then(function() { showToast('Pengaturan tersimpan!', 'success'); })
-        .catch(function(err) { showToast(err.message || 'Gagal simpan', 'error'); });
+      var btn = document.querySelector('#tabKomisi .btn-primary');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'; }
+      callGAS('adminUpdateSettings', { adminRole: 'admin', subMonthly, subQuarterly, subYearly, trialBulan, bannerPerMinggu })
+        .then(function() {
+          showToast('✅ Pengaturan tersimpan!', 'success');
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Simpan Pengaturan'; }
+        })
+        .catch(function(err) {
+          showToast(err.message || 'Gagal simpan', 'error');
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Simpan Pengaturan'; }
+        });
     }
 
     function loadAdminUsers() {
-      if (!currentAdmin) return;
       const el = document.getElementById('adminUsersList');
+      if (!el) return;
       el.innerHTML = '<div style="text-align:center;padding:30px;color:#757575;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>';
+      var usrTimeout = setTimeout(function() {
+        if (el.innerHTML.includes('fa-spin'))
+          el.innerHTML = '<div style="text-align:center;padding:20px;color:#EF4444;font-size:12px;">Perlu deploy GAS terbaru.<br><button onclick="loadAdminUsers()" style="margin-top:8px;background:#E8F5E9;color:var(--primary);border:none;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;"><i class="fas fa-sync"></i> Coba Lagi</button></div>';
+      }, 10000);
       callGAS('adminGetUsers', { adminRole: 'admin' })
         .then(function(users) {
-          if (!users.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:#757575;">Belum ada user</div>'; return; }
+          clearTimeout(usrTimeout);
+          if (!users || !users.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:#757575;">Belum ada user</div>'; return; }
           el.innerHTML = users.map(function(u) {
             const statusColor = u.status === 'active' ? '#4CAF50' : '#F44336';
             const statusLabel = u.status === 'active' ? 'Aktif' : 'Nonaktif';
@@ -6860,7 +7180,7 @@
                 <div>
                   <div style="font-weight:600; font-size:14px;">${u.nama}</div>
                   <div style="font-size:12px; color:#757575;">${u.email} · ${u.role}</div>
-                  <div style="font-size:11px; color:#757575; margin-top:2px;">Trial: ${u.masaTrial}</div>
+                  <div style="font-size:11px; color:#757575; margin-top:2px;">Status: ${u.subscriptionStatus || u.masaTrial || "-"}</div>
                 </div>
                 <div style="text-align:right;">
                   <span style="background:${statusColor}22; color:${statusColor}; font-size:11px; font-weight:700; padding:3px 10px; border-radius:10px;">${statusLabel}</span>
@@ -6870,47 +7190,69 @@
             </div>`;
           }).join('');
         })
-        .catch(function(err) { el.innerHTML = '<div style="color:red;padding:20px;">Gagal memuat: ' + err.message + '</div>'; });
+        .catch(function(err) {
+          clearTimeout(usrTimeout);
+          el.innerHTML = '<div style="text-align:center;padding:20px;color:#EF4444;font-size:12px;">' + (err.message||'Gagal memuat') + '<br><button onclick="loadAdminUsers()" style="margin-top:8px;background:#E8F5E9;color:var(--primary);border:none;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;">Coba Lagi</button></div>';
+        });
     }
 
     function adminToggleUser(userId, newStatus) {
-      if (!currentAdmin) return;
       callGAS('adminSetUserStatus', { adminRole: 'admin', userId: userId, status: newStatus })
         .then(function() { showToast('Status user diperbarui', 'success'); loadAdminUsers(); })
         .catch(function(err) { showToast(err.message || 'Gagal update', 'error'); });
     }
 
     function loadAdminBanners() {
-      if (!currentAdmin) return;
       const el = document.getElementById('adminBannersList');
+      if (!el) return;
       el.innerHTML = '<div style="text-align:center;padding:30px;color:#757575;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>';
+      var banTimeout = setTimeout(function() {
+        if (el.innerHTML.includes('fa-spin'))
+          el.innerHTML = '<div style="text-align:center;padding:20px;color:#EF4444;font-size:12px;">Perlu deploy GAS terbaru.<br><button onclick="loadAdminBanners()" style="margin-top:8px;background:#E8F5E9;color:var(--primary);border:none;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;"><i class="fas fa-sync"></i> Coba Lagi</button></div>';
+      }, 10000);
       callGAS('adminGetBanners', { adminRole: 'admin' })
         .then(function(banners) {
-          if (!banners.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:#757575;">Belum ada iklan</div>'; return; }
+          clearTimeout(banTimeout);
+          if (!banners || !banners.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:#757575;">Belum ada iklan</div>'; return; }
+          var statusMap = {
+            active:         { label: 'Aktif',       color: '#4CAF50' },
+            pending_verify: { label: 'Menunggu',     color: '#F59E0B' },
+            inactive:       { label: 'Nonaktif',     color: '#9E9E9E' },
+            expired:        { label: 'Kadaluarsa',   color: '#9E9E9E' },
+            rejected:       { label: 'Ditolak',      color: '#EF4444' }
+          };
           el.innerHTML = banners.map(function(b) {
-            const statusColor = b.status === 'active' ? '#4CAF50' : '#F44336';
-            const toggleLabel = b.status === 'active' ? 'Nonaktifkan' : 'Aktifkan';
-            const toggleStatus = b.status === 'active' ? 'inactive' : 'active';
-            return `<div style="border:1px solid #E0E0E0; border-radius:12px; padding:14px; margin-bottom:10px;">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-                <div style="flex:1; min-width:0;">
-                  <div style="font-weight:600; font-size:14px;">${b.title}</div>
-                  <div style="font-size:12px; color:#757575;">${b.startDate} s/d ${b.endDate}</div>
-                  <div style="font-size:12px; color:var(--primary);">Rp ${parseInt(b.amount||0).toLocaleString('id-ID')}</div>
-                </div>
-                <div style="text-align:right; flex-shrink:0;">
-                  <span style="background:${statusColor}22; color:${statusColor}; font-size:11px; font-weight:700; padding:3px 10px; border-radius:10px;">${b.status}</span>
-                  <br><button onclick="adminToggleBanner('${b.id}','${toggleStatus}')" style="margin-top:6px; background:#F5F5F5; border:1px solid #E0E0E0; border-radius:8px; padding:5px 12px; font-size:11px; cursor:pointer;">${toggleLabel}</button>
-                </div>
-              </div>
-            </div>`;
+            var st = statusMap[b.status] || { label: b.status, color: '#9E9E9E' };
+            var isPending = b.status === 'pending_verify';
+            var isActive = b.status === 'active';
+            var amt = 'Rp ' + parseInt(b.amount||0).toLocaleString('id-ID');
+            return '<div style="border:1px solid #F0F0F0;border-radius:14px;padding:14px;margin-bottom:10px;">'
+              + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;">'
+              + '<div style="flex:1;min-width:0;">'
+              + '<div style="font-weight:700;font-size:14px;">' + b.title + '</div>'
+              + '<div style="font-size:12px;color:#757575;">' + (b.sellerNama||b.sellerId||'') + ' · ' + amt + '</div>'
+              + (b.startDate ? '<div style="font-size:11px;color:#9E9E9E;">' + b.startDate + ' s/d ' + (b.endDate||'-') + '</div>' : '')
+              + '</div>'
+              + '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:' + st.color + '22;color:' + st.color + ';white-space:nowrap;">' + st.label + '</span>'
+              + '</div>'
+              + (b.proofUrl ? '<a href="' + b.proofUrl + '" target="_blank" style="font-size:12px;color:#2563EB;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:8px;"><i class="fas fa-image"></i> Lihat Bukti Transfer</a><br>' : '')
+              + (isPending ? '<div style="display:flex;gap:8px;margin-top:6px;">'
+                + '<button onclick="adminToggleBanner(\'' + b.id + '\',\'active\')" style="flex:1;background:#4CAF50;color:white;border:none;border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-check"></i> Setujui & Tayangkan</button>'
+                + '<button onclick="adminToggleBanner(\'' + b.id + '\',\'rejected\')" style="flex:1;background:#EF4444;color:white;border:none;border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-times"></i> Tolak</button>'
+                + '</div>'
+                : isActive ? '<button onclick="adminToggleBanner(\'' + b.id + '\',\'inactive\')" style="width:100%;background:#F5F5F5;border:1px solid #E0E0E0;border-radius:10px;padding:8px;font-size:12px;cursor:pointer;">Nonaktifkan</button>'
+                : '<button onclick="adminToggleBanner(\'' + b.id + '\',\'active\')" style="width:100%;background:#E8F5E9;color:var(--primary);border:1px solid #C8E6C9;border-radius:10px;padding:8px;font-size:12px;cursor:pointer;">Aktifkan Kembali</button>'
+              )
+              + '</div>';
           }).join('');
         })
-        .catch(function(err) { el.innerHTML = '<div style="color:red;padding:20px;">Gagal memuat: ' + err.message + '</div>'; });
+        .catch(function(err) {
+          clearTimeout(banTimeout);
+          el.innerHTML = '<div style="text-align:center;padding:20px;color:#EF4444;font-size:12px;">' + (err.message||'Gagal memuat') + '<br><button onclick="loadAdminBanners()" style="margin-top:8px;background:#E8F5E9;color:var(--primary);border:none;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;">Coba Lagi</button></div>';
+        });
     }
 
     function adminToggleBanner(bannerId, newStatus) {
-      if (!currentAdmin) return;
       callGAS('adminSetBannerStatus', { adminRole: 'admin', bannerId: bannerId, status: newStatus })
         .then(function() { showToast('Status iklan diperbarui', 'success'); loadAdminBanners(); })
         .catch(function(err) { showToast(err.message || 'Gagal update', 'error'); });
@@ -7111,104 +7453,330 @@
   </script>
 
   <script>
-    function showSellerInvoices() {
+    function showSellerInvoices() { showSubscriptionPage(); }
+
+    function showSubscriptionPage() {
       if (!currentUser) return;
-      // Sembunyikan semua page di mainApp
       document.querySelectorAll('#mainApp .page').forEach(function(p) {
-        p.style.display = 'none';
-        p.classList.remove('active');
+        p.style.display = 'none'; p.classList.remove('active');
       });
-      // Tampilkan sellerInvoicesPage secara eksplisit
-      var pg = document.getElementById('sellerInvoicesPage');
-      if (pg) {
-        pg.style.display = 'block';
-        pg.classList.add('active');
-        pg.style.removeProperty('display'); // hapus inline display:none dari HTML
-        pg.style.display = 'block';
-      }
-      // Sembunyikan bottom nav (halaman full-screen)
+      var pg = document.getElementById('subscriptionPage');
+      if (pg) { pg.style.display = 'block'; pg.classList.add('active'); }
       var nav = document.getElementById('bottomNav');
       if (nav) nav.style.display = 'none';
-      // Simpan history
-      if (currentPage && currentPage !== 'sellerInvoicesPage') pageHistory.push(currentPage);
-      currentPage = 'sellerInvoicesPage';
+      if (currentPage && currentPage !== 'subscriptionPage') pageHistory.push(currentPage);
+      currentPage = 'subscriptionPage';
       window.scrollTo(0, 0);
-      loadSellerInvoices();
+      loadSubscriptionStatus();
+      loadPaymentAccounts();
     }
-    function loadSellerInvoices() {
-      var el = document.getElementById('invoiceList');
-      if (!el || !currentUser) return;
-      el.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin"></i></div>';
-      callGAS('getSellerInvoices', { sellerId: currentUser.id })
-        .then(function(invoices) {
-          if (!invoices || invoices.length === 0) {
-            el.innerHTML = '<div style="text-align:center;padding:40px;color:#757575;"><i class="fas fa-receipt" style="font-size:40px;color:#E0E0E0;display:block;margin-bottom:12px;"></i><strong>Tidak ada tagihan</strong><br><span style="font-size:13px;">Tagihan komisi COD akan muncul di sini</span></div>';
-            return;
+    function loadSubscriptionStatus() {
+      if (!currentUser || !currentUser.id) {
+        renderSubscriptionHistory([]);
+        return;
+      }
+
+      var badge = document.getElementById('subStatusBadge');
+      var desc = document.getElementById('subStatusDesc');
+      if (badge) badge.textContent = 'Memuat...';
+      if (desc) desc.textContent = '';
+
+      callGAS('getSubscriptionStatus', { sellerId: currentUser.id })
+        .then(function(s) {
+          var card = document.getElementById('subStatusCard');
+          var badge = document.getElementById('subStatusBadge');
+          var desc = document.getElementById('subStatusDesc');
+          var expiry = document.getElementById('subExpiry');
+          var pendingBox = document.getElementById('subPendingBox');
+
+          if (s.status === 'active') {
+            if (card) card.style.background = 'linear-gradient(135deg,#1B5E20,#2E7D32)';
+            if (badge) badge.textContent = '✅ Aktif';
+            if (desc) desc.textContent = 'Produk Anda tampil di beranda pembeli';
+            if (expiry) expiry.textContent = 'Hingga ' + new Date(s.subscription.endDate).toLocaleDateString('id-ID') + ' (' + s.daysLeft + ' hari lagi)';
+          } else if (s.status === 'trial') {
+            if (card) card.style.background = 'linear-gradient(135deg,#1565C0,#1976D2)';
+            if (badge) badge.textContent = '🎁 Trial Gratis';
+            if (desc) desc.textContent = 'Nikmati fitur lengkap selama masa trial';
+            if (expiry) expiry.textContent = 'Trial berakhir dalam ' + s.daysLeft + ' hari';
+          } else {
+            if (card) card.style.background = 'linear-gradient(135deg,#B71C1C,#C62828)';
+            if (badge) badge.textContent = '⚠️ Tidak Aktif';
+            if (desc) desc.textContent = 'Produk Anda tidak tampil di beranda';
+            if (expiry) expiry.textContent = 'Berlangganan untuk mengaktifkan kembali';
           }
-          el.innerHTML = invoices.map(function(inv) {
-            var isPaid = inv.status === 'paid', isPending = inv.status === 'pending_verify';
-            var bg = isPaid ? '#E8F5E9' : isPending ? '#FFF8E1' : '#FFEBEE';
-            var fc = isPaid ? '#2E7D32' : isPending ? '#E65100' : '#C62828';
-            var lbl = isPaid ? 'Lunas' : isPending ? 'Menunggu Verifikasi' : 'Belum Bayar';
-            var uploadSection = (!isPaid && !isPending) ? (
-              '<div style="margin-top:12px;background:#F5F5F5;border-radius:10px;padding:12px;">'
-              + '<div style="font-size:12px;margin-bottom:6px;color:#555;">Transfer ke: <strong>BCA 1234567890 a/n LOKARA PLATFORM</strong></div>'
-              + '<input type="text" class="form-input" id="proof_' + inv.id + '" placeholder="URL bukti transfer (foto/link)" style="margin-bottom:8px;">'
-              + '<button class="btn btn-primary" style="padding:8px;font-size:13px;width:100%;" data-inv-id="' + inv.id + '" onclick="uploadProof(this.dataset.invId)">📎 Upload Bukti</button>'
-              + '</div>'
-            ) : (inv.proofUrl ? '<div style="font-size:12px;margin-top:6px;"><a href="' + inv.proofUrl + '" target="_blank" style="color:var(--primary);">📎 Lihat bukti transfer</a></div>' : '');
-            return '<div style="background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
-              + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
-              + '<div style="font-weight:700;">Periode ' + inv.period + '</div>'
-              + '<span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:' + bg + ';color:' + fc + ';">' + lbl + '</span>'
-              + '</div>'
-              + '<div style="font-size:14px;color:#333;">Komisi: <strong>Rp ' + Number(inv.totalCommission).toLocaleString('id-ID') + '</strong></div>'
-              + uploadSection
-              + '</div>';
-          }).join('');
+
+          if (pendingBox) pendingBox.style.display = s.pendingSub ? 'block' : 'none';
+
+          var choosePlanBtn = document.getElementById('subChoosePlanBtn');
+          if (choosePlanBtn) choosePlanBtn.style.display = (s.status !== 'active' && !s.pendingSub) ? 'block' : 'none';
+
+          // Render riwayat dari data yang sama — tidak perlu API call kedua
+          renderSubscriptionHistory(s.history || []);
         })
-        .catch(function(e) { el.innerHTML = '<div style="padding:20px;color:red;text-align:center;">' + (e.message || 'Gagal memuat') + '</div>'; });
-    }
-    function uploadProof(id) {
-      var u = document.getElementById('proof_' + id);
-      if (!u || !u.value.trim()) { showToast('Isi URL bukti transfer', 'error'); return; }
-      var btn = document.querySelector('[data-inv-id="' + id + '"]');
-      if (btn) { btn.disabled = true; btn.textContent = 'Mengupload...'; }
-      callGAS('uploadCommissionProof', { invoiceId: id, proofUrl: u.value.trim() })
-        .then(function() { showToast('Berhasil! Menunggu verifikasi admin.', 'success'); loadSellerInvoices(); })
-        .catch(function(e) {
-          if (btn) { btn.disabled = false; btn.textContent = '📎 Upload Bukti'; }
-          showToast(e.message || 'Gagal', 'error');
+        .catch(function(err) {
+          console.error('getSubscriptionStatus error', err);
+          var badge = document.getElementById('subStatusBadge');
+          if (badge) badge.textContent = 'Gagal memuat';
+          renderSubscriptionHistory([]);
         });
     }
 
-    function loadAdminInvoices() {
-      var el = document.getElementById('adminInvoicesList');
+    var _selectedPlan = null;
+    function selectPlan(plan) {
+      _selectedPlan = plan;
+      var cards = { monthly: 'planMonthlyCard', quarterly: 'planQuarterlyCard', yearly: 'planYearlyCard' };
+      Object.keys(cards).forEach(function(p) {
+        var el = document.getElementById(cards[p]);
+        if (!el) return;
+        var active = p === plan;
+        el.style.borderColor = active ? 'var(--primary)' : '#E0E0E0';
+        el.style.background = active ? '#E8F5E9' : 'white';
+        el.style.transform = active ? 'scale(1.03)' : 'scale(1)';
+        el.style.boxShadow = active ? '0 4px 16px rgba(27,94,32,.15)' : 'none';
+      });
+      var choosePlanBtn = document.getElementById('subChoosePlanBtn');
+      if (choosePlanBtn) {
+        var labels = { monthly: 'Bulanan — Rp 50.000', quarterly: '3 Bulan — Rp 135.000', yearly: 'Tahunan — Rp 500.000' };
+        choosePlanBtn.innerHTML = '<i class="fas fa-crown"></i> Lanjut: ' + (labels[plan] || plan);
+        choosePlanBtn.style.display = 'block';
+      }
+    }
+
+    function toggleSubUpload() {
+      if (!_selectedPlan) { showToast('Pilih paket terlebih dahulu', 'error'); return; }
+      var sec = document.getElementById('subUploadSection');
+      if (sec) sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function submitSubscription() {
+      if (!_selectedPlan) { showToast('Pilih paket terlebih dahulu', 'error'); return; }
+      var proofInput = document.getElementById('subProofUrl');
+      var proofUrl = proofInput ? proofInput.value.trim() : '';
+      if (!proofUrl) { showToast('Upload bukti transfer terlebih dahulu', 'error'); return; }
+
+      callGAS('createSubscriptionOrder', { sellerId: currentUser.id, planType: _selectedPlan, proofUrl: proofUrl })
+        .then(function(r) {
+          showToast('Berhasil dikirim! Menunggu verifikasi admin.', 'success');
+          var sec = document.getElementById('subUploadSection');
+          if (sec) sec.style.display = 'none';
+          loadSubscriptionStatus();
+        })
+        .catch(function(err) { showToast(err.message || 'Gagal mengirim', 'error'); });
+    }
+
+    function loadSubscriptionHistory() { /* dipanggil via renderSubscriptionHistory */ }
+
+    function renderSubscriptionHistory(history) {
+      var el = document.getElementById('subHistory');
       if (!el) return;
-      el.innerHTML = '<div style="text-align:center;padding:20px;">Memuat...</div>';
-      callGAS('getSellerInvoices', { sellerId: 'ALL', isAdmin: true })
-        .then(function(inv) {
-          if (!inv||inv.length===0){el.innerHTML='<div style="text-align:center;padding:40px;color:#757575;">Tidak ada tagihan</div>';return;}
-          el.innerHTML = inv.map(function(i) {
-            var ip = i.status==='pending_verify';
-            return '<div style="background:#FAFAFA;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #E0E0E0;">'
-              +'<div style="font-size:11px;color:#757575;">Periode: '+i.period+'</div>'
-              +'<div style="font-weight:700;font-size:15px;margin:4px 0;">Rp '+Number(i.totalCommission).toLocaleString('id-ID')+'</div>'
-              +'<div style="font-size:12px;">Status: <strong>'+i.status+'</strong></div>'
-              +(i.proofUrl?'<div style="margin:6px 0;font-size:12px;"><a href="'+i.proofUrl+'" target="_blank" style="color:var(--primary);">Lihat Bukti</a></div>':'<div style="font-size:12px;color:#757575;">Belum ada bukti</div>')
-              +(ip?'<div style="display:flex;gap:8px;margin-top:8px;">'
-                +'<button class="btn" style="flex:1;background:#4CAF50;color:white;padding:8px;font-size:12px;" onclick="verifyInvoice(\"'+i.id+'\",\"approve\")">Setujui</button>'
-                +'<button class="btn" style="flex:1;background:#F44336;color:white;padding:8px;font-size:12px;" onclick="verifyInvoice(\"'+i.id+'\",\"reject\")">Tolak</button>'
-                +'</div>':'')
-              +'</div>';
+      if (!history || history.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:#9E9E9E;font-size:13px;"><i class="fas fa-history" style="font-size:24px;display:block;margin-bottom:8px;opacity:.3;"></i>Belum ada riwayat langganan</div>';
+        return;
+      }
+      var planLabels = { monthly: 'Bulanan', quarterly: '3 Bulan', yearly: 'Tahunan' };
+      var statusMap = {
+        active:   { label: 'Aktif',     color: '#4CAF50' },
+        pending:  { label: 'Menunggu',  color: '#F59E0B' },
+        expired:  { label: 'Kadaluarsa', color: '#9E9E9E' },
+        rejected: { label: 'Ditolak',   color: '#EF4444' }
+      };
+      el.innerHTML = history.map(function(h) {
+        var st = statusMap[h.status] || { label: h.status, color: '#9E9E9E' };
+        var planLabel = planLabels[h.planType] || h.planType;
+        var amountFmt = 'Rp ' + (parseInt(h.amount)||0).toLocaleString('id-ID');
+        var dateStr = h.createdAt ? new Date(h.createdAt).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'}) : '-';
+        var endStr = h.endDate ? new Date(h.endDate).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'}) : '-';
+        return '<div style="background:white;border:1px solid #F0F0F0;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">'
+          + '<div>'
+          + '<div style="font-weight:700;font-size:14px;color:#1B5E20;">' + planLabel + ' — ' + amountFmt + '</div>'
+          + '<div style="font-size:11px;color:#9E9E9E;margin-top:3px;">' + dateStr + (h.endDate && h.status === 'active' ? ' · s/d ' + endStr : '') + '</div>'
+          + '</div>'
+          + '<span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:' + st.color + '20;color:' + st.color + ';">' + st.label + '</span>'
+          + '</div>';
+      }).join('');
+    }
+
+
+    function loadAdminSubscriptions() {
+      var el = document.getElementById('adminSubList');
+      if (!el) return;
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:#9E9E9E;font-size:13px;"><i class="fas fa-spinner fa-spin"></i></div>';
+      // Timeout fallback 10 detik
+      var subTimeout = setTimeout(function() {
+        if (el.innerHTML.includes('fa-spin'))
+          el.innerHTML = '<div style="text-align:center;padding:20px;color:#EF4444;font-size:12px;">GAS belum di-deploy ulang.<br>Deploy Code.js terbaru di Google Apps Script.<br><button onclick="loadAdminSubscriptions()" style="margin-top:8px;background:#E8F5E9;color:var(--primary);border:none;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;"><i class="fas fa-sync"></i> Coba Lagi</button></div>';
+      }, 10000);
+      callGAS('adminGetSubscriptions', { adminRole: 'admin' })
+        .then(function(subs) {
+          clearTimeout(subTimeout);
+          if (!subs || subs.length === 0) {
+            el.innerHTML = '<div style="text-align:center;padding:24px;color:#9E9E9E;font-size:13px;"><i class="fas fa-check-circle" style="font-size:28px;display:block;margin-bottom:8px;opacity:.3;"></i>Belum ada pengajuan langganan</div>';
+            return;
+          }
+          var statusMap = { active:{label:'Aktif',c:'#4CAF50'}, pending:{label:'Menunggu',c:'#F59E0B'}, expired:{label:'Kadaluarsa',c:'#9E9E9E'}, rejected:{label:'Ditolak',c:'#EF4444'} };
+          var planLabels = { monthly:'Bulanan', quarterly:'3 Bulan', yearly:'Tahunan' };
+          el.innerHTML = subs.map(function(s) {
+            var st = statusMap[s.status] || {label:s.status, c:'#9E9E9E'};
+            var pl = planLabels[s.planType] || s.planType;
+            var amt = 'Rp ' + (parseInt(s.amount)||0).toLocaleString('id-ID');
+            var dt = s.createdAt ? new Date(s.createdAt).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}) : '-';
+            return '<div style="border:1px solid #F0F0F0;border-radius:14px;padding:14px;margin-bottom:10px;">'
+              + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'
+              + '<div><div style="font-weight:700;font-size:14px;">' + (s.sellerNama||'-') + '</div>'
+              + '<div style="font-size:11px;color:#9E9E9E;">' + (s.sellerEmail||'') + ' · ' + dt + '</div></div>'
+              + '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:' + st.c + '22;color:' + st.c + ';">' + st.label + '</span>'
+              + '</div>'
+              + '<div style="font-size:12px;color:#555;margin-bottom:8px;"><strong>' + pl + '</strong> — ' + amt + '</div>'
+              + (s.proofUrl ? '<a href="' + s.proofUrl + '" target="_blank" style="font-size:12px;color:#2563EB;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:8px;"><i class="fas fa-image"></i> Lihat Bukti Transfer</a>' : '<div style="font-size:12px;color:#9E9E9E;margin-bottom:8px;">Belum ada bukti</div>')
+              + (s.status === 'pending' ? '<div style="display:flex;gap:8px;">'
+                + '<button onclick="adminVerifySub(\'' + s.id + '\',\'approve\')" style="flex:1;background:#4CAF50;color:white;border:none;border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-check"></i> Setujui</button>'
+                + '<button onclick="adminVerifySub(\'' + s.id + '\',\'reject\')" style="flex:1;background:#EF4444;color:white;border:none;border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-times"></i> Tolak</button>'
+                + '</div>' : '')
+              + '</div>';
           }).join('');
-        }).catch(function(e){el.innerHTML='<div style="padding:20px;color:red;">'+e.message+'</div>';});
+        })
+        .catch(function(err) {
+          clearTimeout(subTimeout);
+          var el2 = document.getElementById('adminSubList');
+          if (el2) el2.innerHTML = '<div style="text-align:center;padding:20px;color:#EF4444;font-size:12px;"><i class="fas fa-exclamation-triangle"></i><br>' + (err.message||'Gagal memuat') + '<br><button onclick="loadAdminSubscriptions()" style="margin-top:8px;background:#E8F5E9;color:var(--primary);border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;">Coba Lagi</button></div>';
+        });
     }
-    function verifyInvoice(id, action) {
-      callGAS('verifyCommissionPayment',{invoiceId:id,action:action})
-        .then(function(r){showToast(r.message||'OK','success');loadAdminInvoices();})
-        .catch(function(e){showToast(e.message||'Gagal','error');});
+
+    function adminVerifySub(subId, action) {
+      if (!confirm(action === 'approve' ? 'Setujui & aktifkan langganan ini?' : 'Tolak pengajuan ini?')) return;
+      callGAS('verifySubscriptionPayment', { adminRole: 'admin', subscriptionId: subId, action: action })
+        .then(function(r) { showToast(r.message || 'Berhasil', 'success'); loadAdminSubscriptions(); })
+        .catch(function(err) { showToast(err.message || 'Gagal', 'error'); });
     }
+
+
+    // ── Admin E-Wallet Penerimaan ──────────────────────────────────────────
+    function showAddAdminEwallet() {
+      var form = document.getElementById('adminEwalletForm');
+      if (form) {
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        if (form.style.display === 'block') {
+          document.getElementById('adminEwalletNumber').value = '';
+          document.getElementById('adminEwalletName').value = '';
+        }
+      }
+    }
+
+    /* loadAdminEwallets defined in main script block above */
+
+    function saveAdminEwallet() {
+      var type   = (document.getElementById('adminEwalletType')||{}).value || '';
+      var number = (document.getElementById('adminEwalletNumber')||{}).value.trim() || '';
+      var name   = (document.getElementById('adminEwalletName')||{}).value.trim() || '';
+      if (!number || !name) { showToast('Isi nomor dan nama pemilik', 'error'); return; }
+
+      // Ambil list dari localStorage (langsung, tidak perlu tunggu GAS)
+      var existing = [];
+      try { existing = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+      existing.push({ type: type, number: number, name: name });
+      var listJson = JSON.stringify(existing);
+
+      // Simpan ke localStorage dulu (langsung tampil)
+      localStorage.setItem('lokara_admin_ewallets', listJson);
+      showToast('Akun pembayaran ditambahkan!', 'success');
+      var form = document.getElementById('adminEwalletForm');
+      if (form) form.style.display = 'none';
+      var numEl = document.getElementById('adminEwalletNumber');
+      var nameEl = document.getElementById('adminEwalletName');
+      if (numEl) numEl.value = '';
+      if (nameEl) nameEl.value = '';
+      loadAdminEwallets();
+
+      // Coba simpan ke GAS di background (agar permanen)
+      callGAS('adminUpdateSettings', { adminRole: 'admin', ewallet_list: listJson })
+        .then(function() { console.log('[ewallet] Synced to GAS'); })
+        .catch(function(err) { console.warn('[ewallet] GAS sync failed (using localStorage):', err.message); });
+    }
+
+    function editAdminEwallet(idx) {
+      callGAS('adminGetSettings', { adminRole: 'admin' })
+        .then(function(settings) {
+          var list = _parseEwalletList(settings);
+          var w = list[idx];
+          if (!w) return;
+          var typeEl  = document.getElementById('adminEwalletType');
+          var numEl   = document.getElementById('adminEwalletNumber');
+          var nameEl  = document.getElementById('adminEwalletName');
+          var form    = document.getElementById('adminEwalletForm');
+          var saveBtn = form ? form.querySelector('button.btn-primary') : null;
+          if (typeEl)  typeEl.value  = w.type;
+          if (numEl)   numEl.value   = w.number;
+          if (nameEl)  nameEl.value  = w.name;
+          if (form)    form.style.display = 'block';
+          if (saveBtn) {
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Update';
+            saveBtn.onclick = function() { updateAdminEwallet(idx); };
+          }
+          if (form) form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    }
+
+    function updateAdminEwallet(idx) {
+      var type   = (document.getElementById('adminEwalletType')||{}).value || '';
+      var number = (document.getElementById('adminEwalletNumber')||{}).value.trim() || '';
+      var name   = (document.getElementById('adminEwalletName')||{}).value.trim() || '';
+      if (!number || !name) { showToast('Isi nomor dan nama pemilik', 'error'); return; }
+      var list = [];
+      try { list = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+      list[idx] = { type: type, number: number, name: name };
+      var listJson = JSON.stringify(list);
+      localStorage.setItem('lokara_admin_ewallets', listJson);
+      showToast('Akun diperbarui!', 'success');
+      var form = document.getElementById('adminEwalletForm');
+      if (form) {
+        form.style.display = 'none';
+        var saveBtn = form.querySelector('button.btn-primary');
+        if (saveBtn) { saveBtn.innerHTML = '<i class="fas fa-check"></i> Simpan'; saveBtn.onclick = saveAdminEwallet; }
+      }
+      loadAdminEwallets();
+      callGAS('adminUpdateSettings', { adminRole: 'admin', ewallet_list: listJson })
+        .catch(function(err) { console.warn('[ewallet] GAS sync failed:', err.message); });
+    }
+
+    function deleteAdminEwallet(idx) {
+      if (!confirm('Hapus akun pembayaran ini?')) return;
+      var list = [];
+      try { list = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+      list.splice(idx, 1);
+      var listJson = JSON.stringify(list);
+      localStorage.setItem('lokara_admin_ewallets', listJson);
+      showToast('Akun dihapus', 'success');
+      loadAdminEwallets();
+      callGAS('adminUpdateSettings', { adminRole: 'admin', ewallet_list: listJson })
+        .catch(function(err) { console.warn('[ewallet] GAS sync failed:', err.message); });
+    }
+    function _renderPaymentAccounts(el, list) {
+      if (!list || list.length === 0) {
+        el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;">Hubungi admin untuk info rekening.</div>';
+        return;
+      }
+      var typeColors = { BCA:'#005BAC', BNI:'#F26522', BRI:'#00509E', Mandiri:'#003F88', DANA:'#118EEA', OVO:'#4C3494', GoPay:'#00AED6', ShopeePay:'#EE4D2D' };
+      el.innerHTML = list.map(function(w) {
+        var c = typeColors[w.type] || '#1B5E20';
+        return '<div style="display:flex;align-items:center;gap:10px;margin-top:8px;background:white;border-radius:12px;padding:10px 12px;">'
+          + '<div style="background:' + c + ';color:white;font-size:10px;font-weight:800;padding:4px 8px;border-radius:8px;min-width:52px;text-align:center;">' + w.type + '</div>'
+          + '<div><div style="font-weight:700;font-size:13px;color:#222;">' + w.number + '</div>'
+          + '<div style="font-size:11px;color:#757575;">a.n. ' + w.name + '</div></div>'
+          + '</div>';
+      }).join('');
+    }
+
+    function loadPaymentAccounts() {
+      var el = document.getElementById('subPaymentAccounts');
+      if (!el) return;
+      callGAS('adminGetSettings', { adminRole: 'admin' })
+        .then(function(s) { _renderPaymentAccounts(el, _parseEwalletList(s)); })
+        .catch(function() { if(el) el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;">Gagal memuat rekening.</div>'; });
+    }
+
+    function loadAdminInvoices() { loadAdminSubscriptions(); }
+    function verifyInvoice(id, action) { adminVerifySub(id, action); }
     function saveGatewaySettings() {
       var sk=(document.getElementById('gatewayServerKey')||{}).value||'';
       var ck=(document.getElementById('gatewayClientKey')||{}).value||'';
