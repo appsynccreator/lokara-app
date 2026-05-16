@@ -589,7 +589,8 @@
     .product-image img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      background: #fafafa;
       transition: transform 0.3s;
     }
 
@@ -6497,8 +6498,8 @@
         URL.revokeObjectURL(objectUrl);
 
         var kb = Math.round(resized.length * 0.75 / 1024);
-        uploadDiv.innerHTML = '<img src="' + resized + '" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">'
-          + '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.45);color:white;font-size:10px;text-align:center;padding:3px;border-radius:0 0 16px 16px;">✅ ' + w + '×' + h + ' · ' + kb + 'KB</div>'
+        uploadDiv.innerHTML = '<img src="' + resized + '" style="width:100%;height:100%;object-fit:contain;border-radius:16px;background:#f5f5f5;">'
+          + '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.45);color:white;font-size:10px;text-align:center;padding:4px;border-radius:0 0 16px 16px;cursor:pointer;" onclick="document.getElementById(\'productImageInput\').click()">📷 Ganti · ' + w + '×' + h + ' · ' + kb + 'KB</div>'
           + '<input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">';
         uploadDiv.classList.add('has-image');
         uploadDiv.dataset.image = resized;
@@ -6514,7 +6515,7 @@
     function applyFotoUrl(url) {
       if (!url || !url.startsWith('http')) return;
       var uploadDiv = document.getElementById('productImageUpload');
-      uploadDiv.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">'
+      uploadDiv.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:contain;background:#f5f5f5;border-radius:16px;">'
         + '<input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">';
       uploadDiv.classList.add('has-image');
       uploadDiv.dataset.image = url;
@@ -7041,13 +7042,24 @@
           const catSel = document.getElementById('productCategory');
           if (catSel) catSel.value = product.kategori || '';
 
-          // Set foto preview jika ada
+          // Set foto preview + tetap bisa ganti foto
           const uploadDiv = document.getElementById('productImageUpload');
-          if (product.foto && uploadDiv) {
-            uploadDiv.innerHTML = `<img src="${product.foto}" style="width:100%; height:100%; object-fit:cover; border-radius:16px;">`;
-            uploadDiv.classList.add('has-image');
-            uploadDiv.dataset.image = product.foto;
+          if (uploadDiv) {
+            if (product.foto) {
+              uploadDiv.innerHTML = '<img src="' + product.foto + '" style="width:100%;height:100%;object-fit:contain;border-radius:16px;background:#f5f5f5;">'
+                + '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.45);color:white;font-size:11px;text-align:center;padding:5px;border-radius:0 0 16px 16px;cursor:pointer;" onclick="document.getElementById(\'productImageInput\').click()"><i class=\"fas fa-camera\"></i> Ganti Foto</div>'
+                + '<input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">';
+              uploadDiv.classList.add('has-image');
+              uploadDiv.dataset.image = product.foto;
+            } else {
+              uploadDiv.innerHTML = '<i class="fas fa-camera"></i><span>Tap untuk pilih foto</span><input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">';
+              uploadDiv.classList.remove('has-image');
+              uploadDiv.dataset.image = '';
+            }
           }
+          // Isi juga input URL jika foto adalah URL
+          var fotoUrlEl = document.getElementById('productFotoUrl');
+          if (fotoUrlEl) fotoUrlEl.value = (product.foto && !product.foto.startsWith('data:')) ? product.foto : '';
 
           // Ubah judul halaman & tombol
           const headerTitle = document.querySelector('#addProductPage .logo-text');
@@ -7074,9 +7086,9 @@
       if (catSel) catSel.value = '';
       const uploadDiv = document.getElementById('productImageUpload');
       if (uploadDiv) {
-        uploadDiv.innerHTML = `<i class="fas fa-camera"></i><span>Tambah Foto Produk</span><input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">`;
+        uploadDiv.innerHTML = '<i class="fas fa-camera"></i><span>Tap untuk pilih foto</span><input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">';
         uploadDiv.classList.remove('has-image');
-        delete uploadDiv.dataset.image;
+        uploadDiv.dataset.image = '';
       }
       const headerTitle = document.querySelector('#addProductPage .logo-text');
       if (headerTitle) headerTitle.textContent = 'Tambah Produk';
