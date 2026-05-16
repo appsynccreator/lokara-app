@@ -4926,23 +4926,33 @@
     function loadBannerPaymentAccounts() {
       var el = document.getElementById('bannerPaymentAccounts');
       if (!el) return;
+      var typeColors = { BCA:'#005BAC', BNI:'#F26522', BRI:'#00509E', Mandiri:'#003F88', DANA:'#118EEA', OVO:'#4C3494', GoPay:'#00AED6', ShopeePay:'#EE4D2D' };
+      function renderBannerAccounts(list) {
+        if (!list || list.length === 0) {
+          el.innerHTML = '<div style="font-size:12px;color:#9E9E9E;">Hubungi admin untuk info rekening.</div>';
+          return;
+        }
+        el.innerHTML = list.map(function(w) {
+          var c = typeColors[w.type] || '#1B5E20';
+          return '<div style="display:flex;align-items:center;gap:8px;margin-top:6px;background:white;border-radius:10px;padding:8px 10px;">'
+            + '<div style="background:' + c + ';color:white;font-size:9px;font-weight:800;padding:3px 7px;border-radius:6px;min-width:48px;text-align:center;">' + w.type + '</div>'
+            + '<div><div style="font-weight:700;font-size:12px;">' + w.number + '</div>'
+            + '<div style="font-size:11px;color:#757575;">a.n. ' + w.name + '</div></div>'
+            + '</div>';
+        }).join('');
+      }
+      // localStorage dulu
+      var cached = [];
+      try { cached = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+      if (cached.length > 0) { renderBannerAccounts(cached); return; }
+      // Fallback GAS
       callGAS('adminGetSettings', { adminRole: 'admin' })
         .then(function(s) {
           var list = _parseEwalletList(s);
-          if (!list || list.length === 0) {
-            el.innerHTML = '<div style="font-size:12px;color:#9E9E9E;">Hubungi admin untuk info rekening.</div>';
-            return;
-          }
-          var typeColors = { BCA:'#005BAC', BNI:'#F26522', BRI:'#00509E', Mandiri:'#003F88', DANA:'#118EEA', OVO:'#4C3494', GoPay:'#00AED6', ShopeePay:'#EE4D2D' };
-          el.innerHTML = list.map(function(w) {
-            var c = typeColors[w.type] || '#1B5E20';
-            return '<div style="display:flex;align-items:center;gap:8px;margin-top:6px;background:white;border-radius:10px;padding:8px 10px;">'
-              + '<div style="background:' + c + ';color:white;font-size:9px;font-weight:800;padding:3px 7px;border-radius:6px;min-width:48px;text-align:center;">' + w.type + '</div>'
-              + '<div><div style="font-weight:700;font-size:12px;">' + w.number + '</div>'
-              + '<div style="font-size:11px;color:#757575;">a.n. ' + w.name + '</div></div>'
-              + '</div>';
-          }).join('');
-        });
+          if (list.length > 0) localStorage.setItem('lokara_admin_ewallets', JSON.stringify(list));
+          renderBannerAccounts(list);
+        })
+        .catch(function() { el.innerHTML = '<div style="font-size:12px;color:#9E9E9E;">Hubungi admin untuk info rekening.</div>'; });
     }
 
     // ==================== UNIFIED PRODUCT SYSTEM ====================
@@ -7770,9 +7780,26 @@
     function loadPaymentAccounts() {
       var el = document.getElementById('subPaymentAccounts');
       if (!el) return;
+      // Baca dari localStorage dulu (instant)
+      var cached = [];
+      try { cached = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+      if (cached.length > 0) {
+        _renderPaymentAccounts(el, cached);
+        return;
+      }
+      // Fallback: coba GAS
+      el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;"><i class="fas fa-spinner fa-spin"></i></div>';
       callGAS('adminGetSettings', { adminRole: 'admin' })
-        .then(function(s) { _renderPaymentAccounts(el, _parseEwalletList(s)); })
-        .catch(function() { if(el) el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;">Gagal memuat rekening.</div>'; });
+        .then(function(s) {
+          var list = _parseEwalletList(s);
+          if (list.length > 0) {
+            localStorage.setItem('lokara_admin_ewallets', JSON.stringify(list));
+            _renderPaymentAccounts(el, list);
+          } else {
+            el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;">Hubungi admin untuk info rekening.</div>';
+          }
+        })
+        .catch(function() { el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;">Hubungi admin untuk info rekening.</div>'; });
     }
 
     function loadAdminInvoices() { loadAdminSubscriptions(); }
