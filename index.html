@@ -4035,12 +4035,13 @@
 
       var fetchPromise;
       if (usePost) {
-        // POST: kirim sebagai form-urlencoded agar GAS bisa baca via e.parameter
-        var body = 'action=' + encodeURIComponent(action) + '&data=' + encodeURIComponent(dataStr);
+        // POST: kirim sebagai JSON dalam text/plain — GAS baca via e.postData.contents
+        // (GAS tidak support application/json karena CORS preflight, tapi text/plain tidak trigger preflight)
+        var body = JSON.stringify({ action: action, data: data || {} });
         fetchPromise = fetch(GAS_URL, {
           method: 'POST',
           redirect: 'follow',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          headers: { 'Content-Type': 'text/plain' },
           body: body
         });
       } else {
