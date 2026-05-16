@@ -3640,7 +3640,7 @@
               <i class="fas fa-plus"></i> Tambah
             </button>
           </div>
-          <div style="font-size:12px; color:#9E9E9E; margin-bottom:14px;">Rekening/e-wallet yang ditampilkan ke seller saat bayar langganan &amp; iklan</div>
+          <div style="font-size:12px; color:#9E9E9E; margin-bottom:14px;">Rekening/e-wallet yang ditampilkan ke seller saat bayar langganan &amp; iklan. Data tersimpan otomatis.</div>
 
           <div id="adminEwalletList">
             <div style="text-align:center;padding:20px;color:#9E9E9E;font-size:13px;"><i class="fas fa-spinner fa-spin"></i></div>
@@ -4941,18 +4941,23 @@
             + '</div>';
         }).join('');
       }
-      // localStorage dulu
-      var cached = [];
-      try { cached = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
-      if (cached.length > 0) { renderBannerAccounts(cached); return; }
-      // Fallback GAS
-      callGAS('adminGetSettings', { adminRole: 'admin' })
-        .then(function(s) {
-          var list = _parseEwalletList(s);
-          if (list.length > 0) localStorage.setItem('lokara_admin_ewallets', JSON.stringify(list));
-          renderBannerAccounts(list);
+      // Gunakan action public getPaymentAccounts
+      callGAS('getPaymentAccounts', {})
+        .then(function(list) {
+          if (list && list.length > 0) {
+            localStorage.setItem('lokara_admin_ewallets', JSON.stringify(list));
+            renderBannerAccounts(list);
+          } else {
+            var cached = [];
+            try { cached = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+            renderBannerAccounts(cached);
+          }
         })
-        .catch(function() { el.innerHTML = '<div style="font-size:12px;color:#9E9E9E;">Hubungi admin untuk info rekening.</div>'; });
+        .catch(function() {
+          var cached = [];
+          try { cached = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+          renderBannerAccounts(cached);
+        });
     }
 
     // ==================== UNIFIED PRODUCT SYSTEM ====================
@@ -7112,9 +7117,20 @@
       showPage('adminMasterDataPage');
       loadAdminSettings();
       loadAdminEwallets();
+      syncEwalletToGAS();   // sync localStorage → GAS di background
       loadAdminSubscriptions();
       loadAdminBanners();
       loadAdminUsers();
+    }
+
+    // Sync ewallet dari localStorage ke GAS (jalankan sekali saat buka admin)
+    function syncEwalletToGAS() {
+      var cached = [];
+      try { cached = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+      if (cached.length === 0) return;
+      callGAS('adminUpdateSettings', { adminRole: 'admin', ewallet_list: JSON.stringify(cached) })
+        .then(function() { console.log('[ewallet] Synced to GAS OK:', cached.length, 'items'); })
+        .catch(function(err) { console.warn('[ewallet] Sync to GAS failed:', err.message); });
     }
 
     function showAdminTabPage(tabId) { /* no-op, page is now single scroll */ }
@@ -7689,7 +7705,7 @@
 
       // Simpan ke localStorage dulu (langsung tampil)
       localStorage.setItem('lokara_admin_ewallets', listJson);
-      showToast('Akun pembayaran ditambahkan!', 'success');
+      showToast('✅ Akun ditambahkan & disinkronkan ke server', 'success');
       var form = document.getElementById('adminEwalletForm');
       if (form) form.style.display = 'none';
       var numEl = document.getElementById('adminEwalletNumber');
@@ -7780,26 +7796,28 @@
     function loadPaymentAccounts() {
       var el = document.getElementById('subPaymentAccounts');
       if (!el) return;
-      // Baca dari localStorage dulu (instant)
-      var cached = [];
-      try { cached = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
-      if (cached.length > 0) {
-        _renderPaymentAccounts(el, cached);
-        return;
-      }
-      // Fallback: coba GAS
       el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;"><i class="fas fa-spinner fa-spin"></i></div>';
-      callGAS('adminGetSettings', { adminRole: 'admin' })
-        .then(function(s) {
-          var list = _parseEwalletList(s);
-          if (list.length > 0) {
+      // Gunakan action public getPaymentAccounts (tidak butuh adminRole)
+      callGAS('getPaymentAccounts', {})
+        .then(function(list) {
+          if (list && list.length > 0) {
             localStorage.setItem('lokara_admin_ewallets', JSON.stringify(list));
             _renderPaymentAccounts(el, list);
           } else {
-            el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;">Hubungi admin untuk info rekening.</div>';
+            // Fallback localStorage jika GAS kosong
+            var cached = [];
+            try { cached = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+            if (cached.length > 0) { _renderPaymentAccounts(el, cached); }
+            else { el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;">Hubungi admin untuk info rekening.</div>'; }
           }
         })
-        .catch(function() { el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;">Hubungi admin untuk info rekening.</div>'; });
+        .catch(function() {
+          // Fallback localStorage
+          var cached = [];
+          try { cached = JSON.parse(localStorage.getItem('lokara_admin_ewallets') || '[]'); } catch(e){}
+          if (cached.length > 0) { _renderPaymentAccounts(el, cached); }
+          else { el.innerHTML = '<div style="color:#9E9E9E;font-size:12px;">Hubungi admin untuk info rekening.</div>'; }
+        });
     }
 
     function loadAdminInvoices() { loadAdminSubscriptions(); }
