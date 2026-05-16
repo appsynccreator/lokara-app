@@ -3395,10 +3395,14 @@
       </div>
 
       <div style="padding: 20px;">
-        <div class="image-upload" id="productImageUpload" onclick="document.getElementById('productImageInput').click()">
+        <div class="image-upload" id="productImageUpload" onclick="document.getElementById('productImageInput').click()" style="position:relative;">
           <i class="fas fa-camera"></i>
-          <span>Tambah Foto Produk</span>
+          <span>Tap untuk pilih foto</span>
           <input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">
+        </div>
+        <div style="margin-top:8px;">
+          <div style="font-size:11px;color:#9E9E9E;margin-bottom:4px;"><i class="fas fa-link"></i> Atau paste link foto langsung:</div>
+          <input type="url" id="productFotoUrl" class="form-input" placeholder="https://i.imgur.com/... atau link foto" style="font-size:12px;" oninput="applyFotoUrl(this.value)">
         </div>
 
         <div class="form-group">
@@ -6470,17 +6474,67 @@
     }
 
     function previewProductImage(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const uploadDiv = document.getElementById('productImageUpload');
-          uploadDiv.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius:16px;">`;
-          uploadDiv.classList.add('has-image');
-          uploadDiv.dataset.image = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
+      var file = event.target.files[0];
+      if (!file) return;
+      var uploadDiv = document.getElementById('productImageUpload');
+
+      // Tampilkan preview lokal dulu
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        uploadDiv.innerHTML = '<img src="' + ev.target.result + '" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">'
+          + '<div id="imgUploadStatus" style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.5);color:white;font-size:11px;text-align:center;padding:4px;border-radius:0 0 16px 16px;"><i class="fas fa-spinner fa-spin"></i> Mengunggah...</div>';
+        uploadDiv.classList.add('has-image');
+        uploadDiv.dataset.image = ''; // kosong dulu, diisi URL setelah upload
+
+        // Upload ke ImgBB
+        var base64 = ev.target.result.split(',')[1];
+        var imgbbKey = (typeof window.LOKARA_CONFIG !== 'undefined' && window.LOKARA_CONFIG.IMGBB_KEY)
+          ? window.LOKARA_CONFIG.IMGBB_KEY : '';
+
+        if (!imgbbKey) {
+          // Tidak ada API key — simpan base64 sebagai fallback (untuk edit saja)
+          uploadDiv.dataset.image = ev.target.result;
+          var st = document.getElementById('imgUploadStatus');
+          if (st) st.remove();
+          showToast('Foto berhasil dipilih (tambahkan IMGBB_KEY di config untuk upload otomatis)', 'info');
+          return;
+        }
+
+        var formData = new FormData();
+        formData.append('key', imgbbKey);
+        formData.append('image', base64);
+
+        fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData })
+          .then(function(r) { return r.json(); })
+          .then(function(res) {
+            var st = document.getElementById('imgUploadStatus');
+            if (res && res.data && res.data.url) {
+              uploadDiv.dataset.image = res.data.url;
+              if (st) st.innerHTML = '<i class="fas fa-check"></i> Foto terunggah';
+              setTimeout(function() { if (st) st.remove(); }, 2000);
+            } else {
+              // Fallback ke base64 jika ImgBB gagal
+              uploadDiv.dataset.image = ev.target.result;
+              if (st) st.remove();
+              showToast('ImgBB gagal, foto disimpan lokal', 'info');
+            }
+          })
+          .catch(function() {
+            uploadDiv.dataset.image = ev.target.result;
+            var st = document.getElementById('imgUploadStatus');
+            if (st) st.remove();
+          });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function applyFotoUrl(url) {
+      if (!url || !url.startsWith('http')) return;
+      var uploadDiv = document.getElementById('productImageUpload');
+      uploadDiv.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">'
+        + '<input type="file" id="productImageInput" accept="image/*" style="display:none;" onchange="previewProductImage(event)">';
+      uploadDiv.classList.add('has-image');
+      uploadDiv.dataset.image = url;
     }
 
     function saveProduct() {
@@ -6490,7 +6544,9 @@
       const stok     = document.getElementById('productStock').value;
       const kategori = document.getElementById('productCategory').value;
       const diskon   = parseFloat(document.getElementById('productDiskon').value) || 0;
-      const foto     = document.getElementById('productImageUpload').dataset.image || '';
+      // Prioritas: dataset.image (dari upload/ImgBB) atau input URL langsung
+      var fotoUrlInput = (document.getElementById('productFotoUrl')||{}).value || '';
+      const foto = document.getElementById('productImageUpload').dataset.image || fotoUrlInput || '';
 
       if (!nama || !harga || !stok || !kategori) {
         showToast('Mohon lengkapi semua field', 'error');
@@ -6509,11 +6565,11 @@
         if (!currentUser || !currentUser.id) { showToast('Sesi tidak valid, silakan login ulang', 'error'); return; }
         // FIX CORS: jangan kirim foto base64 lewat GET - terlalu besar
         // Kirim foto hanya jika URL pendek (bukan base64)
+        // Kirim foto jika URL (bukan base64) — jika base64, pertahankan foto lama
         var fotoKirim = '';
         if (foto && !foto.startsWith('data:')) {
-          fotoKirim = foto; // URL normal (http...), aman dikirim
+          fotoKirim = foto;
         }
-        // Jika base64, foto lama tetap dipakai di server (tidak dikirim)
         callGAS('editProduct', {
           productId: editingProductId,
           sellerId: currentUser.id,
@@ -6533,7 +6589,7 @@
 
       // MODE TAMBAH
       } else {
-        // Jangan kirim foto base64 (terlalu besar) — hanya kirim URL
+        // Kirim foto (ImgBB URL atau kosong — base64 di-strip karena terlalu besar)
         var fotoUrl = foto && !foto.startsWith('data:') ? foto : '';
 
         callGAS('addProduct', {
