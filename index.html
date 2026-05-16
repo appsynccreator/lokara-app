@@ -4033,7 +4033,7 @@
       var dataStr = JSON.stringify(data || {});
       // Gunakan POST jika data besar (ada foto/base64) atau action tulis data
       var bigActions = ['addProduct','editProduct','register','updateProfile','submitBanner','createOrder','uploadFile'];
-      var usePost = dataStr.length > 1500 || bigActions.indexOf(action) !== -1;
+      var usePost = dataStr.length > 500 || bigActions.indexOf(action) !== -1;
 
       console.log('[GAS] action:', action, '| method:', usePost ? 'POST' : 'GET', '| data len:', dataStr.length);
 
@@ -6565,11 +6565,8 @@
         if (!currentUser || !currentUser.id) { showToast('Sesi tidak valid, silakan login ulang', 'error'); return; }
         // FIX CORS: jangan kirim foto base64 lewat GET - terlalu besar
         // Kirim foto hanya jika URL pendek (bukan base64)
-        // Kirim foto jika URL (bukan base64) — jika base64, pertahankan foto lama
-        var fotoKirim = '';
-        if (foto && !foto.startsWith('data:')) {
-          fotoKirim = foto;
-        }
+        // Kirim foto apapun (base64 atau URL) via POST body
+        var fotoKirim = foto || '';
         callGAS('editProduct', {
           productId: editingProductId,
           sellerId: currentUser.id,
@@ -6589,13 +6586,13 @@
 
       // MODE TAMBAH
       } else {
-        // Kirim foto (ImgBB URL atau kosong — base64 di-strip karena terlalu besar)
-        var fotoUrl = foto && !foto.startsWith('data:') ? foto : '';
+        // Kirim foto langsung (base64 atau URL) via POST body
+        var fotoKirimAdd = foto || '';
 
         callGAS('addProduct', {
           sellerId: currentUser.id,
           nama, deskripsi, harga: parseFloat(harga), stok: parseInt(stok),
-          kategori, foto: fotoUrl, diskonPersen: diskon,
+          kategori, foto: fotoKirimAdd, diskonPersen: diskon,
           latitude:  (currentLocation && currentLocation.lat) ? currentLocation.lat : '',
           longitude: (currentLocation && currentLocation.lng) ? currentLocation.lng : '',
           alamat: currentUser.alamat || ''
